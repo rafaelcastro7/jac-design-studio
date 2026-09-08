@@ -31,7 +31,7 @@ export const Route = createFileRoute("/")({
 });
 
 export const ModelRoute = createFileRoute("/modelo/:id")({
-  component: import("./components/ModelViewer").then(mod => mod.ModelViewer),
+  component: async () => import("@/components/ModelViewer").then(mod => mod.ModelViewer),
   shouldLoad: () => true,
 });
 
