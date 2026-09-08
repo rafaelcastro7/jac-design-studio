@@ -8,6 +8,7 @@ import p3d from "@/assets/p-3d.jpg";
 import pPostres from "@/assets/p-postres.jpg";
 import pPocillo from "@/assets/p-pocillo.jpg";
 import pIcopor from "@/assets/p-icopor.jpg";
+import ModelViewer from "@/components/ModelViewer";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -27,6 +28,11 @@ export const Route = createFileRoute("/")({
     ],
   }),
   component: JacDesign,
+});
+
+export const ModelRoute = createFileRoute("/modelo/:id")({
+  component: import("./components/ModelViewer").then(mod => mod.ModelViewer),
+  shouldLoad: () => true,
 });
 
 /* ── data ─────────────────────────────────────────────── */
@@ -637,7 +643,7 @@ function JacDesign() {
           </div>
 
           <div className="rounded-3xl border border-border bg-card p-6 shadow-soft">
-            <label
+<label
               onDragOver={(e) => {
                 e.preventDefault();
                 setDragging(true);
@@ -654,6 +660,8 @@ function JacDesign() {
                 dragging ? "border-amber bg-amber/10" : `border-border bg-muted/50 dark:bg-muted/80 hover:bg-muted`}
               }`}
             >
+              <ModelViewer id="preview-model" onSelect={(url) => toast(`Modelo cargado: ${url.split('/').pop()}`)} />
+              
               <input
                 type="file"
                 accept=".stl,.obj,.step,.stp"
