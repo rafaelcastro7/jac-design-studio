@@ -262,12 +262,12 @@ function JacDesign() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background text-foreground dark:bg-dark text-dark">
       {/* NAV */}
       <header className="sticky top-0 z-40 border-b border-border/70 bg-background/80 backdrop-blur-md">
         <div className="mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-3 lg:px-8">
           <a href="#inicio" className="flex min-w-0 items-center gap-3">
-            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-gradient-warm text-base font-black tracking-tight text-rose-foreground shadow-soft">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-gradient-warm text-base font-black tracking-tight text-rose-foreground shadow-soft dark:shadow-none">
               JD
             </span>
             <span className="min-w-0">
@@ -281,7 +281,7 @@ function JacDesign() {
           </a>
 
           <div className="flex items-center gap-2">
-            <nav className="mr-2 hidden items-center gap-6 text-sm font-medium text-muted-foreground xl:flex">
+            <nav className="mr-2 hidden items-center gap-6 text-sm font-medium transition-colors dark:text-dark/60 xl:flex">
               {[
                 ["#inicio", "Inicio"],
                 ["#colecciones", "Servicios y Colecciones"],
@@ -315,9 +315,9 @@ function JacDesign() {
       </header>
 
       {/* HERO */}
-      <section id="inicio" className="relative overflow-hidden">
-        <div className="pointer-events-none absolute -left-24 top-10 h-72 w-72 rounded-full bg-amber/25 blur-3xl" />
-        <div className="pointer-events-none absolute -right-16 bottom-0 h-80 w-80 rounded-full bg-rose/20 blur-3xl" />
+      <section id="inicio" className="relative overflow-hidden bg-gradient-to-br from-background to-dark dark:from-dark dark:to-secondary">
+        <div className="pointer-events-none absolute -left-24 top-10 h-72 w-72 rounded-full bg-amber/25 blur-3xl animate-pulse" />
+        <div className="pointer-events-none absolute -right-16 bottom-0 h-80 w-80 rounded-full bg-rose/20 blur-3xl animate-pulse" />
         <div className="mx-auto grid max-w-7xl items-center gap-12 px-4 py-16 lg:grid-cols-2 lg:px-8 lg:py-24">
           <div>
             <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
@@ -335,13 +335,13 @@ function JacDesign() {
             <div className="mt-8 flex flex-wrap gap-3">
               <a
                 href="#colecciones"
-                className="rounded-2xl bg-gradient-warm px-6 py-3.5 text-sm font-bold text-rose-foreground shadow-soft transition-transform hover:scale-[1.03]"
+                className="rounded-2xl bg-gradient-warm px-6 py-3.5 text-sm font-bold text-rose-foreground shadow-soft transition-transform hover:scale-[1.03] dark:hover:bg-primary dark:hover:text-primary-foreground"
               >
                 Explorar catálogo
               </a>
               <a
                 href="#personalizador"
-                className="rounded-2xl border border-border bg-card px-6 py-3.5 text-sm font-bold transition-colors hover:bg-muted"
+                className="rounded-2xl border border-border bg-card px-6 py-3.5 text-sm font-bold transition-colors dark:bg-dark dark:border-dark dark:hover:bg-muted dark:hover:text-foreground"
               >
                 Abrir configurador
               </a>
@@ -400,8 +400,8 @@ function JacDesign() {
               onClick={() => setCat(c.id)}
               className={`rounded-full px-5 py-2.5 text-sm font-semibold transition-all ${
                 cat === c.id
-                  ? "bg-gradient-warm text-rose-foreground shadow-soft"
-                  : "border border-border bg-card text-muted-foreground hover:text-foreground"
+                  ? "bg-gradient-warm text-rose-foreground shadow-soft dark:bg-primary dark:text-primary-foreground"
+                  : "border border-border bg-card text-muted-foreground dark:text-dark hover:text-foreground"
               }`}
             >
               {c.label}
@@ -413,7 +413,7 @@ function JacDesign() {
           {filtered.map((p) => (
             <article
               key={p.id}
-              className="group flex flex-col overflow-hidden rounded-3xl border border-border bg-card shadow-soft"
+              className="group flex flex-col overflow-hidden rounded-3xl border border-border bg-card shadow-soft dark:border-dark/50 dark:bg-dark"
             >
               <div className="relative overflow-hidden">
                 <img
@@ -422,17 +422,17 @@ function JacDesign() {
                   height={700}
                   loading="lazy"
                   alt={p.name}
-                  className="h-52 w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  className="h-52 w-full object-cover transition-transform duration-500 ease-in-out hover:scale-105 hover:brightness-110 group-hover:scale-105 group-hover:brightness-110"
                 />
                 <span className="absolute left-3 top-3 rounded-full bg-card/85 px-3 py-1 text-[11px] font-bold uppercase tracking-wider backdrop-blur-md">
                   {p.tag}
                 </span>
                 <div className="absolute right-3 top-3 flex flex-col gap-2">
-                  <button
+<button
                     onClick={() => toggleWish(p)}
                     aria-label="Añadir a favoritos"
-                    className="grid h-9 w-9 place-items-center rounded-full bg-card/85 text-rose backdrop-blur-md transition-transform hover:scale-110"
-                  >
+                    className="grid h-9 w-9 place-items-center rounded-full bg-card/85 text-rose backdrop-blur-md transition-transform hover:scale-110 dark:hover:text-rose"
+>
                     {Icon.heart("h-4 w-4", wish.includes(p.id))}
                   </button>
                   <button
@@ -465,7 +465,7 @@ function JacDesign() {
       </section>
 
       {/* CUSTOMIZER */}
-      <section id="personalizador" className="bg-muted/60 py-20">
+      <section id="personalizador" className="bg-muted/60 py-20 dark:bg-dark/60">
         <div className="mx-auto max-w-7xl px-4 lg:px-8">
           <div className="max-w-2xl">
             <h2 className="text-3xl font-black tracking-tight sm:text-4xl">
@@ -612,7 +612,7 @@ function JacDesign() {
       </section>
 
       {/* 3D QUOTER */}
-      <section id="cotizador" className="mx-auto max-w-7xl px-4 py-20 lg:px-8">
+      <section id="cotizador" className="mx-auto max-w-7xl px-4 py-20 lg:px-8 bg-muted/60 dark:bg-dark/60">
         <div className="grid gap-6 lg:grid-cols-[1.1fr_minmax(0,1fr)]">
           <div>
             <h2 className="text-3xl font-black tracking-tight sm:text-4xl">
@@ -651,7 +651,7 @@ function JacDesign() {
                 toast("Archivo cargado y analizado");
               }}
               className={`flex cursor-pointer flex-col items-center gap-3 rounded-[1.5rem] border-2 border-dashed p-8 text-center transition-colors ${
-                dragging ? "border-amber bg-amber/10" : "border-border bg-muted/50 hover:bg-muted"
+                dragging ? "border-amber bg-amber/10" : `border-border bg-muted/50 dark:bg-muted/80 hover:bg-muted`}
               }`}
             >
               <input
@@ -709,7 +709,7 @@ function JacDesign() {
       </section>
 
       {/* REVIEWS */}
-      <section id="galeria" className="bg-muted/60 py-20">
+      <section id="galeria" className="bg-muted/60 py-20 dark:bg-dark/60">
         <div className="mx-auto max-w-7xl px-4 lg:px-8">
           <h2 className="text-3xl font-black tracking-tight sm:text-4xl">Galería de clientes</h2>
           <p className="mt-3 max-w-xl text-muted-foreground">
@@ -717,7 +717,7 @@ function JacDesign() {
           </p>
           <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {REVIEWS.map((r) => (
-              <figure key={r.name} className="rounded-3xl border border-border bg-card p-6">
+              <figure key={r.name} className="rounded-3xl border border-border bg-card p-6 group-hover:shadow-lg group-hover:border-amber transition-all">
                 <div className="flex gap-1 text-amber">
                   {[0, 1, 2, 3, 4].map((i) => (
                     <span key={i}>{Icon.star("h-4 w-4")}</span>
@@ -737,7 +737,7 @@ function JacDesign() {
       </section>
 
       {/* FOOTER */}
-      <footer className="border-t border-border py-10">
+      <footer className="border-t border-border py-10 bg-muted/60 dark:bg-dark/60">
         <div className="mx-auto flex max-w-7xl flex-col gap-2 px-4 text-sm text-muted-foreground lg:px-8">
           <span className="font-bold text-foreground">Jac Design</span>
           <span>Impresión 3D · Fiestas · Corte láser · Icopor · Repostería saludable</span>
@@ -872,7 +872,7 @@ function Modal({
   children: React.ReactNode;
 }) {
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-slate-deep/50 p-4 backdrop-blur-md">
+    <div className="fixed inset-0 z-50 grid place-items-center bg-slate-deep/80 dark:bg-dark/80 p-4 backdrop-blur-md">
       <div className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-3xl border border-border bg-card p-6 shadow-soft">
         <div className="mb-5 flex items-center justify-between gap-4">
           <h2 className="text-lg font-black tracking-tight">{title}</h2>
