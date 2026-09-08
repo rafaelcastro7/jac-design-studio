@@ -217,10 +217,10 @@ function JacDesign() {
   const toastId = useRef(0);
 
   // customizer
-  const [base, setBase] = useState(BASES[0]);
+  const [base, setBase] = useState(BASES[0]!);
   const [text, setText] = useState("Familia Jaramillo");
-  const [font, setFont] = useState(FONTS[0]);
-  const [theme, setTheme] = useState(THEMES[0]);
+  const [font, setFont] = useState(FONTS[0]!);
+  const [theme, setTheme] = useState(THEMES[0]!);
 
   // 3D quoter
   const [file, setFile] = useState<string | null>(null);
