@@ -19,7 +19,7 @@ export const UI: Dict = {
   cart: { en: "Cart", fr: "Panier", es: "Carrito" },
   wishlist: { en: "Wishlist", fr: "Favoris", es: "Favoritos" },
   language: { en: "Language", fr: "Langue", es: "Idioma" },
-  tagline: { en: "3D • Parties • Laser • Foam • Desserts", fr: "3D • Fêtes • Laser • Mousse • Desserts", es: "3D • Fiestas • Láser • Icopor • Postres" },
+  tagline: { en: "3D • Parties • Laser • Foam • Desserts", fr: "3D • Fêtes • Laser • Mousse • Desserts", es: "3D • Fiestas • Láser • Foam • Postres" },
 
   // hero
   heroBadge: { en: "Designed & made in Canada", fr: "Conçu et fabriqué au Canada", es: "Diseñado y fabricado en Canadá" },

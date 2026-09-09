@@ -74,7 +74,7 @@ const WISH_TOAST: Tri = { en: "item(s) in your wishlist", fr: "article(s) dans v
 
 const SERVICE_LIST: Tri[] = [
   { en: "3D printing in PLA, PETG and resin", fr: "Impression 3D en PLA, PETG et résine", es: "Impresión 3D en PLA, PETG y resina" },
-  { en: "Laser-cut wood and foam signage", fr: "Enseignes en bois et mousse au laser", es: "Letreros en madera e icopor a láser" },
+  { en: "Laser-cut wood and foam signage", fr: "Enseignes en bois et mousse au laser", es: "Letreros en madera y foam a láser" },
   { en: "Full event styling and balloon decor", fr: "Décor d'événements et ballons", es: "Decoración de eventos y globos" },
   { en: "Healthy, keto and protein pastry", fr: "Pâtisserie santé, keto et protéinée", es: "Repostería saludable, keto y proteica" },
 ];
