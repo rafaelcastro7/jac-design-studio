@@ -887,6 +887,11 @@ function JacDesign() {
             onAddToCart={(item) => {
               addToCart(item);
               setCartOpen(true);
+              void supabase.from("quotes").insert({
+                file_name: item.name,
+                estimate_cad: item.price,
+                notes: item.details ?? null,
+              });
             }}
           />
         </div>
