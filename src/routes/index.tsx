@@ -223,11 +223,6 @@ function JacDesign() {
   const [sending, setSending] = useState(false);
   const toastId = useRef(0);
 
-  // customizer
-  const [base, setBase] = useState(BASES[0]!);
-  const [text, setText] = useState("Maple & Co.");
-  const [font, setFont] = useState(FONTS[0]!);
-  const [theme, setTheme] = useState(THEMES[0]!);
 
   const toast = (msg: string) => {
     const id = ++toastId.current;
