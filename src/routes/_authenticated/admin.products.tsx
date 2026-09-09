@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -6,6 +7,7 @@ import { useAdminCatalog } from "@/hooks/useCatalog";
 import { useAuth } from "@/hooks/useAuth";
 import { CAT_LABELS, LEAD_LABELS, type Cat, type LeadKey } from "@/data/products";
 import { IMAGE_MAP, seedRows, type ShopProduct } from "@/lib/catalog";
+import { translateProductCopy } from "@/lib/translate.functions";
 import { Card, Empty, Field, Pill, btnGhost, btnPrimary, cadExact, downloadCsv, inputCls } from "@/components/admin/kit";
 
 export const Route = createFileRoute("/_authenticated/admin/products")({
@@ -39,7 +41,7 @@ interface Draft {
   material: { en: string; fr: string; es: string };
 }
 
-const emptyDraft = (): Draft => ({
+const emptyDraft = (sortOrder = 999): Draft => ({
   slug: "",
   cat: "fiestas",
   price: "0",
@@ -47,7 +49,7 @@ const emptyDraft = (): Draft => ({
   dimensions: "",
   rating: "5",
   reviewCount: "0",
-  sortOrder: "999",
+  sortOrder: String(sortOrder),
   stock: "",
   popular: false,
   published: true,
@@ -108,6 +110,15 @@ const draftToRow = (d: Draft) => ({
   material_es: d.material.es,
 });
 
+const slugify = (v: string) =>
+  v
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 60);
+
 function ProductsAdmin() {
   const { isAdmin } = useAuth();
   const qc = useQueryClient();
@@ -131,9 +142,49 @@ function ProductsAdmin() {
 
   const refresh = () => qc.invalidateQueries({ queryKey: ["catalog"] });
 
+  const nextSortOrder = useMemo(() => {
+    const max = Math.max(0, ...(data ?? []).map((p) => p.sortOrder || 0));
+    return max + 10;
+  }, [data]);
+
+  // AI: write once in any language, get all three plus the slug
+  const translate = useServerFn(translateProductCopy);
+  const [aiSource, setAiSource] = useState<"es" | "en" | "fr">("es");
+  const autofill = useMutation({
+    mutationFn: async (d: Draft) => {
+      const res = await translate({
+        data: {
+          source: aiSource,
+          cat: d.cat,
+          name: d.name[aiSource],
+          tag: d.tag[aiSource],
+          desc: d.desc[aiSource],
+          material: d.material[aiSource],
+        },
+      });
+      return res;
+    },
+    onSuccess: (res) => {
+      setError(null);
+      setDraft((prev) =>
+        prev
+          ? {
+              ...prev,
+              name: res.name,
+              tag: res.tag,
+              desc: res.desc,
+              material: res.material,
+              slug: prev.slug.trim() ? prev.slug : res.slug,
+            }
+          : prev
+      );
+    },
+    onError: (e: Error) => setError(e.message),
+  });
+
   const save = useMutation({
     mutationFn: async (d: Draft) => {
-      const row = draftToRow(d);
+      const row = draftToRow({ ...d, slug: d.slug.trim() || slugify(d.name.en || d.name.es) });
       if (!row.slug || !row.name_en) throw new Error("El identificador y el nombre en inglés son obligatorios.");
       if (!/^[a-z0-9-]+$/.test(row.slug))
         throw new Error("El identificador solo admite minúsculas, números y guiones.");
@@ -253,7 +304,7 @@ function ProductsAdmin() {
               <button onClick={() => renumber.mutate()} disabled={renumber.isPending} className={btnGhost}>
                 {renumber.isPending ? "Numerando…" : "Renumerar 10, 20, 30…"}
               </button>
-              <button onClick={() => setDraft(emptyDraft())} className={btnPrimary}>
+              <button onClick={() => setDraft(emptyDraft(nextSortOrder))} className={btnPrimary}>
                 + Nuevo producto
               </button>
             </div>
@@ -380,7 +431,7 @@ function ProductsAdmin() {
             </div>
 
             <div className="grid gap-3 sm:grid-cols-2">
-              <Field label="Identificador (slug)">
+              <Field label="Identificador (slug) — automático si lo dejas vacío">
                 <input value={draft.slug} onChange={(e) => setDraft({ ...draft, slug: e.target.value })} className={inputCls} />
               </Field>
               <Field label="Categoría">
@@ -449,6 +500,28 @@ function ProductsAdmin() {
                 <input type="checkbox" checked={draft.popular} onChange={(e) => setDraft({ ...draft, popular: e.target.checked })} />
                 Destacado / más vendido
               </label>
+            </div>
+
+            <div className="mt-5 rounded-2xl border border-amber-500/40 bg-amber-500/5 p-4">
+              <p className="text-sm font-bold">Redacción automática trilingüe</p>
+              <p className="mt-1 text-[11px] text-muted-foreground">
+                Escribe el nombre y la descripción en un solo idioma; la IA completa los otros dos, mejora el texto y
+                genera el identificador si está vacío.
+              </p>
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                <select value={aiSource} onChange={(e) => setAiSource(e.target.value as "es" | "en" | "fr")} className={`${inputCls} sm:max-w-[180px]`}>
+                  <option value="es">Escribí en español</option>
+                  <option value="en">I wrote in English</option>
+                  <option value="fr">J’ai écrit en français</option>
+                </select>
+                <button
+                  onClick={() => autofill.mutate(draft)}
+                  disabled={autofill.isPending}
+                  className={btnPrimary}
+                >
+                  {autofill.isPending ? "Traduciendo…" : "Completar los 3 idiomas con IA"}
+                </button>
+              </div>
             </div>
 
             {(["name", "tag", "desc", "material"] as const).map((key) => (
