@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Card, Empty, Pill, cadExact, dateShort, inputCls } from "@/components/admin/kit";
+import { Card, Empty, Pill, SearchInput, btnGhost, cadExact, dateShort, downloadCsv, inputCls } from "@/components/admin/kit";
 
 export const Route = createFileRoute("/_authenticated/admin/quotes")({
   component: QuotesAdmin,
@@ -21,7 +21,6 @@ interface Quote {
   id: string;
   customer_name: string | null;
   customer_email: string | null;
-  customer_phone: string | null;
   file_name: string | null;
   material: string | null;
   infill: string | null;
@@ -39,6 +38,7 @@ function QuotesAdmin() {
   const { isAdmin } = useAuth();
   const qc = useQueryClient();
   const [filter, setFilter] = useState<"todos" | Status>("todos");
+  const [search, setSearch] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   const { data, isLoading } = useQuery({
@@ -68,12 +68,46 @@ function QuotesAdmin() {
     onError: (e: Error) => setError(e.message),
   });
 
-  const list = (data ?? []).filter((q) => filter === "todos" || q.status === filter);
+  const term = search.trim().toLowerCase();
+  const list = (data ?? []).filter(
+    (q) =>
+      (filter === "todos" || q.status === filter) &&
+      (!term ||
+        `${q.customer_name ?? ""} ${q.customer_email ?? ""} ${q.file_name ?? ""} ${q.material ?? ""}`
+          .toLowerCase()
+          .includes(term))
+  );
 
   return (
     <Card
       title="Cotizaciones de impresión 3D"
       action={
+        <div className="flex flex-wrap items-center gap-2">
+        <SearchInput value={search} onChange={setSearch} placeholder="Buscar por cliente, archivo o material" />
+        <button
+          onClick={() =>
+            downloadCsv(
+              "cotizaciones-jac-design.csv",
+              ["fecha", "cliente", "correo", "archivo", "material", "relleno", "cantidad", "volumen_cm3", "estimado_cad", "estado"],
+              list.map((q) => [
+                q.created_at,
+                q.customer_name ?? "",
+                q.customer_email ?? "",
+                q.file_name ?? "",
+                q.material ?? "",
+                q.infill ?? "",
+                q.qty ?? "",
+                q.volume_cm3 ?? "",
+                q.estimate_cad ?? "",
+                q.status,
+              ])
+            )
+          }
+          disabled={list.length === 0}
+          className={`${btnGhost} disabled:opacity-50`}
+        >
+          Exportar CSV
+        </button>
         <select value={filter} onChange={(e) => setFilter(e.target.value as Status | "todos")} className={`${inputCls} max-w-[15rem]`}>
           <option value="todos">Todos los estados</option>
           {STATUS.map((s) => (
@@ -82,6 +116,7 @@ function QuotesAdmin() {
             </option>
           ))}
         </select>
+        </div>
       }
     >
       {error && <p className="mb-3 text-xs font-semibold text-rose-600">{error}</p>}
@@ -99,7 +134,8 @@ function QuotesAdmin() {
                   <p className="truncate text-[11px] text-muted-foreground">
                     {q.customer_name || "Sin nombre"}
                     {q.customer_email ? ` · ${q.customer_email}` : ""}
-                    {q.customer_phone ? ` · ${q.customer_phone}` : ""} · {dateShort(q.created_at)}
+                    {" · "}
+                    {dateShort(q.created_at)}
                   </p>
                 </div>
                 <span className="text-sm font-bold">{cadExact(Number(q.estimate_cad ?? 0))}</span>

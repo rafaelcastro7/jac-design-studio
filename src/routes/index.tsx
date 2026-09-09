@@ -7,6 +7,7 @@ import type { Tri } from "@/i18n/lang";
 import { CATS, CAT_LABELS, LEAD_LABELS, type Cat, type Product } from "@/data/products";
 import { useCatalog } from "@/hooks/useCatalog";
 import { supabase } from "@/integrations/supabase/client";
+import { createOrder } from "@/lib/orders.functions";
 
 import hero from "@/assets/hero-jac.jpg";
 
@@ -280,31 +281,19 @@ function JacDesign() {
     }
     setSending(true);
     try {
-      const { data, error } = await supabase
-        .from("orders")
-        .insert({
-          customer_name: buyer.name.trim(),
-          customer_email: buyer.email.trim(),
-          customer_phone: buyer.phone.trim() || null,
+      const res = await createOrder({
+        data: {
+          name: buyer.name.trim(),
+          email: buyer.email.trim(),
+          phone: buyer.phone.trim() || null,
           lang,
-          total_cad: total,
-        })
-        .select("id")
-        .single();
-      if (error) throw error;
-      const items = cart.map((i) => ({
-        order_id: data.id,
-        product_slug: i.id,
-        name: i.name,
-        unit_price_cad: i.price,
-        qty: 1,
-      }));
-      const res = await supabase.from("order_items").insert(items);
-      if (res.error) throw res.error;
+          items: cart.map((i) => ({ slug: i.id, name: i.name, price: i.price, qty: 1 })),
+        },
+      });
       setCart([]);
       setCartOpen(false);
       setBuyer({ name: "", email: "", phone: "" });
-      toast(t("checkoutDone"));
+      toast(`${t("checkoutDone")} — ${res.code}`);
     } catch {
       toast(t("saveError"));
     } finally {

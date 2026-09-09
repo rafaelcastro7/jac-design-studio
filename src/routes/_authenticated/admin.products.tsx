@@ -6,7 +6,7 @@ import { useAdminCatalog } from "@/hooks/useCatalog";
 import { useAuth } from "@/hooks/useAuth";
 import { CAT_LABELS, LEAD_LABELS, type Cat, type LeadKey } from "@/data/products";
 import { IMAGE_MAP, seedRows, type ShopProduct } from "@/lib/catalog";
-import { Card, Empty, Field, Pill, btnGhost, btnPrimary, cadExact, inputCls } from "@/components/admin/kit";
+import { Card, Empty, Field, Pill, btnGhost, btnPrimary, cadExact, downloadCsv, inputCls } from "@/components/admin/kit";
 
 export const Route = createFileRoute("/_authenticated/admin/products")({
   component: ProductsAdmin,
@@ -25,6 +25,7 @@ interface Draft {
   rating: string;
   reviewCount: string;
   sortOrder: string;
+  stock: string;
   popular: boolean;
   published: boolean;
   imageKey: string;
@@ -44,6 +45,7 @@ const emptyDraft = (): Draft => ({
   rating: "5",
   reviewCount: "0",
   sortOrder: "999",
+  stock: "",
   popular: false,
   published: true,
   imageKey: "",
@@ -63,7 +65,8 @@ const toDraft = (p: ShopProduct): Draft => ({
   dimensions: p.dimensions,
   rating: String(p.rating),
   reviewCount: String(p.reviewCount),
-  sortOrder: "0",
+  sortOrder: String(p.sortOrder),
+  stock: p.stock === null ? "" : String(p.stock),
   popular: p.popular,
   published: p.published,
   imageKey: IMAGE_MAP[p.id] ? p.id : "",
@@ -83,6 +86,7 @@ const draftToRow = (d: Draft) => ({
   rating: Number(d.rating) || 5,
   review_count: Number(d.reviewCount) || 0,
   sort_order: Number(d.sortOrder) || 0,
+  stock: d.stock.trim() === "" ? null : Math.max(0, Number(d.stock) || 0),
   popular: d.popular,
   published: d.published,
   image_key: d.imageKey || null,
@@ -116,6 +120,10 @@ function ProductsAdmin() {
     mutationFn: async (d: Draft) => {
       const row = draftToRow(d);
       if (!row.slug || !row.name_en) throw new Error("El identificador y el nombre en inglés son obligatorios.");
+      if (!/^[a-z0-9-]+$/.test(row.slug))
+        throw new Error("El identificador solo admite minúsculas, números y guiones.");
+      const clash = (data ?? []).some((p) => p.id === row.slug && p.rowId !== d.rowId);
+      if (clash) throw new Error("Ya existe un producto con ese identificador.");
       const res = d.rowId
         ? await supabase.from("products").update(row).eq("id", d.rowId)
         : await supabase.from("products").insert(row);
@@ -179,6 +187,18 @@ function ProductsAdmin() {
               <button onClick={() => importSeed.mutate()} disabled={importSeed.isPending} className={btnGhost}>
                 {importSeed.isPending ? "Importando…" : "Importar catálogo inicial (25)"}
               </button>
+              <button
+                onClick={() =>
+                  downloadCsv(
+                    "catalogo-jac-design.csv",
+                    ["slug", "categoria", "precio_cad", "publicado", "stock", "nombre_en", "nombre_es"],
+                    (data ?? []).map((p) => [p.id, p.cat, p.price, p.published ? "si" : "no", p.stock ?? "", p.name.en, p.name.es])
+                  )
+                }
+                className={btnGhost}
+              >
+                Exportar CSV
+              </button>
               <button onClick={() => setDraft(emptyDraft())} className={btnPrimary}>
                 + Nuevo producto
               </button>
@@ -225,6 +245,11 @@ function ProductsAdmin() {
                     {p.id} · {CAT_LABELS[p.cat].es} · {cadExact(p.price)}
                   </p>
                 </div>
+                {p.stock !== null && (
+                  <Pill tone={p.stock === 0 ? "warn" : p.stock <= 3 ? "info" : "muted"}>
+                    {p.stock === 0 ? "Sin stock" : `${p.stock} en stock`}
+                  </Pill>
+                )}
                 <Pill tone={p.published ? "ok" : "warn"}>{p.published ? "Publicado" : "Oculto"}</Pill>
                 {isAdmin && (
                   <div className="flex gap-2">
@@ -290,6 +315,15 @@ function ProductsAdmin() {
               </Field>
               <Field label="Orden en la tienda">
                 <input type="number" value={draft.sortOrder} onChange={(e) => setDraft({ ...draft, sortOrder: e.target.value })} className={inputCls} />
+              </Field>
+              <Field label="Inventario (vacío = sin control)">
+                <input
+                  type="number"
+                  min="0"
+                  value={draft.stock}
+                  onChange={(e) => setDraft({ ...draft, stock: e.target.value })}
+                  className={inputCls}
+                />
               </Field>
               <Field label="Calificación (1-5)">
                 <input type="number" step="0.1" value={draft.rating} onChange={(e) => setDraft({ ...draft, rating: e.target.value })} className={inputCls} />

@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Card, Empty, Pill, dateShort, inputCls } from "@/components/admin/kit";
+import { Card, Empty, Pill, SearchInput, btnGhost, dateShort, downloadCsv, inputCls } from "@/components/admin/kit";
 
 export const Route = createFileRoute("/_authenticated/admin/messages")({
   component: MessagesAdmin,
@@ -32,6 +32,7 @@ function MessagesAdmin() {
   const { isAdmin } = useAuth();
   const qc = useQueryClient();
   const [filter, setFilter] = useState<"todos" | Status>("todos");
+  const [search, setSearch] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   const { data, isLoading } = useQuery({
@@ -61,12 +62,32 @@ function MessagesAdmin() {
     onError: (e: Error) => setError(e.message),
   });
 
-  const list = (data ?? []).filter((m) => filter === "todos" || m.status === filter);
+  const q = search.trim().toLowerCase();
+  const list = (data ?? []).filter(
+    (m) =>
+      (filter === "todos" || m.status === filter) &&
+      (!q || `${m.name} ${m.email} ${m.phone ?? ""} ${m.body}`.toLowerCase().includes(q))
+  );
 
   return (
     <Card
       title="Mensajes de contacto"
       action={
+        <div className="flex flex-wrap items-center gap-2">
+        <SearchInput value={search} onChange={setSearch} placeholder="Buscar por nombre, correo o texto" />
+        <button
+          onClick={() =>
+            downloadCsv(
+              "mensajes-jac-design.csv",
+              ["fecha", "nombre", "correo", "telefono", "idioma", "estado", "mensaje"],
+              list.map((m) => [m.created_at, m.name, m.email, m.phone ?? "", m.lang, m.status, m.body])
+            )
+          }
+          disabled={list.length === 0}
+          className={`${btnGhost} disabled:opacity-50`}
+        >
+          Exportar CSV
+        </button>
         <select value={filter} onChange={(e) => setFilter(e.target.value as Status | "todos")} className={`${inputCls} max-w-[15rem]`}>
           <option value="todos">Todos los estados</option>
           {STATUS.map((s) => (
@@ -75,6 +96,7 @@ function MessagesAdmin() {
             </option>
           ))}
         </select>
+        </div>
       }
     >
       {error && <p className="mb-3 text-xs font-semibold text-rose-600">{error}</p>}

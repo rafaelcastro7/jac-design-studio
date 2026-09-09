@@ -2,7 +2,9 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Card, Empty, Pill, Stat, cad, dateShort } from "@/components/admin/kit";
+import { useState } from "react";
+import { useAdminCatalog } from "@/hooks/useCatalog";
+import { Card, Empty, Pill, Stat, btnGhost, cad, dateShort, downloadCsv, inputCls } from "@/components/admin/kit";
 
 export const Route = createFileRoute("/_authenticated/admin/")({
   component: Dashboard,
@@ -19,6 +21,8 @@ interface OrderRow {
 
 function Dashboard() {
   const { isAdmin } = useAuth();
+  const [days, setDays] = useState<30 | 90 | 365 | 0>(90);
+  const catalog = useAdminCatalog();
 
   const orders = useQuery({
     queryKey: ["report", "orders"],
@@ -51,6 +55,8 @@ function Dashboard() {
         supabase.from("quotes").select("id, status, estimate_cad"),
         supabase.from("messages").select("id, status"),
       ]);
+      const failed = prod.error ?? quotes.error ?? msgs.error;
+      if (failed) throw failed;
       return {
         products: prod.data?.length ?? 0,
         published: (prod.data ?? []).filter((p) => p.published).length,
@@ -76,7 +82,10 @@ function Dashboard() {
     );
   }
 
-  const list = orders.data ?? [];
+  const all = orders.data ?? [];
+  const since = days === 0 ? 0 : Date.now() - days * 86_400_000;
+  const list = all.filter((o) => new Date(o.created_at).getTime() >= since);
+  const lowStock = (catalog.data ?? []).filter((p) => p.stock !== null && p.stock <= 3);
   const revenue = list
     .filter((o) => o.status !== "cancelado")
     .reduce((s, o) => s + Number(o.total_cad), 0);
@@ -113,6 +122,38 @@ function Dashboard() {
 
   return (
     <div className="grid gap-5">
+      <div className="flex flex-wrap items-center gap-2">
+        <select
+          value={days}
+          onChange={(e) => setDays(Number(e.target.value) as 30 | 90 | 365 | 0)}
+          aria-label="Periodo del reporte"
+          className={`${inputCls} sm:max-w-[15rem]`}
+        >
+          <option value={30}>Últimos 30 días</option>
+          <option value={90}>Últimos 90 días</option>
+          <option value={365}>Último año</option>
+          <option value={0}>Todo el histórico</option>
+        </select>
+        <button
+          onClick={() =>
+            downloadCsv(
+              "reporte-ventas-jac-design.csv",
+              ["codigo", "fecha", "cliente", "estado", "total_cad"],
+              list.map((o) => [o.code, o.created_at, o.customer_name, o.status, Number(o.total_cad).toFixed(2)])
+            )
+          }
+          disabled={list.length === 0}
+          className={`${btnGhost} disabled:opacity-50`}
+        >
+          Exportar reporte CSV
+        </button>
+        {(orders.error || items.error || counts.error) && (
+          <span className="text-xs font-semibold text-rose-600">
+            No se pudieron cargar algunos datos. Recarga la página.
+          </span>
+        )}
+      </div>
+
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Stat label="Ventas acumuladas" value={cad(revenue)} hint={`${list.length} pedidos`} />
         <Stat label="Ticket promedio" value={cad(avg)} />
@@ -129,6 +170,19 @@ function Dashboard() {
         <Stat label="Valor cotizado" value={cad(counts.data?.quotesValue ?? 0)} />
         <Stat label="Mensajes nuevos" value={String(counts.data?.messagesNew ?? 0)} />
       </div>
+
+      {lowStock.length > 0 && (
+        <Card title="Inventario bajo">
+          <ul className="grid gap-2">
+            {lowStock.map((p) => (
+              <li key={p.rowId ?? p.id} className="flex items-center gap-3 rounded-2xl bg-muted/50 px-3 py-2.5">
+                <span className="min-w-0 flex-1 truncate text-sm font-semibold">{p.name.es || p.name.en}</span>
+                <Pill tone="warn">{p.stock === 0 ? "Sin stock" : `${p.stock} u.`}</Pill>
+              </li>
+            ))}
+          </ul>
+        </Card>
+      )}
 
       <Card title="Ventas por semana (últimas 8)">
         {list.length === 0 ? (
