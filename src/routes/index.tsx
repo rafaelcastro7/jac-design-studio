@@ -157,6 +157,7 @@ function JacDesign() {
   const [quick, setQuick] = useState<Product | null>(null);
   const [cartOpen, setCartOpen] = useState(false);
   const [toasts, setToasts] = useState<{ id: number; text: string }[]>([]);
+  const [contact, setContact] = useState({ name: "", email: "", phone: "", message: "" });
   const toastId = useRef(0);
 
   // customizer
@@ -781,7 +782,7 @@ function JacDesign() {
       {/* FOOTER */}
       <footer className="py-12 lg:py-16 bg-dark border-t border-dark/50">
         <div className="mx-auto max-w-7xl px-4 lg:px-8">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
             <div>
               <span className="text-2xl font-black tracking-wider text-rose-foreground mb-4 block">Jac Design</span>
               <p className="text-muted-foreground text-sm">
@@ -806,21 +807,95 @@ function JacDesign() {
                 <li>Repostería saludable y fit</li>
               </ul>
             </div>
+          </div>
+
+          {/* CONTACTO */}
+          <div id="contacto" className="grid gap-6 lg:grid-cols-[1fr_1.2fr] rounded-3xl border border-border bg-card p-5 sm:p-8 shadow-soft mb-10">
             <div>
-              <h4 className="font-bold text-foreground mb-4">Contacto</h4>
-              <p className="text-sm text-muted-foreground mb-2">
-                Responde en hasta 48 horas
+              <h4 className="text-xl sm:text-2xl font-black tracking-tight">Hablemos de tu proyecto</h4>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Cuéntanos qué necesitas y te enviamos una propuesta con precios en CAD.
               </p>
-              <a
-                href="mailto:contacto@jac-design.com"
-                className="text-rose-foreground hover:text-rose-foreground transition-colors"
-              >
-                contacto@jac-design.com
-              </a>
-              <p className="text-xs text-muted-foreground">
-                Lunes a Viernes: 9:00 - 18:00
-              </p>
+              <dl className="mt-5 space-y-3 text-sm">
+                <div>
+                  <dt className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Teléfono</dt>
+                  <dd>
+                    <a href="tel:+15551234567" className="font-semibold hover:text-amber-600">
+                      +1 (555) 123-4567
+                    </a>
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Correo</dt>
+                  <dd>
+                    <a href="mailto:contacto@jac-design.com" className="font-semibold hover:text-amber-600">
+                      contacto@jac-design.com
+                    </a>
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Horario de atención</dt>
+                  <dd className="font-semibold">Lunes a viernes 9:00–18:00 · Sábados 10:00–14:00 (ET)</dd>
+                </div>
+              </dl>
             </div>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (!contact.name.trim() || !contact.email.trim() || !contact.message.trim()) {
+                  toast("Completa nombre, correo y mensaje");
+                  return;
+                }
+                setContact({ name: "", email: "", phone: "", message: "" });
+                toast("¡Mensaje enviado! Te respondemos en 48 horas");
+              }}
+              className="grid gap-3"
+            >
+              <div className="grid gap-3 sm:grid-cols-2">
+                <input
+                  value={contact.name}
+                  onChange={(e) => setContact({ ...contact, name: e.target.value })}
+                  maxLength={100}
+                  placeholder="Nombre completo"
+                  aria-label="Nombre completo"
+                  className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-amber"
+                />
+                <input
+                  value={contact.phone}
+                  onChange={(e) => setContact({ ...contact, phone: e.target.value })}
+                  maxLength={30}
+                  type="tel"
+                  placeholder="Teléfono (opcional)"
+                  aria-label="Teléfono"
+                  className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-amber"
+                />
+              </div>
+              <input
+                value={contact.email}
+                onChange={(e) => setContact({ ...contact, email: e.target.value })}
+                maxLength={255}
+                type="email"
+                placeholder="Correo electrónico"
+                aria-label="Correo electrónico"
+                className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-amber"
+              />
+              <textarea
+                value={contact.message}
+                onChange={(e) => setContact({ ...contact, message: e.target.value })}
+                maxLength={1000}
+                rows={4}
+                placeholder="Cuéntanos qué quieres crear…"
+                aria-label="Mensaje"
+                className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-amber"
+              />
+              <button
+                type="submit"
+                className="w-full rounded-2xl bg-gradient-warm py-3.5 text-sm font-bold text-rose-foreground shadow-soft transition-transform hover:scale-[1.02]"
+              >
+                Enviar mensaje
+              </button>
+            </form>
           </div>
           <div className="pt-8 border-t border-dark/20 flex flex-col lg:flex-row justify-between items-center gap-4">
             <p className="text-xs text-muted-foreground">
