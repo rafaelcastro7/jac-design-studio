@@ -157,6 +157,7 @@ function JacDesign() {
   const [quick, setQuick] = useState<Product | null>(null);
   const [cartOpen, setCartOpen] = useState(false);
   const [toasts, setToasts] = useState<{ id: number; text: string }[]>([]);
+  const [contact, setContact] = useState({ name: "", email: "", phone: "", message: "" });
   const toastId = useRef(0);
 
   // customizer
@@ -288,13 +289,13 @@ function JacDesign() {
               <span className="inline-flex items-center gap-2 rounded-full bg-gradient-warm px-4 py-2 text-xs font-semibold uppercase tracking-[0.15em] text-rose-foreground shadow-soft mb-6">
                 Taller de fabricación digital
               </span>
-              <h1 className="text-5xl font-black leading-[1.1] tracking-tight sm:text-6xl lg:text-7xl mb-6">
-                Diseño integral para tus
-              <span className="bg-gradient-warm bg-clip-text text-transparent">ideas</span>
-              y
+              <h1 className="text-[2rem] font-black leading-[1.1] tracking-tight [overflow-wrap:anywhere] sm:text-5xl lg:text-7xl mb-6">
+                Diseño integral para tus{" "}
+              <span className="bg-gradient-warm bg-clip-text text-transparent">ideas</span>{" "}
+              y{" "}
               <span className="bg-gradient-warm bg-clip-text text-transparent">celebraciones</span>
               </h1>
-              <p className="text-base leading-relaxed text-muted-foreground text-lg max-w-xl mb-8">
+              <p className="text-base leading-relaxed text-muted-foreground sm:text-lg max-w-xl mb-8">
                 Impresión 3D, corte láser en madera, letreros en icopor, decoración de fiestas y repostería saludable. Un solo taller para imaginar, personalizar y recibir tu pedido en tiempo récord.
               </p>
               <div className="flex flex-wrap gap-3 mb-10">
@@ -311,7 +312,7 @@ function JacDesign() {
                   Iniciar configurador
                 </a>
               </div>
-              <div className="grid grid-cols-3 gap-3 text-sm">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
                 <div className="rounded-xl bg-card p-3 flex items-center gap-2">
                   <span className="text-amber-500">🚀</span> +1.200 proyectos
                 </div>
@@ -337,7 +338,7 @@ function JacDesign() {
       </section>
 
 {/* CATALOG */}
-      <section id="colecciones" className="py-24 lg:py-32 bg-muted/60 dark:bg-dark/60">
+      <section id="colecciones" className="py-14 sm:py-20 lg:py-32 bg-muted/60 dark:bg-dark/60">
         <div className="mx-auto max-w-7xl px-4 lg:px-8">
           <div className="max-w-3xl mx-auto mb-12 text-center">
             <span className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.14em] text-primary mb-3">
@@ -463,11 +464,11 @@ function JacDesign() {
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-3">
               {filtered.map((p) => (
                 <article
                   key={p.id}
-                  className="group flex flex-col rounded-3xl border border-border bg-card shadow-soft dark:border-dark/50 dark:bg-dark overflow-hidden transition-all duration-300 hover:shadow-xl hover:border-amber hover:-translate-y-1"
+                  className="group flex flex-col rounded-2xl sm:rounded-3xl border border-border bg-card shadow-soft dark:border-dark/50 dark:bg-dark overflow-hidden transition-all duration-300 hover:shadow-xl hover:border-amber hover:-translate-y-1"
                 >
                   <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted">
                     <img
@@ -481,81 +482,81 @@ function JacDesign() {
                     <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
 
                     {/* Tag badge */}
-                    <div className="absolute left-3 top-3 flex flex-col gap-1.5 items-start">
-                      <span className="rounded-full bg-card/90 px-3 py-1 text-[10px] font-bold uppercase tracking-wider backdrop-blur-md shadow-sm">
+                    <div className="absolute left-1.5 top-1.5 sm:left-3 sm:top-3 flex flex-col gap-1 items-start">
+                      <span className="max-w-[9rem] truncate rounded-full bg-card/90 px-2 py-0.5 sm:px-3 sm:py-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider backdrop-blur-md shadow-sm">
                         {p.tag}
                       </span>
                       {p.popular && (
-                        <span className="rounded-full bg-amber-500 text-white px-2.5 py-0.5 text-[9px] font-black uppercase tracking-wider shadow-sm flex items-center gap-1">
+                        <span className="rounded-full bg-amber-500 text-white px-2 py-0.5 text-[9px] font-black uppercase tracking-wider shadow-sm flex items-center gap-1">
                           {Icon.sparkles("h-2.5 w-2.5")} Bestseller
                         </span>
                       )}
                     </div>
 
                     {/* Actions on top-right */}
-                    <div className="absolute right-3 top-3 flex flex-col gap-2 z-10">
+                    <div className="absolute right-1.5 top-1.5 sm:right-3 sm:top-3 flex flex-col gap-1.5 sm:gap-2 z-10">
                       <button
                         onClick={() => toggleWish(p)}
                         aria-label="Añadir a favoritos"
-                        className="grid h-9 w-9 place-items-center rounded-full bg-card/90 text-rose backdrop-blur-md transition-transform hover:scale-115 shadow-sm"
+                        className="grid h-8 w-8 sm:h-9 sm:w-9 place-items-center rounded-full bg-card/90 text-rose backdrop-blur-md transition-transform hover:scale-115 shadow-sm"
                       >
                         {Icon.heart("h-4 w-4", wish.includes(p.id))}
                       </button>
                       <button
                         onClick={() => setQuick(p)}
                         aria-label="Vista rápida"
-                        className="grid h-9 w-9 place-items-center rounded-full bg-card/90 backdrop-blur-md transition-transform hover:scale-115 shadow-sm hover:text-primary"
+                        className="grid h-8 w-8 sm:h-9 sm:w-9 place-items-center rounded-full bg-card/90 backdrop-blur-md transition-transform hover:scale-115 shadow-sm hover:text-primary"
                       >
                         {Icon.search("h-4 w-4")}
                       </button>
                     </div>
 
                     {/* Rating badge bottom right */}
-                    <div className="absolute right-3 bottom-3 rounded-full bg-black/60 text-white px-2.5 py-1 text-[11px] font-bold backdrop-blur-md flex items-center gap-1">
+                    <div className="absolute right-1.5 bottom-1.5 sm:right-3 sm:bottom-3 rounded-full bg-black/60 text-white px-2 py-0.5 sm:px-2.5 sm:py-1 text-[10px] sm:text-[11px] font-bold backdrop-blur-md flex items-center gap-1">
                       <span className="text-amber-400">{Icon.star("h-3 w-3")}</span>
                       <span>{p.rating.toFixed(1)}</span>
-                      <span className="text-white/70 text-[10px]">({p.reviewCount})</span>
+                      <span className="hidden sm:inline text-white/70 text-[10px]">({p.reviewCount})</span>
                     </div>
                   </div>
 
-                  <div className="flex flex-1 flex-col p-5">
-                    <div className="flex items-center gap-2 mb-1.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
-                      <span className="text-primary font-bold">
+                  <div className="flex flex-1 flex-col p-3 sm:p-5">
+                    <div className="flex min-w-0 flex-wrap items-center gap-x-2 mb-1 sm:mb-1.5 text-[10px] sm:text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+                      <span className="text-primary font-bold truncate">
                         {CATS.find((c) => c.id === p.cat)?.label}
                       </span>
-                      <span>•</span>
-                      <span className="flex items-center gap-1">
+                      <span className="hidden sm:inline">•</span>
+                      <span className="hidden sm:flex items-center gap-1">
                         {Icon.truck("h-3 w-3")} {p.leadTime}
                       </span>
                     </div>
 
-                    <h3 className="text-lg font-bold leading-snug tracking-tight group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+                    <h3 className="line-clamp-2 text-sm sm:text-lg font-bold leading-snug tracking-tight group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
                       {p.name}
                     </h3>
 
-                    <p className="mt-2 text-xs leading-relaxed text-muted-foreground line-clamp-2 flex-1">
+                    <p className="mt-1.5 sm:mt-2 hidden sm:line-clamp-2 text-xs leading-relaxed text-muted-foreground flex-1">
                       {p.desc}
                     </p>
 
-                    <div className="mt-3 pt-3 border-t border-border/60 flex items-center justify-between">
-                      <div>
+                    <div className="mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-border/60 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="min-w-0">
                         <span className="text-[10px] uppercase font-bold text-muted-foreground block">
                           Precio
                         </span>
-                        <span className="text-xl font-black tracking-tight">
-                          USD {p.price}
+                        <span className="text-base sm:text-xl font-black tracking-tight">
+                          CAD ${p.price}
                         </span>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="grid grid-cols-2 gap-1.5 sm:flex sm:items-center sm:gap-2">
                         <button
                           onClick={() => addToCart(p)}
-                          className="inline-flex items-center gap-1.5 rounded-2xl bg-primary px-3.5 py-2 text-xs font-bold text-primary-foreground transition-transform hover:scale-[1.04] shadow-sm"
+                          className="inline-flex items-center justify-center gap-1.5 rounded-xl sm:rounded-2xl bg-primary px-2 py-2 text-[11px] sm:text-xs font-bold text-primary-foreground transition-transform hover:scale-[1.04] shadow-sm"
                         >
                           {Icon.cart("h-3.5 w-3.5")} Añadir
                         </button>
                         <button
                           onClick={() => setQuick(p)}
-                          className="inline-flex items-center gap-1 rounded-2xl bg-muted px-3 py-2 text-xs font-bold transition-colors hover:bg-muted/80"
+                          className="inline-flex items-center justify-center gap-1 rounded-xl sm:rounded-2xl bg-muted px-2 py-2 text-[11px] sm:text-xs font-bold transition-colors hover:bg-muted/80"
                           title="Vista rápida"
                         >
                           {Icon.search("h-3.5 w-3.5")} Ver
@@ -571,7 +572,7 @@ function JacDesign() {
       </section>
 
 {/* CUSTOMIZER */}
-      <section id="personalizador" className="py-24 lg:py-32 bg-muted/60 dark:bg-dark/60">
+      <section id="personalizador" className="py-14 sm:py-20 lg:py-32 bg-muted/60 dark:bg-dark/60">
         <div className="mx-auto max-w-7xl px-4 lg:px-8">
           <div className="max-w-3xl mx-auto mb-12">
             <h2 className="text-4xl font-black tracking-tight sm:text-5xl mb-4">
@@ -656,7 +657,7 @@ function JacDesign() {
                 }
                 className="w-full rounded-2xl bg-gradient-warm py-4 text-sm font-bold text-rose-foreground shadow-soft transition-transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-amber focus:ring-offset-2 mt-4"
               >
-                Añadir personalización — USD {customPrice.toFixed(2)}
+                Añadir personalización — CAD ${customPrice.toFixed(2)}
               </button>
             </div>
 
@@ -699,7 +700,7 @@ function JacDesign() {
                 {[
                   ["Base", base.label],
                   ["Tipografía", font.label],
-                  ["Precio", `USD ${customPrice.toFixed(2)}`],
+                  ["Precio", `CAD $${customPrice.toFixed(2)}`],
                 ].map(([k, v]) => (
                   <div key={k} className="rounded-xl bg-muted p-3">
                     <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{k}</p>
@@ -713,7 +714,7 @@ function JacDesign() {
       </section>
 
 {/* 3D QUOTER */}
-      <section id="cotizador" className="py-24 lg:py-32 bg-muted/40 dark:bg-dark/60">
+      <section id="cotizador" className="py-14 sm:py-20 lg:py-32 bg-muted/40 dark:bg-dark/60">
         <div className="mx-auto max-w-7xl px-4 lg:px-8">
           <div className="max-w-3xl mb-12">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-xs font-bold uppercase tracking-wider mb-3">
@@ -737,7 +738,7 @@ function JacDesign() {
       </section>
 
       {/* REVIEWS */}
-      <section id="galeria" className="py-24 lg:py-32 bg-muted/60 dark:bg-dark/60">
+      <section id="galeria" className="py-14 sm:py-20 lg:py-32 bg-muted/60 dark:bg-dark/60">
         <div className="mx-auto max-w-7xl px-4 lg:px-8">
           <div className="max-w-2xl mx-auto mb-12 text-center">
             <h2 className="text-4xl font-black tracking-tight sm:text-5xl mb-4">
@@ -781,7 +782,7 @@ function JacDesign() {
       {/* FOOTER */}
       <footer className="py-12 lg:py-16 bg-dark border-t border-dark/50">
         <div className="mx-auto max-w-7xl px-4 lg:px-8">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
             <div>
               <span className="text-2xl font-black tracking-wider text-rose-foreground mb-4 block">Jac Design</span>
               <p className="text-muted-foreground text-sm">
@@ -806,21 +807,95 @@ function JacDesign() {
                 <li>Repostería saludable y fit</li>
               </ul>
             </div>
+          </div>
+
+          {/* CONTACTO */}
+          <div id="contacto" className="grid gap-6 lg:grid-cols-[1fr_1.2fr] rounded-3xl border border-border bg-card p-5 sm:p-8 shadow-soft mb-10">
             <div>
-              <h4 className="font-bold text-foreground mb-4">Contacto</h4>
-              <p className="text-sm text-muted-foreground mb-2">
-                Responde en hasta 48 horas
+              <h4 className="text-xl sm:text-2xl font-black tracking-tight">Hablemos de tu proyecto</h4>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Cuéntanos qué necesitas y te enviamos una propuesta con precios en CAD.
               </p>
-              <a
-                href="mailto:contacto@jac-design.com"
-                className="text-rose-foreground hover:text-rose-foreground transition-colors"
-              >
-                contacto@jac-design.com
-              </a>
-              <p className="text-xs text-muted-foreground">
-                Lunes a Viernes: 9:00 - 18:00
-              </p>
+              <dl className="mt-5 space-y-3 text-sm">
+                <div>
+                  <dt className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Teléfono</dt>
+                  <dd>
+                    <a href="tel:+15551234567" className="font-semibold hover:text-amber-600">
+                      +1 (555) 123-4567
+                    </a>
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Correo</dt>
+                  <dd>
+                    <a href="mailto:contacto@jac-design.com" className="font-semibold hover:text-amber-600">
+                      contacto@jac-design.com
+                    </a>
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Horario de atención</dt>
+                  <dd className="font-semibold">Lunes a viernes 9:00–18:00 · Sábados 10:00–14:00 (ET)</dd>
+                </div>
+              </dl>
             </div>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (!contact.name.trim() || !contact.email.trim() || !contact.message.trim()) {
+                  toast("Completa nombre, correo y mensaje");
+                  return;
+                }
+                setContact({ name: "", email: "", phone: "", message: "" });
+                toast("¡Mensaje enviado! Te respondemos en 48 horas");
+              }}
+              className="grid gap-3"
+            >
+              <div className="grid gap-3 sm:grid-cols-2">
+                <input
+                  value={contact.name}
+                  onChange={(e) => setContact({ ...contact, name: e.target.value })}
+                  maxLength={100}
+                  placeholder="Nombre completo"
+                  aria-label="Nombre completo"
+                  className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-amber"
+                />
+                <input
+                  value={contact.phone}
+                  onChange={(e) => setContact({ ...contact, phone: e.target.value })}
+                  maxLength={30}
+                  type="tel"
+                  placeholder="Teléfono (opcional)"
+                  aria-label="Teléfono"
+                  className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-amber"
+                />
+              </div>
+              <input
+                value={contact.email}
+                onChange={(e) => setContact({ ...contact, email: e.target.value })}
+                maxLength={255}
+                type="email"
+                placeholder="Correo electrónico"
+                aria-label="Correo electrónico"
+                className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-amber"
+              />
+              <textarea
+                value={contact.message}
+                onChange={(e) => setContact({ ...contact, message: e.target.value })}
+                maxLength={1000}
+                rows={4}
+                placeholder="Cuéntanos qué quieres crear…"
+                aria-label="Mensaje"
+                className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-amber"
+              />
+              <button
+                type="submit"
+                className="w-full rounded-2xl bg-gradient-warm py-3.5 text-sm font-bold text-rose-foreground shadow-soft transition-transform hover:scale-[1.02]"
+              >
+                Enviar mensaje
+              </button>
+            </form>
           </div>
           <div className="pt-8 border-t border-dark/20 flex flex-col lg:flex-row justify-between items-center gap-4">
             <p className="text-xs text-muted-foreground">
@@ -908,7 +983,7 @@ function JacDesign() {
                   <span className="text-[10px] uppercase font-bold text-muted-foreground block">
                     Precio total
                   </span>
-                  <p className="text-3xl font-black tracking-tight">USD {quick.price}</p>
+                  <p className="text-3xl font-black tracking-tight">CAD ${quick.price}</p>
                 </div>
                 <button
                   onClick={() => {
@@ -940,7 +1015,7 @@ function JacDesign() {
                     <span className="min-w-0 flex-1 truncate text-sm font-semibold">
                       {item.name}
                     </span>
-                    <span className="text-sm font-bold">USD {item.price.toFixed(2)}</span>
+                    <span className="text-sm font-bold">CAD ${item.price.toFixed(2)}</span>
                     <button
                       onClick={() => setCart((c) => c.filter((_, idx) => idx !== i))}
                       aria-label="Eliminar"
@@ -953,7 +1028,7 @@ function JacDesign() {
               </ul>
               <div className="mt-4 flex items-center justify-between rounded-2xl bg-muted p-4">
                 <span className="text-sm font-semibold text-muted-foreground">Total</span>
-                <span className="text-xl font-black">USD {total.toFixed(2)}</span>
+                <span className="text-xl font-black">CAD ${total.toFixed(2)}</span>
               </div>
               <button
                 onClick={() => {
