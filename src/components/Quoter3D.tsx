@@ -1277,7 +1277,7 @@ export function Quoter3D({ onAddToCart }: Quoter3DProps) {
                 {q("step1")}
               </label>
               <div className="space-y-2">
-                {MATERIALS.map((mat) => (
+                {(isBasic ? MATERIALS.filter((m) => BASIC_MATERIALS.some((b) => b.id === m.id)) : MATERIALS).map((mat) => (
                   <div
                     key={mat.id}
                     onClick={() => setMaterialId(mat.id)}
@@ -1291,11 +1291,11 @@ export function Quoter3D({ onAddToCart }: Quoter3DProps) {
                       <div className="flex items-center gap-2">
                         <span className="font-bold text-sm">{mat.name}</span>
                         <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-muted text-muted-foreground border border-border/40">
-                          {q(mat.tag)}
+                          {q(isBasic ? (BASIC_MATERIALS.find((b) => b.id === mat.id)?.label ?? mat.tag) : mat.tag)}
                         </span>
                       </div>
                       <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{q(mat.desc)}</p>
-                      <div className="flex items-center gap-2 mt-1.5">
+                      <div className={`items-center gap-2 mt-1.5 ${isBasic ? "hidden" : "flex"}`}>
                         {mat.properties.map((prop, idx) => (
                           <span key={idx} className="text-[10px] text-amber-600 dark:text-amber-400 font-medium">
                             ✓ {q(prop)}
@@ -1341,8 +1341,41 @@ export function Quoter3D({ onAddToCart }: Quoter3DProps) {
               </div>
             </div>
 
+            {/* Easy mode: one single quality decision */}
+            {isBasic && (
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">{q("qualityLabel")}</label>
+                <div className="grid gap-2 sm:grid-cols-3">
+                  {QUALITY_PRESETS.map((preset) => (
+                    <button
+                      key={preset.id}
+                      onClick={() => applyQuality(preset)}
+                      className={`rounded-2xl border p-3 text-left transition-all ${
+                        activeQuality === preset.id
+                          ? "border-amber-500 bg-amber-500/10 shadow-sm"
+                          : "border-border/60 bg-muted/20 hover:bg-muted/50"
+                      }`}
+                    >
+                      <span className="block text-xs font-bold">{q(preset.label)}</span>
+                      <span className="mt-0.5 block text-[10px] leading-snug text-muted-foreground">{q(preset.hint)}</span>
+                    </button>
+                  ))}
+                </div>
+                <p className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                  <ShieldCheck className="h-3.5 w-3.5 text-amber-500" />
+                  {q("autoTuned")}
+                </p>
+                <button
+                  onClick={() => changeMode("pro")}
+                  className="text-[11px] font-bold text-amber-600 underline decoration-dotted hover:text-amber-700 dark:text-amber-400"
+                >
+                  {q("seeAllOptions")}
+                </button>
+              </div>
+            )}
+
             {/* Infill & Layer Height Sliders */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+            <div className={`grid-cols-1 sm:grid-cols-2 gap-4 pt-2 ${isBasic ? "hidden" : "grid"}`}>
               {/* Infill Density Slider */}
               <div className="space-y-2 p-3 rounded-2xl bg-muted/30 border border-border/60">
                 <div className="flex justify-between items-center text-xs">
