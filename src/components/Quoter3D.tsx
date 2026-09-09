@@ -233,6 +233,32 @@ const QT: Record<string, Tri> = {
   downloadStl: { en: "Download STL", fr: "Télécharger le STL", es: "Descargar STL" },
   aiBuilding: { en: "Building 3D relief...", fr: "Construction du relief 3D...", es: "Construyendo relieve 3D..." },
 
+  // Modes
+  modeBasic: { en: "Easy mode", fr: "Mode simple", es: "Modo fácil" },
+  modePro: { en: "Advanced", fr: "Avancé", es: "Avanzado" },
+  modeBasicHint: { en: "Three steps: describe it, see it in 3D, get your price. We choose the technical settings for you.", fr: "Trois étapes : décrivez, visualisez en 3D, obtenez le prix. Nous choisissons les réglages techniques.", es: "Tres pasos: descríbelo, míralo en 3D y recibe el precio. Nosotros elegimos los ajustes técnicos." },
+  modeProHint: { en: "Full control: materials, infill, layer height, presets and your own STL files.", fr: "Contrôle total : matériaux, remplissage, hauteur de couche, modèles et vos fichiers STL.", es: "Control total: materiales, relleno, altura de capa, modelos y tus propios archivos STL." },
+  stepDesignLabel: { en: "Describe", fr: "Décrire", es: "Describir" },
+  stepViewLabel: { en: "See in 3D", fr: "Voir en 3D", es: "Ver en 3D" },
+  stepQuoteLabel: { en: "Price", fr: "Prix", es: "Precio" },
+  sizeLabel: { en: "Size", fr: "Taille", es: "Tamaño" },
+  sizeS: { en: "Small · 70 mm", fr: "Petit · 70 mm", es: "Pequeño · 70 mm" },
+  sizeM: { en: "Medium · 110 mm", fr: "Moyen · 110 mm", es: "Mediano · 110 mm" },
+  sizeL: { en: "Large · 160 mm", fr: "Grand · 160 mm", es: "Grande · 160 mm" },
+  qualityLabel: { en: "Finish quality", fr: "Qualité de finition", es: "Calidad del acabado" },
+  qualityEco: { en: "Economy", fr: "Économique", es: "Económico" },
+  qualityBalanced: { en: "Recommended", fr: "Recommandé", es: "Recomendado" },
+  qualityPremium: { en: "Premium detail", fr: "Détail premium", es: "Detalle premium" },
+  qualityEcoHint: { en: "Lighter piece, lowest price", fr: "Pièce légère, prix minimal", es: "Pieza ligera, precio mínimo" },
+  qualityBalancedHint: { en: "Best balance of detail and price", fr: "Meilleur équilibre détail/prix", es: "Mejor equilibrio entre detalle y precio" },
+  qualityPremiumHint: { en: "Sharpest detail, sturdier part", fr: "Détail maximal, pièce plus solide", es: "Máximo detalle, pieza más resistente" },
+  matEveryday: { en: "Everyday", fr: "Quotidien", es: "Uso diario" },
+  matStrong: { en: "Extra strong", fr: "Très résistant", es: "Extra resistente" },
+  matDetail: { en: "Fine detail", fr: "Détail fin", es: "Detalle fino" },
+  autoTuned: { en: "Technical settings tuned automatically", fr: "Réglages techniques ajustés automatiquement", es: "Ajustes técnicos configurados automáticamente" },
+  seeAllOptions: { en: "Need more control? Switch to Advanced", fr: "Besoin de plus de contrôle ? Passez en Avancé", es: "¿Quieres más control? Cambia a Avanzado" },
+  ready: { en: "Ready", fr: "Prêt", es: "Listo" },
+
 
   // Materials
   "Standard & decorative": { en: "Standard & decorative", fr: "Standard et décoratif", es: "Estándar y decorativo" },
@@ -307,6 +333,18 @@ export function Quoter3D({ onAddToCart }: Quoter3DProps) {
   const [reliefInvert, setReliefInvert] = useState<boolean>(false);
   const [hasRelief, setHasRelief] = useState<boolean>(false);
   const reliefGeoRef = useRef<any>(null);
+
+  // Studio mode: basic (guided) or pro (full control)
+  const [mode, setMode] = useState<"basic" | "pro">("basic");
+  useEffect(() => {
+    const saved = typeof window !== "undefined" ? window.localStorage.getItem("jd-studio-mode") : null;
+    if (saved === "pro" || saved === "basic") setMode(saved);
+  }, []);
+  const changeMode = (next: "basic" | "pro") => {
+    setMode(next);
+    if (typeof window !== "undefined") window.localStorage.setItem("jd-studio-mode", next);
+  };
+  const isBasic = mode === "basic";
 
   // Viewport toggles
   const [autoRotate, setAutoRotate] = useState<boolean>(true);
@@ -792,6 +830,13 @@ export function Quoter3D({ onAddToCart }: Quoter3DProps) {
     }
   };
 
+  // Easy mode: the moment the AI image is ready, show it in 3D automatically
+  useEffect(() => {
+    if (!isBasic || !designImage || !designIsFinal || isBuildingRelief) return;
+    void buildReliefFromDesign(designImage, !hasRelief);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isBasic, designImage, designIsFinal]);
+
   const handleValidateIn3D = () => {
     if (!designImage) return;
     void buildReliefFromDesign(designImage, true);
@@ -816,6 +861,31 @@ export function Quoter3D({ onAddToCart }: Quoter3DProps) {
     a.click();
     URL.revokeObjectURL(url);
   };
+
+  // Easy-mode presets that drive the technical parameters
+  const QUALITY_PRESETS = [
+    { id: "eco", label: "qualityEco", hint: "qualityEcoHint", infill: 15, layer: 0.28 },
+    { id: "balanced", label: "qualityBalanced", hint: "qualityBalancedHint", infill: 25, layer: 0.2 },
+    { id: "premium", label: "qualityPremium", hint: "qualityPremiumHint", infill: 40, layer: 0.12 },
+  ] as const;
+  const activeQuality =
+    QUALITY_PRESETS.find((p) => p.infill === infillPercent && p.layer === layerHeight)?.id ?? null;
+  const applyQuality = (preset: (typeof QUALITY_PRESETS)[number]) => {
+    setInfillPercent(preset.infill);
+    setLayerHeight(preset.layer);
+  };
+
+  const SIZE_PRESETS = [
+    { id: "s", label: "sizeS", width: 70 },
+    { id: "m", label: "sizeM", width: 110 },
+    { id: "l", label: "sizeL", width: 160 },
+  ] as const;
+
+  const BASIC_MATERIALS = [
+    { id: "pla-eco", label: "matEveryday" },
+    { id: "petg-tough", label: "matStrong" },
+    { id: "resin-12k", label: "matDetail" },
+  ];
 
   // Camera Reset
   const handleResetCamera = () => {
