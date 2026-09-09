@@ -373,7 +373,7 @@ export function Customizer({ onAddToCart }: Props) {
                   src={mockup.photo}
                   alt={tr(mockup.alt)}
                   loading="lazy"
-                  className="absolute inset-0 h-full w-full animate-fade-in object-cover"
+                  className="absolute inset-0 h-full w-full object-cover transition-opacity duration-300"
                 />
                 {/* finish tint so the chosen colour reads on the photo */}
                 <span
