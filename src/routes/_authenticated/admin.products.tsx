@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAdminCatalog } from "@/hooks/useCatalog";
 import { useAuth } from "@/hooks/useAuth";
@@ -9,6 +9,9 @@ import { IMAGE_MAP, seedRows, type ShopProduct } from "@/lib/catalog";
 import { Card, Empty, Field, Pill, btnGhost, btnPrimary, cadExact, downloadCsv, inputCls } from "@/components/admin/kit";
 
 export const Route = createFileRoute("/_authenticated/admin/products")({
+  validateSearch: (search: Record<string, unknown>): { edit?: string | undefined } => ({
+    edit: typeof search['edit'] === "string" ? (search['edit'] as string) : undefined,
+  }),
   component: ProductsAdmin,
 });
 
@@ -113,6 +116,18 @@ function ProductsAdmin() {
   const [cat, setCat] = useState<"todos" | Cat>("todos");
   const [draft, setDraft] = useState<Draft | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const { edit } = Route.useSearch();
+  const openedFor = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!edit || !isAdmin || !data || openedFor.current === edit) return;
+    const found = data.find((p) => p.id === edit || p.rowId === edit);
+    if (found) {
+      openedFor.current = edit;
+      setDraft(toDraft(found));
+      setSearch(found.id);
+    }
+  }, [edit, isAdmin, data]);
 
   const refresh = () => qc.invalidateQueries({ queryKey: ["catalog"] });
 

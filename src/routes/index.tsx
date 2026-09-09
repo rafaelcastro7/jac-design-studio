@@ -6,6 +6,7 @@ import { useI18n, LANGS } from "@/i18n";
 import type { Tri } from "@/i18n/lang";
 import { CATS, CAT_LABELS, LEAD_LABELS, type Cat, type Product } from "@/data/products";
 import { useCatalog } from "@/hooks/useCatalog";
+import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { createOrder } from "@/lib/orders.functions";
 
@@ -35,6 +36,8 @@ export const Route = createFileRoute("/")({
 });
 
 /* ── local trilingual copy ─────────────────────────────── */
+
+const EDIT_PRODUCT: Tri = { en: "Edit product", fr: "Modifier le produit", es: "Editar producto" };
 
 const SORTS: { id: "featured" | "price-asc" | "price-desc" | "rating"; label: Tri }[] = [
   { id: "featured", label: { en: "Featured", fr: "En vedette", es: "Destacados" } },
@@ -206,6 +209,7 @@ const FREE_SHIP_THRESHOLD = 150;
 function JacDesign() {
   const { t, tr, money, lang, setLang } = useI18n();
   const { products } = useCatalog();
+  const { isAdmin } = useAuth();
 
   const [cat, setCat] = useState<"todos" | Cat>("todos");
   const [search, setSearch] = useState("");
@@ -638,6 +642,17 @@ function JacDesign() {
                       >
                         {Icon.search("h-4 w-4")}
                       </button>
+                      {isAdmin && (
+                        <Link
+                          to="/admin/products"
+                          search={{ edit: p.id }}
+                          aria-label={tr(EDIT_PRODUCT)}
+                          title={tr(EDIT_PRODUCT)}
+                          className="grid h-8 w-8 place-items-center rounded-full bg-amber-500 text-[11px] font-black text-white shadow-sm transition-transform hover:scale-110 sm:h-9 sm:w-9"
+                        >
+                          ✎
+                        </Link>
+                      )}
                     </div>
 
                     <div className="absolute bottom-1.5 right-1.5 flex items-center gap-1 rounded-full bg-black/60 px-2 py-0.5 text-[10px] font-bold text-white backdrop-blur-md sm:bottom-3 sm:right-3 sm:px-2.5 sm:py-1 sm:text-[11px]">
