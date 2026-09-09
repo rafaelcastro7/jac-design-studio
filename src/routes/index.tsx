@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useRef, useState } from "react";
 import { Quoter3D } from "@/components/Quoter3D";
+import { Customizer } from "@/components/Customizer";
 import { useI18n, LANGS } from "@/i18n";
 import type { Tri } from "@/i18n/lang";
 import { CATS, CAT_LABELS, LEAD_LABELS, type Cat, type Product } from "@/data/products";
@@ -33,25 +34,6 @@ export const Route = createFileRoute("/")({
 });
 
 /* ── local trilingual copy ─────────────────────────────── */
-
-const FONTS = [
-  { id: "sans", key: "fontSans", css: "var(--font-sans)" },
-  { id: "serif", key: "fontSerif", css: "var(--font-serif)" },
-  { id: "mono", key: "fontMono", css: "var(--font-mono)" },
-];
-
-const THEMES = [
-  { id: "amber", key: "colAmber", token: "var(--amber)" },
-  { id: "rose", key: "colRose", token: "var(--rose)" },
-  { id: "healthy", key: "colGreen", token: "var(--healthy)" },
-  { id: "graphite", key: "colBlack", token: "var(--graphite)" },
-];
-
-const BASES = [
-  { id: "sign", key: "prodSign", price: 68 },
-  { id: "mug", key: "prodMug", price: 26 },
-  { id: "box", key: "prodBox", price: 34 },
-];
 
 const SORTS: { id: "featured" | "price-asc" | "price-desc" | "rating"; label: Tri }[] = [
   { id: "featured", label: { en: "Featured", fr: "En vedette", es: "Destacados" } },
@@ -88,8 +70,6 @@ const QUICK_TITLE: Tri = { en: "Product details", fr: "Détails du produit", es:
 const VERIFIED: Tri = { en: "verified reviews", fr: "avis vérifiés", es: "opiniones verificadas" };
 const LINKS: Tri = { en: "Quick links", fr: "Liens rapides", es: "Enlaces rápidos" };
 const SERVICES: Tri = { en: "Services", fr: "Services", es: "Servicios" };
-const YOUR_TEXT_HERE: Tri = { en: "Your text here", fr: "Votre texte ici", es: "Tu texto aquí" };
-const NO_TEXT: Tri = { en: "No text", fr: "Sans texte", es: "Sin texto" };
 const WISH_TOAST: Tri = { en: "item(s) in your wishlist", fr: "article(s) dans vos favoris", es: "artículo(s) en favoritos" };
 
 const SERVICE_LIST: Tri[] = [
@@ -241,11 +221,6 @@ function JacDesign() {
   const [sending, setSending] = useState(false);
   const toastId = useRef(0);
 
-  // customizer
-  const [base, setBase] = useState(BASES[0]!);
-  const [text, setText] = useState("Maple & Co.");
-  const [font, setFont] = useState(FONTS[0]!);
-  const [theme, setTheme] = useState(THEMES[0]!);
 
   const toast = (msg: string) => {
     const id = ++toastId.current;
@@ -360,11 +335,6 @@ function JacDesign() {
       setSending(false);
     }
   };
-
-  const customPrice = useMemo(() => {
-    const extra = Math.min(text.trim().length, 40) * 0.8 + (font.id === "serif" ? 5 : 0);
-    return Math.round((base.price + extra) * 100) / 100;
-  }, [base, text, font]);
 
   const navLinks: [string, string][] = [
     ["#inicio", t("navHome")],
@@ -731,146 +701,13 @@ function JacDesign() {
       </section>
 
       {/* CUSTOMIZER */}
-      <section id="personalizador" className="py-14 sm:py-20 lg:py-28">
-        <div className="mx-auto max-w-7xl px-4 lg:px-8">
-          <div className="mb-10 max-w-3xl">
-            <span className="mb-3 inline-flex rounded-full bg-primary/10 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.14em] text-primary">
-              {t("customKicker")}
-            </span>
-            <h2 className="mb-3 text-3xl font-black tracking-tight sm:text-5xl">{t("customTitle")}</h2>
-            <p className="text-muted-foreground sm:text-lg">{t("customText")}</p>
-          </div>
+      <Customizer
+        onAddToCart={(item) => {
+          addToCart(item);
+          setCartOpen(true);
+        }}
+      />
 
-          <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_1.1fr]">
-            <div className="space-y-6">
-              <Field label={t("baseProduct")}>
-                <div className="grid gap-2 sm:grid-cols-3">
-                  {BASES.map((b) => (
-                    <button
-                      key={b.id}
-                      onClick={() => setBase(b)}
-                      className={`rounded-2xl border px-3 py-3 text-xs font-bold leading-tight transition-colors ${
-                        base.id === b.id
-                          ? "border-transparent bg-primary text-primary-foreground"
-                          : "border-border hover:bg-muted"
-                      }`}
-                    >
-                      {t(b.key)}
-                    </button>
-                  ))}
-                </div>
-              </Field>
-
-              <Field label={t("yourText")}>
-                <input
-                  value={text}
-                  onChange={(e) => setText(e.target.value)}
-                  maxLength={40}
-                  placeholder={t("textPlaceholder")}
-                  aria-label={t("yourText")}
-                  className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-amber"
-                />
-              </Field>
-
-              <Field label={t("typeface")}>
-                <div className="grid gap-2 sm:grid-cols-3">
-                  {FONTS.map((f) => (
-                    <button
-                      key={f.id}
-                      onClick={() => setFont(f)}
-                      style={{ fontFamily: f.css }}
-                      className={`rounded-2xl border px-3 py-3 text-xs font-bold transition-colors ${
-                        font.id === f.id
-                          ? "border-transparent bg-primary text-primary-foreground"
-                          : "border-border hover:bg-muted"
-                      }`}
-                    >
-                      {t(f.key)}
-                    </button>
-                  ))}
-                </div>
-              </Field>
-
-              <Field label={`${t("finish")} · ${t(theme.key)}`}>
-                <div className="flex gap-3">
-                  {THEMES.map((x) => (
-                    <button
-                      key={x.id}
-                      onClick={() => setTheme(x)}
-                      aria-label={t(x.key)}
-                      style={{ backgroundColor: x.token }}
-                      className={`h-10 w-10 rounded-full transition-transform ${
-                        theme.id === x.id
-                          ? "scale-110 ring-2 ring-foreground ring-offset-2 ring-offset-card"
-                          : "hover:scale-105"
-                      }`}
-                    />
-                  ))}
-                </div>
-              </Field>
-
-              <button
-                onClick={() =>
-                  addToCart({
-                    id: `custom-${Date.now()}`,
-                    name: `${t(base.key)} · "${text.trim() || tr(NO_TEXT)}"`,
-                    price: customPrice,
-                  })
-                }
-                className="mt-2 w-full rounded-2xl bg-gradient-warm py-4 text-sm font-bold text-rose-foreground shadow-soft transition-transform hover:scale-[1.02]"
-              >
-                {t("addCustom")} — {money(customPrice)}
-              </button>
-            </div>
-
-            <div className="rounded-3xl border border-border bg-card p-6 shadow-soft">
-              <p className="mb-4 text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">
-                {t("livePreview")}
-              </p>
-              <div
-                className="mt-4 grid min-h-[280px] place-items-center rounded-[1.5rem] p-6 text-center"
-                style={{
-                  backgroundColor: `color-mix(in oklab, ${theme.token} 15%, white)`,
-                  border: `2px solid color-mix(in oklab, ${theme.token} 40%, white)`,
-                }}
-              >
-                <div
-                  className={
-                    base.id === "mug"
-                      ? "relative grid h-40 w-52 place-items-center rounded-2xl bg-white shadow-soft"
-                      : base.id === "box"
-                        ? "grid h-40 w-60 place-items-center rounded-xl bg-white shadow-soft"
-                        : "grid h-36 w-64 place-items-center rounded-lg bg-white shadow-soft"
-                  }
-                  style={{ outline: `6px solid color-mix(in oklab, ${theme.token} 65%, white)` }}
-                >
-                  <span
-                    className="max-w-full break-words px-4 text-2xl font-bold leading-tight"
-                    style={{ fontFamily: font.css, color: theme.token }}
-                  >
-                    {text.trim() || tr(YOUR_TEXT_HERE)}
-                  </span>
-                  {base.id === "mug" && (
-                    <span className="absolute -right-6 top-8 h-14 w-12 rounded-full border-8 border-white" />
-                  )}
-                </div>
-              </div>
-              <div className="mt-5 grid grid-cols-3 gap-3 text-center text-sm">
-                {[
-                  [t("baseProduct"), t(base.key)],
-                  [t("typeface"), t(font.key)],
-                  [t("totalPrice"), money(customPrice)],
-                ].map(([k, v]) => (
-                  <div key={k} className="rounded-xl bg-muted p-3">
-                    <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{k}</p>
-                    <p className="mt-1 font-bold leading-tight">{v}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* 3D QUOTER */}
       <section id="cotizador" className="bg-muted/40 py-14 sm:py-20 lg:py-28">
@@ -1254,14 +1091,6 @@ function Badge({ n }: { n: number }) {
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div>
-      <p className="mb-2 text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">{label}</p>
-      {children}
-    </div>
-  );
-}
 
 function Modal({
   title,
