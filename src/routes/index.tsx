@@ -1189,15 +1189,41 @@ function JacDesign() {
                 <span className="text-sm font-semibold text-muted-foreground">{t("total")}</span>
                 <span className="text-xl font-black">{money(total)}</span>
               </div>
+              <div className="mt-4 grid gap-2">
+                <input
+                  value={buyer.name}
+                  onChange={(e) => setBuyer({ ...buyer, name: e.target.value })}
+                  placeholder={t("fieldName")}
+                  aria-label={t("fieldName")}
+                  maxLength={100}
+                  className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-amber"
+                />
+                <div className="grid gap-2 sm:grid-cols-2">
+                  <input
+                    type="email"
+                    value={buyer.email}
+                    onChange={(e) => setBuyer({ ...buyer, email: e.target.value })}
+                    placeholder={t("fieldEmail")}
+                    aria-label={t("fieldEmail")}
+                    className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-amber"
+                  />
+                  <input
+                    type="tel"
+                    value={buyer.phone}
+                    onChange={(e) => setBuyer({ ...buyer, phone: e.target.value })}
+                    placeholder={t("fieldPhone")}
+                    aria-label={t("fieldPhone")}
+                    maxLength={30}
+                    className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-amber"
+                  />
+                </div>
+              </div>
               <button
-                onClick={() => {
-                  setCart([]);
-                  setCartOpen(false);
-                  toast(t("checkoutDone"));
-                }}
-                className="mt-4 w-full rounded-2xl bg-gradient-warm py-4 text-sm font-bold text-rose-foreground shadow-soft transition-transform hover:scale-[1.02]"
+                onClick={() => void placeOrder()}
+                disabled={sending}
+                className="mt-3 w-full rounded-2xl bg-gradient-warm py-4 text-sm font-bold text-rose-foreground shadow-soft transition-transform hover:scale-[1.02] disabled:opacity-60"
               >
-                {t("checkout")}
+                {sending ? "…" : t("checkout")}
               </button>
             </>
           )}
