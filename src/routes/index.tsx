@@ -976,17 +976,18 @@ function JacDesign() {
                 </div>
               </dl>
               <p className="mt-4 text-[11px] italic text-muted-foreground">{t("placeholderNote")}</p>
+              <Link
+                to="/auth"
+                className="mt-4 inline-flex rounded-2xl border border-border px-4 py-2.5 text-xs font-bold hover:bg-muted"
+              >
+                {t("adminAccess")}
+              </Link>
             </div>
 
             <form
               onSubmit={(e) => {
                 e.preventDefault();
-                if (!contact.name.trim() || !contact.email.trim() || !contact.message.trim()) {
-                  toast(t("contactIncomplete"));
-                  return;
-                }
-                setContact({ name: "", email: "", phone: "", message: "" });
-                toast(t("contactSent"));
+                void sendMessage();
               }}
               className="grid gap-3"
             >
