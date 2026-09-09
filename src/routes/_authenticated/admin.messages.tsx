@@ -9,12 +9,11 @@ export const Route = createFileRoute("/_authenticated/admin/messages")({
   component: MessagesAdmin,
 });
 
-const STATUS = ["nuevo", "en_proceso", "respondido", "cerrado"] as const;
+const STATUS = ["nuevo", "en_proceso", "cerrado"] as const;
 type Status = (typeof STATUS)[number];
 const LABEL: Record<Status, string> = {
   nuevo: "Nuevo",
   en_proceso: "En proceso",
-  respondido: "Respondido",
   cerrado: "Cerrado",
 };
 

@@ -16,7 +16,7 @@ const CATS: Cat[] = ["fiestas", "madera", "3d", "postres", "juguetes"];
 const LEADS = Object.keys(LEAD_LABELS) as LeadKey[];
 
 interface Draft {
-  rowId?: string;
+  rowId?: string | undefined;
   slug: string;
   cat: Cat;
   price: string;

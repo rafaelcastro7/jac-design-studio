@@ -9,14 +9,14 @@ export const Route = createFileRoute("/_authenticated/admin/orders")({
   component: OrdersAdmin,
 });
 
-const STATUS = ["nuevo", "confirmado", "produccion", "enviado", "entregado", "cancelado"] as const;
+const STATUS = ["nuevo", "confirmado", "produccion", "listo", "entregado", "cancelado"] as const;
 type Status = (typeof STATUS)[number];
 
 const STATUS_LABEL: Record<Status, string> = {
   nuevo: "Nuevo",
   confirmado: "Confirmado",
   produccion: "En producción",
-  enviado: "Enviado",
+  listo: "Listo para entrega",
   entregado: "Entregado",
   cancelado: "Cancelado",
 };
