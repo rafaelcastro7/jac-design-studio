@@ -11,6 +11,7 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { I18nProvider } from "@/i18n";
 
 function NotFoundComponent() {
   return (
@@ -77,17 +78,17 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Jac Design" },
+      { title: "Jac Design — Custom 3D Printing, Laser Wood & Party Decor" },
       {
         name: "description",
         content:
-          "Jac Design: impresión 3D, decoración de fiestas, corte láser en madera, icopor y repostería saludable.",
+          "Jac Design: Canadian studio for 3D printing, party decor, laser-cut wood signage and healthy desserts.",
       },
       { name: "author", content: "Jac Design" },
-      { property: "og:title", content: "Jac Design" },
+      { property: "og:title", content: "Jac Design — Custom design for your ideas" },
       {
         property: "og:description",
-        content: "Diseño integral para tus ideas y tus celebraciones.",
+        content: "Custom design for your ideas and celebrations. Prices in CAD.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -132,8 +133,10 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
+      <I18nProvider>
+        {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+        <Outlet />
+      </I18nProvider>
     </QueryClientProvider>
   );
 }
