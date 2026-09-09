@@ -1,6 +1,9 @@
 import { useMemo, useState } from "react";
 import { useI18n } from "@/i18n";
 import type { Tri } from "@/i18n/lang";
+import imgSign from "@/assets/p-madera.jpg";
+import imgMug from "@/assets/p-pocillo.jpg";
+import imgBox from "@/assets/p-postres.jpg";
 
 /* ── copy ─────────────────────────────────────────────── */
 const C = {
