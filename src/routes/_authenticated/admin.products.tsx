@@ -116,6 +116,18 @@ function ProductsAdmin() {
   const [cat, setCat] = useState<"todos" | Cat>("todos");
   const [draft, setDraft] = useState<Draft | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const { edit } = Route.useSearch();
+  const openedFor = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!edit || !isAdmin || !data || openedFor.current === edit) return;
+    const found = data.find((p) => p.id === edit || p.rowId === edit);
+    if (found) {
+      openedFor.current = edit;
+      setDraft(toDraft(found));
+      setSearch(found.id);
+    }
+  }, [edit, isAdmin, data]);
 
   const refresh = () => qc.invalidateQueries({ queryKey: ["catalog"] });
 
