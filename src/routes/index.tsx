@@ -289,13 +289,13 @@ function JacDesign() {
               <span className="inline-flex items-center gap-2 rounded-full bg-gradient-warm px-4 py-2 text-xs font-semibold uppercase tracking-[0.15em] text-rose-foreground shadow-soft mb-6">
                 Taller de fabricación digital
               </span>
-              <h1 className="text-5xl font-black leading-[1.1] tracking-tight sm:text-6xl lg:text-7xl mb-6">
-                Diseño integral para tus
-              <span className="bg-gradient-warm bg-clip-text text-transparent">ideas</span>
-              y
+              <h1 className="text-[2rem] font-black leading-[1.1] tracking-tight [overflow-wrap:anywhere] sm:text-5xl lg:text-7xl mb-6">
+                Diseño integral para tus{" "}
+              <span className="bg-gradient-warm bg-clip-text text-transparent">ideas</span>{" "}
+              y{" "}
               <span className="bg-gradient-warm bg-clip-text text-transparent">celebraciones</span>
               </h1>
-              <p className="text-base leading-relaxed text-muted-foreground text-lg max-w-xl mb-8">
+              <p className="text-base leading-relaxed text-muted-foreground sm:text-lg max-w-xl mb-8">
                 Impresión 3D, corte láser en madera, letreros en icopor, decoración de fiestas y repostería saludable. Un solo taller para imaginar, personalizar y recibir tu pedido en tiempo récord.
               </p>
               <div className="flex flex-wrap gap-3 mb-10">
@@ -312,7 +312,7 @@ function JacDesign() {
                   Iniciar configurador
                 </a>
               </div>
-              <div className="grid grid-cols-3 gap-3 text-sm">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
                 <div className="rounded-xl bg-card p-3 flex items-center gap-2">
                   <span className="text-amber-500">🚀</span> +1.200 proyectos
                 </div>
