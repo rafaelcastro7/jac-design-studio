@@ -39,7 +39,7 @@ export const ModelRoute = createFileRoute("/modelo/:id")({
 
 /* ── data ─────────────────────────────────────────────── */
 
-type Cat = "fiestas" | "madera" | "3d" | "postres";
+type Cat = "fiestas" | "madera" | "3d" | "postres" | "juguetes";
 
 type Product = {
   id: string;
@@ -49,6 +49,7 @@ type Product = {
   img: string;
   tag: string;
   desc: string;
+  popular: boolean;
 };
 
 const CATS: { id: "todos" | Cat; label: string }[] = [
@@ -57,6 +58,7 @@ const CATS: { id: "todos" | Cat; label: string }[] = [
   { id: "madera", label: "Madera & Láser" },
   { id: "3d", label: "Impresión 3D" },
   { id: "postres", label: "Postres Saludables" },
+  { id: "juguetes", label: "Juguetes 3D" },
 ];
 
 const PRODUCTS: Product[] = [
@@ -105,7 +107,7 @@ const PRODUCTS: Product[] = [
     tag: "PLA ecológico",
     desc: "Soporte modular impreso en 3D para celular, audífonos y lápices. Disponible en grafito, ámbar y rosa.",
   },
-  {
+{
     id: "postres",
     name: "Caja de postres fit (6 unidades)",
     cat: "postres",
@@ -113,6 +115,58 @@ const PRODUCTS: Product[] = [
     img: pPostres,
     tag: "Sin azúcar añadida",
     desc: "Brownies de cacao y cupcakes proteicos con frutos rojos. Endulzados con stevia y empaque personalizado.",
+    popular: false,
+  },
+  /* ── NUEVOS PRODUCTOS JUGUETES 3D - MÁS VENDIDOS ───────────────────── */
+  {
+    id: "accion-personalizable",
+    name: "Figura de Acción Personalizable",
+    cat: "juguetes",
+    price: 45,
+    img: pFiestas,
+    tag: "Personalización disponible",
+    desc: "Figura de acción imprimible en 3D con nombre y diseño personalizado. Disponible en 5 temas: héroes, espacio, dinosaurios, superhéroes y deportes.",
+    popular: true,
+  },
+  {
+    id: "rompecabezas-3d",
+    name: "Rompecabezas 3D Personalizado",
+    cat: "juguetes",
+    price: 22,
+    img: pMadera,
+    tag: "90 piezas",
+    desc: "Rompecabezas 3D con diseño propio. Elige una foto, nombre o motivo. 90 piezas de alta calidad, ensamblaje sin herramientas necesario.",
+    popular: true,
+  },
+  {
+    id: "juguete-educativo",
+    name: "Bloques Educativos 3D",
+    cat: "juguetes",
+    price: 38,
+    img: pPostres,
+    tag: "Set de 100 piezas",
+    desc: "Bloques interconectantes para desarrollar creatividad y habilidades espaciales. Material PLA ecológico, seguro para niños +3 años. Incluye guía de actividades.",
+    popular: true,
+  },
+  {
+    id: "figura-colleccionable",
+    name: "Figura Coleccionable Edición Limitada",
+    cat: "juguetes",
+    price: 65,
+    img: pIcopor,
+    tag: "Edición Limitada 50 u.",
+    desc: "Figura coleccionable numerada de 50 unidades. Diseños exclusivos de personajes famosos, héroes de cine y personajes de ficción. Altamente detallado, 15cm de altura.",
+    popular: true,
+  },
+  {
+    id: "juguete-mascota",
+    name: "Juguete para Mascota Personalizado",
+    cat: "juguetes",
+    price: 18,
+    img: pPocillo,
+    tag: "Grabado con nombre",
+    desc: "Juguete masticable y duradero para perros. Nombre del dueño grabado en relieve. Material resistente y seguro. Disponible en 3 tamaños.",
+    popular: true,
   },
 ];
 
