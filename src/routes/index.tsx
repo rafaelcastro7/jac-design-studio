@@ -70,8 +70,6 @@ const QUICK_TITLE: Tri = { en: "Product details", fr: "Détails du produit", es:
 const VERIFIED: Tri = { en: "verified reviews", fr: "avis vérifiés", es: "opiniones verificadas" };
 const LINKS: Tri = { en: "Quick links", fr: "Liens rapides", es: "Enlaces rápidos" };
 const SERVICES: Tri = { en: "Services", fr: "Services", es: "Servicios" };
-const YOUR_TEXT_HERE: Tri = { en: "Your text here", fr: "Votre texte ici", es: "Tu texto aquí" };
-const NO_TEXT: Tri = { en: "No text", fr: "Sans texte", es: "Sin texto" };
 const WISH_TOAST: Tri = { en: "item(s) in your wishlist", fr: "article(s) dans vos favoris", es: "artículo(s) en favoritos" };
 
 const SERVICE_LIST: Tri[] = [
@@ -1093,14 +1091,6 @@ function Badge({ n }: { n: number }) {
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div>
-      <p className="mb-2 text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">{label}</p>
-      {children}
-    </div>
-  );
-}
 
 function Modal({
   title,
