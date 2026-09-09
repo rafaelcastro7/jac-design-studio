@@ -1,16 +1,11 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useRef, useState } from "react";
 import { Quoter3D } from "@/components/Quoter3D";
 import { useI18n, LANGS } from "@/i18n";
 import type { Tri } from "@/i18n/lang";
-import {
-  CATS,
-  CAT_LABELS,
-  LEAD_LABELS,
-  PRODUCTS,
-  type Cat,
-  type Product,
-} from "@/data/products";
+import { CATS, CAT_LABELS, LEAD_LABELS, type Cat, type Product } from "@/data/products";
+import { useCatalog } from "@/hooks/useCatalog";
+import { supabase } from "@/integrations/supabase/client";
 
 import hero from "@/assets/hero-jac.jpg";
 
