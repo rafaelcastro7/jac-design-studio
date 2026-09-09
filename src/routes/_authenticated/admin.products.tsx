@@ -176,11 +176,9 @@ function ProductsAdmin() {
         action={
           isAdmin ? (
             <div className="flex flex-wrap gap-2">
-              {(data?.length ?? 0) === 0 && (
-                <button onClick={() => importSeed.mutate()} disabled={importSeed.isPending} className={btnGhost}>
-                  {importSeed.isPending ? "Importando…" : "Importar catálogo inicial (25)"}
-                </button>
-              )}
+              <button onClick={() => importSeed.mutate()} disabled={importSeed.isPending} className={btnGhost}>
+                {importSeed.isPending ? "Importando…" : "Importar catálogo inicial (25)"}
+              </button>
               <button onClick={() => setDraft(emptyDraft())} className={btnPrimary}>
                 + Nuevo producto
               </button>
