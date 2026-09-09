@@ -5,6 +5,8 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { STLLoader } from "three/examples/jsm/loaders/STLLoader.js";
 import { toast } from "sonner";
+import { useI18n } from "@/i18n";
+import type { Lang, Tri } from "@/i18n/lang";
 import { 
   Box, 
   RotateCcw, 
@@ -38,69 +40,69 @@ export const MATERIALS = [
   {
     id: "pla-eco",
     name: "PLA+ Eco Pro",
-    tag: "Estándar & Decorativo",
+    tag: "Standard & decorative",
     density: 1.24, // g/cm³
     pricePerCm3: 0.12,
     baseCost: 3.5,
     speedFactor: 1.0,
-    desc: "Biodegradable, gran estabilidad dimensional y excelente acabado estético sin alabeo.",
-    properties: ["Rigidez alta", "Eco-friendly", "Detalle limpio"],
+    desc: "Biodegradable, dimensionally stable and a clean cosmetic finish with no warping.",
+    properties: ["High stiffness", "Eco-friendly", "Crisp detail"],
   },
   {
     id: "petg-tough",
     name: "PETG Tough Industrial",
-    tag: "Uso Mecánico & Exterior",
+    tag: "Mechanical & outdoor use",
     density: 1.27,
     pricePerCm3: 0.18,
     baseCost: 4.5,
     speedFactor: 1.15,
-    desc: "Resistencia térmica hasta 75°C, alta absorción de impactos y resistencia química y a rayos UV.",
-    properties: ["Resistente al calor", "Anti-impacto", "Uso rudo"],
+    desc: "Heat resistant to 75 °C, strong impact absorption plus chemical and UV resistance.",
+    properties: ["Heat resistant", "Impact proof", "Heavy duty"],
   },
   {
     id: "resin-12k",
     name: "Resina UV 12K Tough",
-    tag: "Ultra Alta Definición",
+    tag: "Ultra high definition",
     density: 1.15,
     pricePerCm3: 0.35,
     baseCost: 8.0,
     speedFactor: 1.4,
-    desc: "Resolución óptica milimétrica con capas imperceptibles de 25 a 50 micras. Ideal para miniaturas.",
-    properties: ["Capa 25 micras", "Superficie lisa", "Máxima precisión"],
+    desc: "Optical resolution with imperceptible 25-50 micron layers. Ideal for miniatures.",
+    properties: ["25 micron layers", "Smooth surface", "Maximum precision"],
   },
   {
     id: "nylon-pa12",
     name: "Nylon PA12 SLS",
-    tag: "Ingeniería de Grado Industrial",
+    tag: "Industrial grade engineering",
     density: 1.01,
     pricePerCm3: 0.52,
     baseCost: 12.0,
     speedFactor: 1.6,
-    desc: "Poliamida de grado aeronáutico e industrial. Máxima tenacidad a la fatiga cíclica sin soportes.",
-    properties: ["Indestructible", "Grado aeroespacial", "Resistencia a fricción"],
+    desc: "Aerospace-grade polyamide with maximum toughness against cyclic fatigue.",
+    properties: ["Indestructible", "Aerospace grade", "Friction resistant"],
   },
   {
     id: "tpu-flex",
     name: "TPU Flexible 95A",
-    tag: "Goma Elástica & Sellos",
+    tag: "Elastomer & gaskets",
     density: 1.21,
     pricePerCm3: 0.28,
     baseCost: 6.0,
     speedFactor: 1.8,
-    desc: "Elastómero termoplástico flexible tipo goma. Absorbe vibraciones, impactos y presiones.",
-    properties: ["Flexible 95A", "Antichoque", "Memoria elástica"],
+    desc: "Rubber-like thermoplastic elastomer that absorbs vibration, impact and pressure.",
+    properties: ["Flexible 95A", "Shock absorbing", "Elastic memory"],
   },
 ];
 
 // Color Palette with Metallic / Roughness characteristics
 export const COLOR_OPTIONS = [
-  { name: "Negro Carbón Mate", hex: "#1f2328", roughness: 0.6, metalness: 0.1 },
-  { name: "Blanco Ártico", hex: "#f8f9fa", roughness: 0.4, metalness: 0.05 },
-  { name: "Naranja Neón Studio", hex: "#ff5722", roughness: 0.35, metalness: 0.1 },
-  { name: "Azul Cobalto Eléctrico", hex: "#1d4ed8", roughness: 0.3, metalness: 0.2 },
-  { name: "Oro Seda Perlado", hex: "#d4af37", roughness: 0.25, metalness: 0.6 },
-  { name: "Verde Esmeralda Silk", hex: "#059669", roughness: 0.28, metalness: 0.4 },
-  { name: "Gris Titanio Satinado", hex: "#64748b", roughness: 0.45, metalness: 0.5 },
+  { name: "Matte carbon black", hex: "#1f2328", roughness: 0.6, metalness: 0.1 },
+  { name: "Arctic white", hex: "#f8f9fa", roughness: 0.4, metalness: 0.05 },
+  { name: "Studio neon orange", hex: "#ff5722", roughness: 0.35, metalness: 0.1 },
+  { name: "Electric cobalt blue", hex: "#1d4ed8", roughness: 0.3, metalness: 0.2 },
+  { name: "Pearl silk gold", hex: "#d4af37", roughness: 0.25, metalness: 0.6 },
+  { name: "Emerald silk green", hex: "#059669", roughness: 0.28, metalness: 0.4 },
+  { name: "Satin titanium grey", hex: "#64748b", roughness: 0.45, metalness: 0.5 },
 ];
 
 // Presets that can be generated procedurally
@@ -117,38 +119,125 @@ interface PresetItem {
 const PRESETS: PresetItem[] = [
   {
     id: "dice-tower",
-    name: "Torre de Dados Fortaleza RPG",
-    category: "Accesorios Gaming",
+    name: "RPG Fortress Dice Tower",
+    category: "Gaming accessories",
     estimatedVolumeCm3: 64.5,
     dimensionsMm: [72, 72, 120],
   },
   {
     id: "helical-gear",
-    name: "Engranaje Helicoidal Mecánico",
-    category: "Ingeniería & Robótica",
+    name: "Mechanical Helical Gear",
+    category: "Engineering & robotics",
     estimatedVolumeCm3: 38.2,
     dimensionsMm: [80, 80, 35],
   },
   {
     id: "voronoi-vase",
-    name: "Florero Escultórico Paramétrico",
-    category: "Decoración & Diseño",
+    name: "Parametric Sculptural Vase",
+    category: "Decor & design",
     estimatedVolumeCm3: 52.8,
     dimensionsMm: [75, 75, 110],
   },
   {
     id: "lowpoly-skull",
-    name: "Monolito Facetado Low-Poly",
-    category: "Coleccionable & Arte",
+    name: "Low-Poly Faceted Monolith",
+    category: "Collectible & art",
     estimatedVolumeCm3: 41.6,
     dimensionsMm: [65, 70, 85],
   },
 ];
 
+
+// Trilingual strings for the Maker Studio (English source keys)
+const QT: Record<string, Tri> = {
+  models: { en: "Models:", fr: "Modèles :", es: "Modelos:" },
+  triangles: { en: "triangles", fr: "triangles", es: "triángulos" },
+  pause: { en: "Pause rotation", fr: "Pauser la rotation", es: "Pausar rotación" },
+  spin: { en: "Auto-rotate", fr: "Rotation auto", es: "Girar automáticamente" },
+  center: { en: "Center view", fr: "Centrer la vue", es: "Centrar vista" },
+  wire: { en: "Wireframe mode", fr: "Mode filaire", es: "Modo malla" },
+  grid: { en: "Show/hide grid", fr: "Afficher/masquer la grille", es: "Mostrar/ocultar cuadrícula" },
+  dims: { en: "Dimensions (X × Y × Z)", fr: "Dimensions (X × Y × Z)", es: "Dimensiones (X × Y × Z)" },
+  volume: { en: "Actual volume", fr: "Volume réel", es: "Volumen real" },
+  weight: { en: "Estimated weight", fr: "Poids estimé", es: "Peso estimado" },
+  upload: { en: "Upload my STL", fr: "Téléverser mon STL", es: "Subir mi STL" },
+  analyzingShort: { en: "Analyzing...", fr: "Analyse...", es: "Analizando..." },
+  analyzing: { en: "Analyzing 3D geometry and computing volume...", fr: "Analyse de la géométrie 3D et du volume...", es: "Analizando geometría 3D y calculando volumen..." },
+  analyzed: { en: "model analyzed successfully", fr: "modèle analysé avec succès", es: "modelo analizado con éxito" },
+  loaded: { en: "Model loaded", fr: "Modèle chargé", es: "Modelo cargado" },
+  errExt: { en: "Please choose a valid .STL file", fr: "Veuillez choisir un fichier .STL valide", es: "Selecciona un archivo .STL válido" },
+  errEmpty: { en: "This STL file has no valid vertices.", fr: "Ce fichier STL n'a aucun sommet valide.", es: "El archivo STL no contiene vértices válidos." },
+  errParse: { en: "Could not process the STL file", fr: "Impossible de traiter le fichier STL", es: "No se pudo procesar el archivo STL" },
+  params: { en: "Manufacturing parameters", fr: "Paramètres de fabrication", es: "Parámetros de fabricación" },
+  modelConfig: { en: "Model configuration", fr: "Configuration du modèle", es: "Configuración del modelo" },
+  configHint: { en: "Adjust material, density and layer height to recalculate cost and time instantly.", fr: "Ajustez matériau, densité et hauteur de couche pour recalculer coût et durée.", es: "Ajusta material, densidad y altura de capa para recalcular costo y tiempo." },
+  step1: { en: "1. Print material", fr: "1. Matériau d'impression", es: "1. Material de fabricación" },
+  step2: { en: "2. Finish colour (live 3D shader)", fr: "2. Couleur du fini (rendu 3D en direct)", es: "2. Color de acabado (render 3D en vivo)" },
+  infill: { en: "Infill", fr: "Remplissage", es: "Relleno (infill)" },
+  light: { en: "light", fr: "léger", es: "ligero" },
+  strong: { en: "strong", fr: "robuste", es: "robusto" },
+  solid: { en: "solid", fr: "plein", es: "sólido" },
+  layerRes: { en: "Layer resolution", fr: "Résolution de couche", es: "Resolución de capa" },
+  Fine: { en: "Fine", fr: "Fine", es: "Fina" },
+  Standard: { en: "Standard", fr: "Standard", es: "Estándar" },
+  Fast: { en: "Fast", fr: "Rapide", es: "Rápida" },
+  qty: { en: "Quantity:", fr: "Quantité :", es: "Cantidad:" },
+  printTime: { en: "Estimated print time:", fr: "Temps d'impression estimé :", es: "Tiempo de impresión estimado:" },
+  perPiece: { en: "per piece", fr: "par pièce", es: "por pieza" },
+  qa: { en: "Geometry inspection & post-processing:", fr: "Inspection et post-traitement :", es: "Inspección geométrica y postproceso:" },
+  qaIncluded: { en: "Included (±0.1 mm tolerance)", fr: "Inclus (tolérance ±0,1 mm)", es: "Incluido (tolerancia ±0,1 mm)" },
+  estTotal: { en: "Estimated total quote", fr: "Devis total estimé", es: "Presupuesto total estimado" },
+  each: { en: "each", fr: "ch.", es: "c/u" },
+  addQuote: { en: "Add quote to cart", fr: "Ajouter le devis au panier", es: "Añadir cotización al carrito" },
+  quoteAdded: { en: "Quote added", fr: "Devis ajouté", es: "Cotización añadida" },
+  print3d: { en: "3D print", fr: "Impression 3D", es: "Impresión 3D" },
+
+  // Materials
+  "Standard & decorative": { en: "Standard & decorative", fr: "Standard et décoratif", es: "Estándar y decorativo" },
+  "Biodegradable, dimensionally stable and a clean cosmetic finish with no warping.": { en: "Biodegradable, dimensionally stable and a clean cosmetic finish with no warping.", fr: "Biodégradable, stable et fini soigné sans gauchissement.", es: "Biodegradable, estable y con acabado limpio sin alabeo." },
+  "High stiffness": { en: "High stiffness", fr: "Grande rigidité", es: "Rigidez alta" },
+  "Eco-friendly": { en: "Eco-friendly", fr: "Écologique", es: "Ecológico" },
+  "Crisp detail": { en: "Crisp detail", fr: "Détail net", es: "Detalle limpio" },
+  "Mechanical & outdoor use": { en: "Mechanical & outdoor use", fr: "Usage mécanique et extérieur", es: "Uso mecánico y exterior" },
+  "Heat resistant to 75 °C, strong impact absorption plus chemical and UV resistance.": { en: "Heat resistant to 75 °C, strong impact absorption plus chemical and UV resistance.", fr: "Résiste à 75 °C, absorbe les chocs, résistant aux produits chimiques et aux UV.", es: "Resiste 75 °C, absorbe impactos y resiste químicos y rayos UV." },
+  "Heat resistant": { en: "Heat resistant", fr: "Résistant à la chaleur", es: "Resistente al calor" },
+  "Impact proof": { en: "Impact proof", fr: "Antichoc", es: "Anti-impacto" },
+  "Heavy duty": { en: "Heavy duty", fr: "Usage intensif", es: "Uso rudo" },
+  "Ultra high definition": { en: "Ultra high definition", fr: "Ultra haute définition", es: "Ultra alta definición" },
+  "Optical resolution with imperceptible 25-50 micron layers. Ideal for miniatures.": { en: "Optical resolution with imperceptible 25-50 micron layers. Ideal for miniatures.", fr: "Résolution optique avec couches de 25 à 50 microns. Idéal pour les miniatures.", es: "Resolución óptica con capas de 25 a 50 micras. Ideal para miniaturas." },
+  "25 micron layers": { en: "25 micron layers", fr: "Couches de 25 µm", es: "Capas de 25 micras" },
+  "Smooth surface": { en: "Smooth surface", fr: "Surface lisse", es: "Superficie lisa" },
+  "Maximum precision": { en: "Maximum precision", fr: "Précision maximale", es: "Máxima precisión" },
+  "Industrial grade engineering": { en: "Industrial grade engineering", fr: "Ingénierie de grade industriel", es: "Ingeniería de grado industrial" },
+  "Aerospace-grade polyamide with maximum toughness against cyclic fatigue.": { en: "Aerospace-grade polyamide with maximum toughness against cyclic fatigue.", fr: "Polyamide de grade aérospatial, ténacité maximale à la fatigue cyclique.", es: "Poliamida de grado aeroespacial con máxima tenacidad a la fatiga cíclica." },
+  Indestructible: { en: "Indestructible", fr: "Indestructible", es: "Indestructible" },
+  "Aerospace grade": { en: "Aerospace grade", fr: "Grade aérospatial", es: "Grado aeroespacial" },
+  "Friction resistant": { en: "Friction resistant", fr: "Résistant à la friction", es: "Resistente a la fricción" },
+  "Elastomer & gaskets": { en: "Elastomer & gaskets", fr: "Élastomère et joints", es: "Elastómero y sellos" },
+  "Rubber-like thermoplastic elastomer that absorbs vibration, impact and pressure.": { en: "Rubber-like thermoplastic elastomer that absorbs vibration, impact and pressure.", fr: "Élastomère thermoplastique qui absorbe vibrations, chocs et pression.", es: "Elastómero termoplástico que absorbe vibraciones, impactos y presión." },
+  "Flexible 95A": { en: "Flexible 95A", fr: "Flexible 95A", es: "Flexible 95A" },
+  "Shock absorbing": { en: "Shock absorbing", fr: "Amortisseur de chocs", es: "Antichoque" },
+  "Elastic memory": { en: "Elastic memory", fr: "Mémoire élastique", es: "Memoria elástica" },
+
+  // Colours
+  "Matte carbon black": { en: "Matte carbon black", fr: "Noir carbone mat", es: "Negro carbón mate" },
+  "Arctic white": { en: "Arctic white", fr: "Blanc arctique", es: "Blanco ártico" },
+  "Studio neon orange": { en: "Studio neon orange", fr: "Orange néon studio", es: "Naranja neón studio" },
+  "Electric cobalt blue": { en: "Electric cobalt blue", fr: "Bleu cobalt électrique", es: "Azul cobalto eléctrico" },
+  "Pearl silk gold": { en: "Pearl silk gold", fr: "Or soie perlé", es: "Oro seda perlado" },
+  "Emerald silk green": { en: "Emerald silk green", fr: "Vert émeraude soie", es: "Verde esmeralda seda" },
+  "Satin titanium grey": { en: "Satin titanium grey", fr: "Gris titane satiné", es: "Gris titanio satinado" },
+};
+
+const qFor = (lang: Lang) => (key: string) => QT[key]?.[lang] ?? key;
+
 export function Quoter3D({ onAddToCart }: Quoter3DProps) {
+  const { lang } = useI18n();
+  const q = React.useMemo(() => qFor(lang), [lang]);
+
   // Model & File state
   const [selectedPreset, setSelectedPreset] = useState<PresetKey>("dice-tower");
-  const [fileName, setFileName] = useState<string>("Torre_Dados_Fortaleza.stl");
+  const [fileName, setFileName] = useState<string>("RPG_Fortress_Dice_Tower.stl");
   const [triangleCount, setTriangleCount] = useState<number>(18420);
   const [dimensions, setDimensions] = useState<{ x: number; y: number; z: number }>({ x: 72, y: 72, z: 120 });
   const [volumeCm3, setVolumeCm3] = useState<number>(64.5);
@@ -157,7 +246,7 @@ export function Quoter3D({ onAddToCart }: Quoter3DProps) {
 
   // Print Configuration state
   const [materialId, setMaterialId] = useState<string>("pla-eco");
-  const [selectedColor, setSelectedColor] = useState(COLOR_OPTIONS[2]!); // Naranja Neón Studio
+  const [selectedColor, setSelectedColor] = useState(COLOR_OPTIONS[2]!); // Studio neon orange
   const [infillPercent, setInfillPercent] = useState<number>(20);
   const [layerHeight, setLayerHeight] = useState<number>(0.20);
   const [quantity, setQuantity] = useState<number>(1);
@@ -548,19 +637,19 @@ export function Quoter3D({ onAddToCart }: Quoter3DProps) {
       setFileName(`${preset.name.replace(/\s+/g, "_")}.stl`);
       const geo = createPresetGeometry(key);
       applyGeometryToScene(geo, preset.name);
-      toast.success(`Cargado modelo: ${preset.name}`);
+      toast.success(`${q("loaded")}: ${preset.name}`);
     }
   };
 
   // Parse & Load Custom STL File
   const processSTLFile = async (file: File) => {
     if (!file.name.toLowerCase().endsWith(".stl")) {
-      toast.error("Por favor selecciona un archivo .STL válido");
+      toast.error(q("errExt"));
       return;
     }
 
     setIsAnalyzing(true);
-    const toastId = toast.loading("Analizando geometría 3D y calculando volumen...");
+    const toastId = toast.loading(q("analyzing"));
 
     try {
       const buffer = await file.arrayBuffer();
@@ -568,7 +657,7 @@ export function Quoter3D({ onAddToCart }: Quoter3DProps) {
       const geometry = loader.parse(buffer);
 
       if (!geometry || geometry.attributes.position.count === 0) {
-        throw new Error("El archivo STL no contiene vértices válidos.");
+        throw new Error(q("errEmpty"));
       }
 
       setFileName(file.name);
@@ -576,10 +665,10 @@ export function Quoter3D({ onAddToCart }: Quoter3DProps) {
       applyGeometryToScene(geometry, file.name);
 
       toast.dismiss(toastId);
-      toast.success(`¡Modelo ${file.name} analizado exitosamente!`);
+      toast.success(`${file.name} — ${q("analyzed")}`);
     } catch (err: any) {
       toast.dismiss(toastId);
-      toast.error(err?.message || "Error al procesar el archivo STL");
+      toast.error(err?.message || q("errParse"));
     } finally {
       setIsAnalyzing(false);
     }
@@ -598,15 +687,15 @@ export function Quoter3D({ onAddToCart }: Quoter3DProps) {
   const handleAddToCart = () => {
     const item: QuotedItem = {
       id: `quote-3d-${Date.now()}`,
-      name: `Impresión 3D: ${fileName.replace(/\.stl$/i, "")} (${activeMaterial.name})`,
+      name: `${q("print3d")}: ${fileName.replace(/\.stl$/i, "")} (${activeMaterial.name})`,
       price: totalPrice,
-      details: `${dimensions.x}×${dimensions.y}×${dimensions.z}mm · ${infillPercent}% infill · ${selectedColor.name} · ${quantity} ud(s)`,
+      details: `${dimensions.x}×${dimensions.y}×${dimensions.z} mm · ${infillPercent}% infill · ${q(selectedColor.name)} × ${quantity}`,
     };
 
     if (onAddToCart) {
       onAddToCart(item);
     } else {
-      toast.success(`Cotización añadida: $${totalPrice.toFixed(2)} CAD`);
+      toast.success(`${q("quoteAdded")}: $${totalPrice.toFixed(2)} CAD`);
     }
   };
 
@@ -632,14 +721,14 @@ export function Quoter3D({ onAddToCart }: Quoter3DProps) {
               )}
             </div>
             <p className="text-xs text-muted-foreground">
-              {dimensions.x} × {dimensions.y} × {dimensions.z} mm · {volumeCm3} cm³ · {triangleCount.toLocaleString()} triángulos
+              {dimensions.x} × {dimensions.y} × {dimensions.z} mm · {volumeCm3} cm³ · {triangleCount.toLocaleString()} {q("triangles")}
             </p>
           </div>
         </div>
 
         {/* Preset Selector */}
         <div className="flex items-center gap-2 overflow-x-auto py-1">
-          <span className="text-xs font-semibold text-muted-foreground mr-1 hidden sm:inline">Modelos:</span>
+          <span className="text-xs font-semibold text-muted-foreground mr-1 hidden sm:inline">{q("models")}</span>
           {PRESETS.map((p) => (
             <button
               key={p.id}
@@ -667,7 +756,7 @@ export function Quoter3D({ onAddToCart }: Quoter3DProps) {
           <div className="absolute top-4 left-4 flex items-center gap-1.5 p-1 rounded-2xl bg-background/80 backdrop-blur-md border border-border/60 shadow-lg z-10">
             <button
               onClick={() => setAutoRotate((v) => !v)}
-              title={autoRotate ? "Pausar rotación" : "Girar automáticamente"}
+              title={autoRotate ? q("pause") : q("spin")}
               className={`p-2 rounded-xl text-xs transition-colors ${
                 autoRotate ? "bg-amber-500/20 text-amber-500 font-semibold" : "text-muted-foreground hover:text-foreground"
               }`}
@@ -676,14 +765,14 @@ export function Quoter3D({ onAddToCart }: Quoter3DProps) {
             </button>
             <button
               onClick={handleResetCamera}
-              title="Centrar vista"
+              title={q("center")}
               className="p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted text-xs transition-colors"
             >
               <RotateCcw className="w-4 h-4" />
             </button>
             <button
               onClick={() => setWireframe((v) => !v)}
-              title="Modo Malla (Wireframe)"
+              title={q("wire")}
               className={`p-2 rounded-xl text-xs transition-colors ${
                 wireframe ? "bg-amber-500/20 text-amber-500 font-semibold" : "text-muted-foreground hover:text-foreground hover:bg-muted"
               }`}
@@ -692,7 +781,7 @@ export function Quoter3D({ onAddToCart }: Quoter3DProps) {
             </button>
             <button
               onClick={() => setShowGrid((v) => !v)}
-              title="Mostrar/Ocultar cuadrícula"
+              title={q("grid")}
               className={`p-2 rounded-xl text-xs transition-colors ${
                 showGrid ? "bg-amber-500/20 text-amber-500 font-semibold" : "text-muted-foreground hover:text-foreground hover:bg-muted"
               }`}
@@ -704,15 +793,15 @@ export function Quoter3D({ onAddToCart }: Quoter3DProps) {
           {/* Live Dimension HUD Overlay */}
           <div className="absolute bottom-4 left-4 p-3 rounded-2xl bg-background/85 backdrop-blur-md border border-border/60 shadow-lg text-xs space-y-1.5 max-w-[260px] pointer-events-none">
             <div className="flex items-center justify-between text-muted-foreground font-semibold">
-              <span>Dimensiones (X × Y × Z)</span>
+              <span>{q("dims")}</span>
               <span className="text-foreground">{dimensions.x} × {dimensions.y} × {dimensions.z} mm</span>
             </div>
             <div className="flex items-center justify-between text-muted-foreground">
-              <span>Volumen real</span>
+              <span>{q("volume")}</span>
               <span className="font-semibold text-foreground">{volumeCm3.toFixed(1)} cm³</span>
             </div>
             <div className="flex items-center justify-between text-muted-foreground">
-              <span>Peso estimado</span>
+              <span>{q("weight")}</span>
               <span className="font-semibold text-amber-600 dark:text-amber-400">~{partWeightGrams} g</span>
             </div>
           </div>
@@ -721,7 +810,7 @@ export function Quoter3D({ onAddToCart }: Quoter3DProps) {
           <div className="absolute bottom-4 right-4 z-10">
             <label className="cursor-pointer flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs shadow-lg transition-transform hover:scale-105 active:scale-95">
               <UploadCloud className="w-4 h-4" />
-              <span>{isAnalyzing ? "Analizando..." : "Subir mi STL"}</span>
+              <span>{isAnalyzing ? q("analyzingShort") : q("upload")}</span>
               <input
                 type="file"
                 accept=".stl"
@@ -741,18 +830,18 @@ export function Quoter3D({ onAddToCart }: Quoter3DProps) {
           <div className="space-y-6">
             <div>
               <span className="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
-                Parámetros de Fabricación
+                {q("params")}
               </span>
-              <h3 className="text-2xl font-black tracking-tight mt-1">Configuración del Modelo</h3>
+              <h3 className="text-2xl font-black tracking-tight mt-1">{q("modelConfig")}</h3>
               <p className="text-xs text-muted-foreground mt-1">
-                Ajusta material, densidad y capa para recalcular costos y tiempos al milímetro.
+                {q("configHint")}
               </p>
             </div>
 
             {/* Material Selector */}
             <div className="space-y-2">
               <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                1. Material de Fabricación
+                {q("step1")}
               </label>
               <div className="space-y-2">
                 {MATERIALS.map((mat) => (
@@ -769,14 +858,14 @@ export function Quoter3D({ onAddToCart }: Quoter3DProps) {
                       <div className="flex items-center gap-2">
                         <span className="font-bold text-sm">{mat.name}</span>
                         <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-muted text-muted-foreground border border-border/40">
-                          {mat.tag}
+                          {q(mat.tag)}
                         </span>
                       </div>
-                      <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{mat.desc}</p>
+                      <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{q(mat.desc)}</p>
                       <div className="flex items-center gap-2 mt-1.5">
                         {mat.properties.map((prop, idx) => (
                           <span key={idx} className="text-[10px] text-amber-600 dark:text-amber-400 font-medium">
-                            ✓ {prop}
+                            ✓ {q(prop)}
                           </span>
                         ))}
                       </div>
@@ -794,16 +883,16 @@ export function Quoter3D({ onAddToCart }: Quoter3DProps) {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                  2. Color de Acabado (Shader 3D en vivo)
+                  {q("step2")}
                 </label>
-                <span className="text-xs font-medium text-amber-600 dark:text-amber-400">{selectedColor.name}</span>
+                <span className="text-xs font-medium text-amber-600 dark:text-amber-400">{q(selectedColor.name)}</span>
               </div>
               <div className="flex flex-wrap items-center gap-2.5 pt-1">
                 {COLOR_OPTIONS.map((c) => (
                   <button
                     key={c.name}
                     onClick={() => setSelectedColor(c)}
-                    title={c.name}
+                    title={q(c.name)}
                     className={`w-8 h-8 rounded-full border-2 transition-all relative flex items-center justify-center ${
                       selectedColor.name === c.name
                         ? "border-amber-500 scale-110 shadow-md ring-2 ring-amber-500/30"
@@ -824,7 +913,7 @@ export function Quoter3D({ onAddToCart }: Quoter3DProps) {
               {/* Infill Density Slider */}
               <div className="space-y-2 p-3 rounded-2xl bg-muted/30 border border-border/60">
                 <div className="flex justify-between items-center text-xs">
-                  <span className="font-bold text-muted-foreground">Relleno (Infill)</span>
+                  <span className="font-bold text-muted-foreground">{q("infill")}</span>
                   <span className="font-bold text-foreground bg-card px-2 py-0.5 rounded-md border border-border/40">
                     {infillPercent}%
                   </span>
@@ -839,25 +928,25 @@ export function Quoter3D({ onAddToCart }: Quoter3DProps) {
                   className="w-full accent-amber-500 cursor-pointer"
                 />
                 <div className="flex justify-between text-[10px] text-muted-foreground">
-                  <span>10% (Ligero)</span>
-                  <span>40% (Robusto)</span>
-                  <span>100% (Sólido)</span>
+                  <span>10% · {q("light")}</span>
+                  <span>40% · {q("strong")}</span>
+                  <span>100% · {q("solid")}</span>
                 </div>
               </div>
 
               {/* Layer Resolution */}
               <div className="space-y-2 p-3 rounded-2xl bg-muted/30 border border-border/60">
                 <div className="flex justify-between items-center text-xs">
-                  <span className="font-bold text-muted-foreground">Resolución de Capa</span>
+                  <span className="font-bold text-muted-foreground">{q("layerRes")}</span>
                   <span className="font-bold text-foreground bg-card px-2 py-0.5 rounded-md border border-border/40">
                     {layerHeight} mm
                   </span>
                 </div>
                 <div className="grid grid-cols-3 gap-1 pt-1">
                   {[
-                    { val: 0.12, label: "Fino" },
-                    { val: 0.20, label: "Estándar" },
-                    { val: 0.28, label: "Rápido" },
+                    { val: 0.12, label: "Fine" },
+                    { val: 0.20, label: "Standard" },
+                    { val: 0.28, label: "Fast" },
                   ].map((res) => (
                     <button
                       key={res.val}
@@ -868,7 +957,7 @@ export function Quoter3D({ onAddToCart }: Quoter3DProps) {
                           : "bg-background hover:bg-muted text-muted-foreground"
                       }`}
                     >
-                      {res.label}
+                      {q(res.label)}
                     </button>
                   ))}
                 </div>
@@ -877,7 +966,7 @@ export function Quoter3D({ onAddToCart }: Quoter3DProps) {
 
             {/* Quantity Selector */}
             <div className="flex items-center justify-between p-3 rounded-2xl bg-muted/30 border border-border/60">
-              <span className="text-xs font-bold text-muted-foreground">Cantidad de unidades:</span>
+              <span className="text-xs font-bold text-muted-foreground">{q("qty")}</span>
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => setQuantity((q) => Math.max(1, q - 1))}
@@ -900,22 +989,22 @@ export function Quoter3D({ onAddToCart }: Quoter3DProps) {
           <div className="pt-4 border-t border-border/60 space-y-4">
             <div className="space-y-1.5 text-xs text-muted-foreground">
               <div className="flex justify-between">
-                <span>Tiempo de impresión estimado:</span>
+                <span>{q("printTime")}</span>
                 <span className="font-semibold text-foreground flex items-center gap-1">
                   <Clock className="w-3.5 h-3.5 text-amber-500" />
-                  {formattedTime} por pieza
+                  {formattedTime} / {q("perPiece")}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span>Inspección geométrica & Post-proceso:</span>
+                <span>{q("qa")}</span>
                 <span className="font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
                   <ShieldCheck className="w-3.5 h-3.5" />
-                  Incluido (Tolerancia ±0.1mm)
+                  {q("qaIncluded")}
                 </span>
               </div>
               <div className="flex justify-between items-baseline pt-2">
                 <div>
-                  <span className="text-xs font-medium text-muted-foreground block">Presupuesto Total Estimado</span>
+                  <span className="text-xs font-medium text-muted-foreground block">{q("estTotal")}</span>
                   <span className="text-3xl font-black tracking-tight text-foreground">
                     ${totalPrice.toFixed(2)}{" "}
                     <span className="text-xs font-semibold text-muted-foreground">CAD</span>
@@ -923,7 +1012,7 @@ export function Quoter3D({ onAddToCart }: Quoter3DProps) {
                 </div>
                 {quantity > 1 && (
                   <span className="text-xs text-muted-foreground font-medium">
-                    (${unitPrice.toFixed(2)} c/u)
+                    (${unitPrice.toFixed(2)} {q("each")})
                   </span>
                 )}
               </div>
@@ -934,7 +1023,7 @@ export function Quoter3D({ onAddToCart }: Quoter3DProps) {
               className="w-full py-4 px-6 rounded-2xl bg-amber-500 hover:bg-amber-600 active:scale-[0.99] text-white font-extrabold text-sm shadow-xl shadow-amber-500/20 flex items-center justify-center gap-2.5 transition-all"
             >
               <ShoppingCart className="w-4 h-4" />
-              <span>Añadir Cotización al Carrito</span>
+              <span>{q("addQuote")}</span>
             </button>
           </div>
         </div>
