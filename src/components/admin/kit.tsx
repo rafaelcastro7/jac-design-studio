@@ -77,3 +77,40 @@ export const btnGhost =
 export function Empty({ children }: { children: ReactNode }) {
   return <p className="py-10 text-center text-sm text-muted-foreground">{children}</p>;
 }
+
+/** Escapes a value for CSV (Excel/Sheets safe). */
+const csvCell = (v: unknown) => {
+  const s = v === null || v === undefined ? "" : String(v);
+  return /[",\n;]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+};
+
+/** Builds a CSV file from rows and triggers a browser download. */
+export function downloadCsv(filename: string, headers: string[], rows: unknown[][]) {
+  const csv = [headers, ...rows].map((r) => r.map(csvCell).join(";")).join("\n");
+  const url = URL.createObjectURL(new Blob([`\uFEFF${csv}`], { type: "text/csv;charset=utf-8" }));
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+export function SearchInput({
+  value,
+  onChange,
+  placeholder,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  placeholder: string;
+}) {
+  return (
+    <input
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder={placeholder}
+      aria-label={placeholder}
+      className={`${inputCls} sm:max-w-xs`}
+    />
+  );
+}

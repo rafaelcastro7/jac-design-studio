@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Card, Empty, Pill, btnGhost, cadExact, dateShort, inputCls } from "@/components/admin/kit";
+import { Card, Empty, Pill, SearchInput, Stat, btnGhost, cadExact, dateShort, downloadCsv, inputCls } from "@/components/admin/kit";
 
 export const Route = createFileRoute("/_authenticated/admin/orders")({
   component: OrdersAdmin,
@@ -46,6 +46,7 @@ function OrdersAdmin() {
   const { isAdmin } = useAuth();
   const qc = useQueryClient();
   const [filter, setFilter] = useState<"todos" | Status>("todos");
+  const [search, setSearch] = useState("");
   const [open, setOpen] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -79,12 +80,44 @@ function OrdersAdmin() {
     onError: (e: Error) => setError(e.message),
   });
 
-  const list = (data ?? []).filter((o) => filter === "todos" || o.status === filter);
+  const term = search.trim().toLowerCase();
+  const list = (data ?? []).filter(
+    (o) =>
+      (filter === "todos" || o.status === filter) &&
+      (!term ||
+        `${o.code} ${o.customer_name} ${o.customer_email} ${o.customer_phone ?? ""}`.toLowerCase().includes(term))
+  );
+  const shown = list.filter((o) => o.status !== "cancelado");
+  const shownTotal = shown.reduce((sum, o) => sum + Number(o.total_cad), 0);
 
   return (
     <Card
       title="Pedidos y clientes"
       action={
+        <div className="flex flex-wrap items-center gap-2">
+        <SearchInput value={search} onChange={setSearch} placeholder="Buscar por código, cliente o correo" />
+        <button
+          onClick={() =>
+            downloadCsv(
+              "pedidos-jac-design.csv",
+              ["codigo", "fecha", "cliente", "correo", "telefono", "estado", "total_cad", "articulos"],
+              list.map((o) => [
+                o.code,
+                o.created_at,
+                o.customer_name,
+                o.customer_email,
+                o.customer_phone ?? "",
+                o.status,
+                Number(o.total_cad).toFixed(2),
+                o.order_items.map((it) => `${it.qty}x ${it.name}`).join(" | "),
+              ])
+            )
+          }
+          disabled={list.length === 0}
+          className={`${btnGhost} disabled:opacity-50`}
+        >
+          Exportar CSV
+        </button>
         <select value={filter} onChange={(e) => setFilter(e.target.value as Status | "todos")} className={`${inputCls} max-w-[15rem]`}>
           <option value="todos">Todos los estados</option>
           {STATUS.map((s) => (
@@ -93,9 +126,18 @@ function OrdersAdmin() {
             </option>
           ))}
         </select>
+        </div>
       }
     >
       {error && <p className="mb-3 text-xs font-semibold text-rose-600">{error}</p>}
+      <div className="mb-4 grid gap-3 sm:grid-cols-3">
+        <Stat label="Pedidos en la vista" value={String(list.length)} />
+        <Stat label="Valor (sin cancelados)" value={cadExact(shownTotal)} />
+        <Stat
+          label="Ticket promedio"
+          value={cadExact(shown.length ? shownTotal / shown.length : 0)}
+        />
+      </div>
       {isLoading ? (
         <Empty>Cargando pedidos…</Empty>
       ) : list.length === 0 ? (

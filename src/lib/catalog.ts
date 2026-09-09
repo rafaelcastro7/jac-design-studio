@@ -36,7 +36,12 @@ export interface ProductRow {
   updated_at?: string;
 }
 
-export type ShopProduct = Product & { rowId?: string; published: boolean };
+export type ShopProduct = Product & {
+  rowId?: string;
+  published: boolean;
+  sortOrder: number;
+  stock: number | null;
+};
 
 const tri = (en: string | null, fr: string | null, es: string | null) => ({
   en: en ?? "",
@@ -53,6 +58,8 @@ export function rowToProduct(r: ProductRow): ShopProduct {
     img: (r.image_key ? IMAGE_MAP[r.image_key] : undefined) ?? r.image_url ?? IMAGE_MAP[r.slug] ?? "",
     popular: r.popular,
     published: r.published,
+    sortOrder: r.sort_order ?? 0,
+    stock: r.stock,
     rating: Number(r.rating),
     reviewCount: r.review_count,
     dimensions: r.dimensions ?? "",
@@ -92,4 +99,9 @@ export const seedRows = () =>
     material_es: p.material.es,
   }));
 
-export const STATIC_PRODUCTS: ShopProduct[] = PRODUCTS.map((p) => ({ ...p, published: true }));
+export const STATIC_PRODUCTS: ShopProduct[] = PRODUCTS.map((p, i) => ({
+  ...p,
+  published: true,
+  sortOrder: i * 10,
+  stock: null,
+}));

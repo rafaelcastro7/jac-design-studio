@@ -46,21 +46,36 @@ function TeamAdmin() {
 
   const refresh = () => qc.invalidateQueries({ queryKey: ["team"] });
 
+  const clearError = () => setError(null);
+
   const grant = useMutation({
     mutationFn: async ({ userId, role }: { userId: string; role: Role }) => {
       const { error } = await supabase.from("user_roles").insert({ user_id: userId, role });
       if (error) throw error;
     },
-    onSuccess: refresh,
+    onSuccess: () => {
+      clearError();
+      refresh();
+    },
     onError: (e: Error) => setError(e.message),
   });
 
   const revoke = useMutation({
     mutationFn: async ({ userId, role }: { userId: string; role: Role }) => {
+      if (role === "admin") {
+        const admins = (roles.data ?? []).filter((r) => r.role === "admin");
+        if (admins.length <= 1)
+          throw new Error("Debe quedar al menos un administrador. Asigna otro antes de quitar este.");
+        if (userId === user?.id)
+          throw new Error("No puedes quitarte a ti mismo el rol de administrador.");
+      }
       const { error } = await supabase.from("user_roles").delete().eq("user_id", userId).eq("role", role);
       if (error) throw error;
     },
-    onSuccess: refresh,
+    onSuccess: () => {
+      clearError();
+      refresh();
+    },
     onError: (e: Error) => setError(e.message),
   });
 
