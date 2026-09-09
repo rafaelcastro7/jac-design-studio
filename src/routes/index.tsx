@@ -224,6 +224,7 @@ const FREE_SHIP_THRESHOLD = 150;
 
 function JacDesign() {
   const { t, tr, money, lang, setLang } = useI18n();
+  const { products } = useCatalog();
 
   const [cat, setCat] = useState<"todos" | Cat>("todos");
   const [search, setSearch] = useState("");
@@ -236,6 +237,8 @@ function JacDesign() {
   const [langOpen, setLangOpen] = useState(false);
   const [toasts, setToasts] = useState<{ id: number; text: string }[]>([]);
   const [contact, setContact] = useState({ name: "", email: "", phone: "", message: "" });
+  const [buyer, setBuyer] = useState({ name: "", email: "", phone: "" });
+  const [sending, setSending] = useState(false);
   const toastId = useRef(0);
 
   // customizer
@@ -255,13 +258,13 @@ function JacDesign() {
       CATS.map((c) => ({
         id: c.id,
         label: tr(CAT_LABELS[c.id]),
-        count: c.id === "todos" ? PRODUCTS.length : PRODUCTS.filter((p) => p.cat === c.id).length,
+        count: c.id === "todos" ? products.length : products.filter((p) => p.cat === c.id).length,
       })),
-    [tr]
+    [tr, products]
   );
 
   const filtered = useMemo(() => {
-    let list = PRODUCTS;
+    let list = products;
     if (cat !== "todos") list = list.filter((p) => p.cat === cat);
     if (onlyPopular) list = list.filter((p) => p.popular);
     if (search.trim()) {
@@ -278,7 +281,7 @@ function JacDesign() {
     if (sort === "rating")
       return [...list].sort((a, b) => b.rating - a.rating || b.reviewCount - a.reviewCount);
     return list;
-  }, [cat, onlyPopular, search, sort, lang]);
+  }, [products, cat, onlyPopular, search, sort, lang]);
 
   const total = cart.reduce((s, i) => s + i.price, 0);
   const missingForFree = Math.max(0, FREE_SHIP_THRESHOLD - total);
@@ -292,6 +295,70 @@ function JacDesign() {
     const saved = wish.includes(p.id);
     setWish((w) => (saved ? w.filter((x) => x !== p.id) : [...w, p.id]));
     toast(`${tr(p.name)} — ${saved ? t("removedFromWishlist") : t("addedToWishlist")}`);
+  };
+
+  /* ── orders are stored in the business panel ─────────── */
+  const placeOrder = async () => {
+    if (!buyer.name.trim() || !buyer.email.trim()) {
+      toast(t("contactIncomplete"));
+      return;
+    }
+    setSending(true);
+    try {
+      const { data, error } = await supabase
+        .from("orders")
+        .insert({
+          customer_name: buyer.name.trim(),
+          customer_email: buyer.email.trim(),
+          customer_phone: buyer.phone.trim() || null,
+          lang,
+          total_cad: total,
+        })
+        .select("id")
+        .single();
+      if (error) throw error;
+      const items = cart.map((i) => ({
+        order_id: data.id,
+        product_slug: i.id,
+        name: i.name,
+        unit_price_cad: i.price,
+        qty: 1,
+      }));
+      const res = await supabase.from("order_items").insert(items);
+      if (res.error) throw res.error;
+      setCart([]);
+      setCartOpen(false);
+      setBuyer({ name: "", email: "", phone: "" });
+      toast(t("checkoutDone"));
+    } catch {
+      toast(t("saveError"));
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const sendMessage = async () => {
+    if (!contact.name.trim() || !contact.email.trim() || !contact.message.trim()) {
+      toast(t("contactIncomplete"));
+      return;
+    }
+    setSending(true);
+    try {
+      const { error } = await supabase.from("messages").insert({
+        name: contact.name.trim(),
+        email: contact.email.trim(),
+        phone: contact.phone.trim() || null,
+        body: contact.message.trim(),
+        lang,
+      });
+      if (error) throw error;
+      setContact({ name: "", email: "", phone: "", message: "" });
+      toast(t("contactSent"));
+    } catch {
+      toast(t("saveError"));
+    } finally {
+      setSending(false);
+    }
   };
 
   const customPrice = useMemo(() => {
