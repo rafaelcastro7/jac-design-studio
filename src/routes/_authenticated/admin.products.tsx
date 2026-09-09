@@ -9,7 +9,7 @@ import { IMAGE_MAP, seedRows, type ShopProduct } from "@/lib/catalog";
 import { Card, Empty, Field, Pill, btnGhost, btnPrimary, cadExact, downloadCsv, inputCls } from "@/components/admin/kit";
 
 export const Route = createFileRoute("/_authenticated/admin/products")({
-  validateSearch: (search: Record<string, unknown>): { edit?: string } => ({
+  validateSearch: (search: Record<string, unknown>): { edit?: string | undefined } => ({
     edit: typeof search['edit'] === "string" ? (search['edit'] as string) : undefined,
   }),
   component: ProductsAdmin,
