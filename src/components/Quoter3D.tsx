@@ -606,7 +606,7 @@ export function Quoter3D({ onAddToCart }: Quoter3DProps) {
     if (onAddToCart) {
       onAddToCart(item);
     } else {
-      toast.success(`Cotización añadida: $${totalPrice.toFixed(2)} USD`);
+      toast.success(`Cotización añadida: $${totalPrice.toFixed(2)} CAD`);
     }
   };
 
@@ -918,7 +918,7 @@ export function Quoter3D({ onAddToCart }: Quoter3DProps) {
                   <span className="text-xs font-medium text-muted-foreground block">Presupuesto Total Estimado</span>
                   <span className="text-3xl font-black tracking-tight text-foreground">
                     ${totalPrice.toFixed(2)}{" "}
-                    <span className="text-xs font-semibold text-muted-foreground">USD</span>
+                    <span className="text-xs font-semibold text-muted-foreground">CAD</span>
                   </span>
                 </div>
                 {quantity > 1 && (
