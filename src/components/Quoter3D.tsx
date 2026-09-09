@@ -731,6 +731,92 @@ export function Quoter3D({ onAddToCart }: Quoter3DProps) {
     }
   };
 
+  // ---- AI design flow: prompt -> image -> 3D relief -> instant quote ----
+  const STYLE_HINTS: Record<string, string> = {
+    styleLine: "bold clean line art, pure black lines on white, no shading, no text",
+    styleRelief: "grayscale bas-relief sculpture depth map, smooth gradients, centered subject, plain background, no text",
+    stylePhoto: "high contrast grayscale photographic subject, centered, plain light background, no text",
+    styleLogo: "minimal emblem silhouette, solid black shape on white, no lettering",
+  };
+
+  const SAMPLE_PROMPTS = [
+    "Rocky Mountain skyline with a maple leaf, bas-relief medallion",
+    "Family portrait silhouette inside a heart frame",
+    "Geometric bear head emblem for a wall plaque",
+  ];
+
+  const handleGenerateDesign = async () => {
+    const base = designPrompt.trim();
+    if (!base) {
+      toast.error(q("aiPromptRequired"));
+      return;
+    }
+    setIsGenerating(true);
+    setDesignIsFinal(false);
+    setDesignImage(null);
+    const fullPrompt = `${base}. ${STYLE_HINTS[designStyle]}. Square composition suitable for a 3D printed relief: strong depth separation, no text or watermarks.`;
+    try {
+      await streamImage("/api/design-image", fullPrompt, (dataUrl, isFinal) => {
+        setDesignImage(dataUrl);
+        setDesignIsFinal(isFinal);
+      });
+    } catch (err: any) {
+      toast.error(err?.message || q("aiFailed"));
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const buildReliefFromDesign = async (src: string, notify: boolean) => {
+    setIsBuildingRelief(true);
+    try {
+      const field = await sampleHeightField(src, 130);
+      const result = buildReliefGeometry(field, {
+        widthMm: reliefWidth,
+        reliefMm: reliefDepth,
+        baseMm: reliefBase,
+        invert: reliefInvert,
+        shape: reliefShape,
+      });
+      reliefGeoRef.current = result.geometry;
+      setHasRelief(true);
+      setIsCustomUpload(true);
+      const name = `JacDesign_AI_${reliefShape}.stl`;
+      setFileName(name);
+      applyGeometryToScene(result.geometry, name);
+      if (notify) toast.success(q("aiReady"));
+    } catch (err: any) {
+      toast.error(err?.message || q("aiFailed"));
+    } finally {
+      setIsBuildingRelief(false);
+    }
+  };
+
+  const handleValidateIn3D = () => {
+    if (!designImage) return;
+    void buildReliefFromDesign(designImage, true);
+  };
+
+  // Live re-build when relief parameters change
+  useEffect(() => {
+    if (!hasRelief || !designImage) return;
+    const t = setTimeout(() => void buildReliefFromDesign(designImage, false), 220);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reliefShape, reliefWidth, reliefDepth, reliefBase, reliefInvert]);
+
+  const handleDownloadStl = async () => {
+    const geo = reliefGeoRef.current;
+    if (!geo) return;
+    const blob = await exportGeometryToStl(geo);
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = fileName || "jac-design.stl";
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   // Camera Reset
   const handleResetCamera = () => {
     if (!cameraRef.current || !controlsRef.current) return;
