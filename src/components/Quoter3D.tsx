@@ -1074,7 +1074,28 @@ export function Quoter3D({ onAddToCart }: Quoter3DProps) {
                 ))}
               </div>
 
-              {[
+              {isBasic && (
+                <div className="space-y-1.5">
+                  <span className="text-[11px] font-semibold text-muted-foreground">{q("sizeLabel")}</span>
+                  <div className="grid grid-cols-3 gap-1.5">
+                    {SIZE_PRESETS.map((sp) => (
+                      <button
+                        key={sp.id}
+                        onClick={() => setReliefWidth(sp.width)}
+                        className={`py-2 text-[11px] font-bold rounded-xl border transition-colors ${
+                          reliefWidth === sp.width
+                            ? "bg-amber-500 border-amber-500 text-white"
+                            : "bg-background border-border/60 text-muted-foreground hover:bg-muted"
+                        }`}
+                      >
+                        {q(sp.label)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {!isBasic && [
                 { label: "aiWidth", value: reliefWidth, set: setReliefWidth, min: 40, max: 200, step: 5, unit: "mm" },
                 { label: "aiDepth", value: reliefDepth, set: setReliefDepth, min: 1, max: 8, step: 0.5, unit: "mm" },
                 { label: "aiBase", value: reliefBase, set: setReliefBase, min: 1, max: 6, step: 0.5, unit: "mm" },
@@ -1096,7 +1117,7 @@ export function Quoter3D({ onAddToCart }: Quoter3DProps) {
                 </div>
               ))}
 
-              <label className="flex items-center gap-2 text-[11px] font-semibold text-muted-foreground cursor-pointer">
+              <label className={`items-center gap-2 text-[11px] font-semibold text-muted-foreground cursor-pointer ${isBasic ? "hidden" : "flex"}`}>
                 <input
                   type="checkbox"
                   checked={reliefInvert}
@@ -1135,6 +1156,7 @@ export function Quoter3D({ onAddToCart }: Quoter3DProps) {
               <button
                 onClick={handleValidateIn3D}
                 disabled={!designImage || !designIsFinal || isBuildingRelief}
+                hidden={isBasic && hasRelief}
                 className="flex-1 min-w-[160px] py-3 px-4 rounded-2xl bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 transition-all active:scale-[0.99]"
               >
                 {isBuildingRelief ? <Loader2 className="w-4 h-4 animate-spin" /> : <Box className="w-4 h-4" />}
@@ -1182,6 +1204,7 @@ export function Quoter3D({ onAddToCart }: Quoter3DProps) {
             <button
               onClick={() => setWireframe((v) => !v)}
               title={q("wire")}
+              hidden={isBasic}
               className={`p-2 rounded-xl text-xs transition-colors ${
                 wireframe ? "bg-amber-500/20 text-amber-500 font-semibold" : "text-muted-foreground hover:text-foreground hover:bg-muted"
               }`}
@@ -1191,6 +1214,7 @@ export function Quoter3D({ onAddToCart }: Quoter3DProps) {
             <button
               onClick={() => setShowGrid((v) => !v)}
               title={q("grid")}
+              hidden={isBasic}
               className={`p-2 rounded-xl text-xs transition-colors ${
                 showGrid ? "bg-amber-500/20 text-amber-500 font-semibold" : "text-muted-foreground hover:text-foreground hover:bg-muted"
               }`}
@@ -1216,7 +1240,7 @@ export function Quoter3D({ onAddToCart }: Quoter3DProps) {
           </div>
 
           {/* Floating STL Drag & Drop Bar at Bottom Right */}
-          <div className="absolute bottom-4 right-4 z-10">
+          <div className={`absolute bottom-4 right-4 z-10 ${isBasic ? "hidden" : ""}`}>
             <label className="cursor-pointer flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs shadow-lg transition-transform hover:scale-105 active:scale-95">
               <UploadCloud className="w-4 h-4" />
               <span>{isAnalyzing ? q("analyzingShort") : q("upload")}</span>
