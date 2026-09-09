@@ -21,8 +21,20 @@ import {
   Scale, 
   ShieldCheck, 
   ShoppingCart,
-  Maximize2
+  Maximize2,
+  Wand2,
+  Download,
+  Loader2,
+  Image as ImageIcon,
+  RefreshCw
 } from "lucide-react";
+import { streamImage } from "@/lib/streamImage";
+import {
+  sampleHeightField,
+  buildReliefGeometry,
+  exportGeometryToStl,
+  type ReliefShape,
+} from "@/lib/relief";
 
 export interface QuotedItem {
   id: string;
@@ -192,6 +204,36 @@ const QT: Record<string, Tri> = {
   quoteAdded: { en: "Quote added", fr: "Devis ajouté", es: "Cotización añadida" },
   print3d: { en: "3D print", fr: "Impression 3D", es: "Impresión 3D" },
 
+  // AI design step
+  aiStep: { en: "Step 1 · Design your piece with AI", fr: "Étape 1 · Concevez votre pièce avec l'IA", es: "Paso 1 · Diseña tu pieza con IA" },
+  aiHint: { en: "Describe the artwork you want to print. Review the image, then validate it in 3D and see the exact price before ordering.", fr: "Décrivez le visuel à imprimer. Vérifiez l'image, validez-la en 3D et voyez le prix exact avant de commander.", es: "Describe la imagen que quieres imprimir. Revísala, valídala en 3D y verás el precio exacto antes de ordenar." },
+  aiPlaceholder: { en: "e.g. a mountain skyline with a maple leaf, clean high-contrast silhouette", fr: "ex. une chaîne de montagnes avec une feuille d'érable, silhouette nette", es: "ej. una cordillera con una hoja de maple, silueta nítida de alto contraste" },
+  aiGenerate: { en: "Generate design", fr: "Générer le design", es: "Generar diseño" },
+  aiGenerating: { en: "Generating...", fr: "Génération...", es: "Generando..." },
+  aiRegenerate: { en: "Try another", fr: "Autre version", es: "Otra versión" },
+  aiSample: { en: "Use sample idea", fr: "Idée d'exemple", es: "Usar idea de ejemplo" },
+  aiEmpty: { en: "Your AI design preview will appear here", fr: "Votre aperçu IA apparaîtra ici", es: "Aquí aparecerá tu diseño generado" },
+  aiPromptRequired: { en: "Describe your design first", fr: "Décrivez d'abord votre design", es: "Describe primero tu diseño" },
+  aiValidate: { en: "Validate in 3D & quote", fr: "Valider en 3D et chiffrer", es: "Validar en 3D y cotizar" },
+  aiRelief: { en: "3D relief settings", fr: "Réglages du relief 3D", es: "Ajustes del relieve 3D" },
+  aiShape: { en: "Format", fr: "Format", es: "Formato" },
+  plaque: { en: "Plaque", fr: "Plaque", es: "Placa" },
+  medallion: { en: "Medallion", fr: "Médaillon", es: "Medallón" },
+  aiWidth: { en: "Width / diameter", fr: "Largeur / diamètre", es: "Ancho / diámetro" },
+  aiDepth: { en: "Relief depth", fr: "Profondeur du relief", es: "Profundidad del relieve" },
+  aiBase: { en: "Base thickness", fr: "Épaisseur de base", es: "Espesor de la base" },
+  aiInvert: { en: "Lithophane mode (dark = thick)", fr: "Mode lithophane (foncé = épais)", es: "Modo litofanía (oscuro = grueso)" },
+  aiReady: { en: "3D relief ready — price updated", fr: "Relief 3D prêt — prix mis à jour", es: "Relieve 3D listo: precio actualizado" },
+  aiFailed: { en: "Could not generate the design", fr: "Impossible de générer le design", es: "No se pudo generar el diseño" },
+  aiStyle: { en: "Style", fr: "Style", es: "Estilo" },
+  styleLine: { en: "Line art", fr: "Trait", es: "Línea" },
+  styleRelief: { en: "Bas-relief", fr: "Bas-relief", es: "Bajorrelieve" },
+  stylePhoto: { en: "Photo", fr: "Photo", es: "Foto" },
+  styleLogo: { en: "Logo", fr: "Logo", es: "Logotipo" },
+  downloadStl: { en: "Download STL", fr: "Télécharger le STL", es: "Descargar STL" },
+  aiBuilding: { en: "Building 3D relief...", fr: "Construction du relief 3D...", es: "Construyendo relieve 3D..." },
+
+
   // Materials
   "Standard & decorative": { en: "Standard & decorative", fr: "Standard et décoratif", es: "Estándar y decorativo" },
   "Biodegradable, dimensionally stable and a clean cosmetic finish with no warping.": { en: "Biodegradable, dimensionally stable and a clean cosmetic finish with no warping.", fr: "Biodégradable, stable et fini soigné sans gauchissement.", es: "Biodegradable, estable y con acabado limpio sin alabeo." },
@@ -250,6 +292,21 @@ export function Quoter3D({ onAddToCart }: Quoter3DProps) {
   const [infillPercent, setInfillPercent] = useState<number>(20);
   const [layerHeight, setLayerHeight] = useState<number>(0.20);
   const [quantity, setQuantity] = useState<number>(1);
+
+  // AI design state (step 1: design the artwork, then validate it in 3D)
+  const [designPrompt, setDesignPrompt] = useState<string>("");
+  const [designStyle, setDesignStyle] = useState<string>("styleRelief");
+  const [designImage, setDesignImage] = useState<string | null>(null);
+  const [designIsFinal, setDesignIsFinal] = useState<boolean>(false);
+  const [isGenerating, setIsGenerating] = useState<boolean>(false);
+  const [isBuildingRelief, setIsBuildingRelief] = useState<boolean>(false);
+  const [reliefShape, setReliefShape] = useState<ReliefShape>("plaque");
+  const [reliefWidth, setReliefWidth] = useState<number>(90);
+  const [reliefDepth, setReliefDepth] = useState<number>(3);
+  const [reliefBase, setReliefBase] = useState<number>(2);
+  const [reliefInvert, setReliefInvert] = useState<boolean>(false);
+  const [hasRelief, setHasRelief] = useState<boolean>(false);
+  const reliefGeoRef = useRef<any>(null);
 
   // Viewport toggles
   const [autoRotate, setAutoRotate] = useState<boolean>(true);
@@ -674,6 +731,92 @@ export function Quoter3D({ onAddToCart }: Quoter3DProps) {
     }
   };
 
+  // ---- AI design flow: prompt -> image -> 3D relief -> instant quote ----
+  const STYLE_HINTS: Record<string, string> = {
+    styleLine: "bold clean line art, pure black lines on white, no shading, no text",
+    styleRelief: "grayscale bas-relief sculpture depth map, smooth gradients, centered subject, plain background, no text",
+    stylePhoto: "high contrast grayscale photographic subject, centered, plain light background, no text",
+    styleLogo: "minimal emblem silhouette, solid black shape on white, no lettering",
+  };
+
+  const SAMPLE_PROMPTS = [
+    "Rocky Mountain skyline with a maple leaf, bas-relief medallion",
+    "Family portrait silhouette inside a heart frame",
+    "Geometric bear head emblem for a wall plaque",
+  ];
+
+  const handleGenerateDesign = async () => {
+    const base = designPrompt.trim();
+    if (!base) {
+      toast.error(q("aiPromptRequired"));
+      return;
+    }
+    setIsGenerating(true);
+    setDesignIsFinal(false);
+    setDesignImage(null);
+    const fullPrompt = `${base}. ${STYLE_HINTS[designStyle]}. Square composition suitable for a 3D printed relief: strong depth separation, no text or watermarks.`;
+    try {
+      await streamImage("/api/design-image", fullPrompt, (dataUrl, isFinal) => {
+        setDesignImage(dataUrl);
+        setDesignIsFinal(isFinal);
+      });
+    } catch (err: any) {
+      toast.error(err?.message || q("aiFailed"));
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const buildReliefFromDesign = async (src: string, notify: boolean) => {
+    setIsBuildingRelief(true);
+    try {
+      const field = await sampleHeightField(src, 130);
+      const result = buildReliefGeometry(field, {
+        widthMm: reliefWidth,
+        reliefMm: reliefDepth,
+        baseMm: reliefBase,
+        invert: reliefInvert,
+        shape: reliefShape,
+      });
+      reliefGeoRef.current = result.geometry;
+      setHasRelief(true);
+      setIsCustomUpload(true);
+      const name = `JacDesign_AI_${reliefShape}.stl`;
+      setFileName(name);
+      applyGeometryToScene(result.geometry, name);
+      if (notify) toast.success(q("aiReady"));
+    } catch (err: any) {
+      toast.error(err?.message || q("aiFailed"));
+    } finally {
+      setIsBuildingRelief(false);
+    }
+  };
+
+  const handleValidateIn3D = () => {
+    if (!designImage) return;
+    void buildReliefFromDesign(designImage, true);
+  };
+
+  // Live re-build when relief parameters change
+  useEffect(() => {
+    if (!hasRelief || !designImage) return;
+    const t = setTimeout(() => void buildReliefFromDesign(designImage, false), 220);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reliefShape, reliefWidth, reliefDepth, reliefBase, reliefInvert]);
+
+  const handleDownloadStl = async () => {
+    const geo = reliefGeoRef.current;
+    if (!geo) return;
+    const blob = await exportGeometryToStl(geo);
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = fileName || "jac-design.stl";
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   // Camera Reset
   const handleResetCamera = () => {
     if (!cameraRef.current || !controlsRef.current) return;
@@ -742,6 +885,164 @@ export function Quoter3D({ onAddToCart }: Quoter3DProps) {
               {p.name.split(" ")[0]} {p.name.split(" ")[1]}
             </button>
           ))}
+        </div>
+      </div>
+
+      {/* ---------- Step 1: AI design studio ---------- */}
+      <div className="px-5 sm:px-6 py-6 border-b border-border/60 bg-gradient-to-br from-amber-500/5 via-transparent to-rose-500/5">
+        <div className="flex items-start gap-3 mb-4">
+          <div className="w-9 h-9 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-500 shrink-0">
+            <Wand2 className="w-4.5 h-4.5" />
+          </div>
+          <div>
+            <h3 className="font-bold text-sm sm:text-base tracking-tight">{q("aiStep")}</h3>
+            <p className="text-xs text-muted-foreground max-w-2xl mt-0.5">{q("aiHint")}</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          {/* Prompt column */}
+          <div className="space-y-3">
+            <textarea
+              value={designPrompt}
+              onChange={(e) => setDesignPrompt(e.target.value)}
+              rows={3}
+              placeholder={q("aiPlaceholder")}
+              className="w-full rounded-2xl border border-border/70 bg-background p-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-amber-500/40"
+            />
+
+            <div className="space-y-1.5">
+              <span className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">{q("aiStyle")}</span>
+              <div className="grid grid-cols-4 gap-1.5">
+                {["styleLine", "styleRelief", "stylePhoto", "styleLogo"].map((s) => (
+                  <button
+                    key={s}
+                    onClick={() => setDesignStyle(s)}
+                    className={`py-1.5 text-[11px] font-bold rounded-xl border transition-colors ${
+                      designStyle === s
+                        ? "bg-rose-500 border-rose-500 text-white"
+                        : "bg-background border-border/60 text-muted-foreground hover:bg-muted"
+                    }`}
+                  >
+                    {q(s)}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={handleGenerateDesign}
+                disabled={isGenerating}
+                className="flex-1 min-w-[150px] py-3 px-4 rounded-2xl bg-rose-500 hover:bg-rose-600 disabled:opacity-60 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-rose-500/20 transition-all active:scale-[0.99]"
+              >
+                {isGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                <span>{isGenerating ? q("aiGenerating") : designImage ? q("aiRegenerate") : q("aiGenerate")}</span>
+              </button>
+              <button
+                onClick={() => setDesignPrompt(SAMPLE_PROMPTS[Math.floor(Math.random() * SAMPLE_PROMPTS.length)]!)}
+                className="py-3 px-4 rounded-2xl bg-background border border-border/60 hover:bg-muted text-xs font-bold text-muted-foreground flex items-center gap-2"
+              >
+                <RefreshCw className="w-3.5 h-3.5" />
+                {q("aiSample")}
+              </button>
+            </div>
+
+            {/* Relief controls */}
+            <div className="rounded-2xl border border-border/60 bg-muted/30 p-3 space-y-3">
+              <span className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">{q("aiRelief")}</span>
+
+              <div className="grid grid-cols-2 gap-1.5">
+                {(["plaque", "medallion"] as ReliefShape[]).map((s) => (
+                  <button
+                    key={s}
+                    onClick={() => setReliefShape(s)}
+                    className={`py-1.5 text-[11px] font-bold rounded-xl transition-colors ${
+                      reliefShape === s ? "bg-amber-500 text-white" : "bg-background text-muted-foreground hover:bg-muted"
+                    }`}
+                  >
+                    {q(s)}
+                  </button>
+                ))}
+              </div>
+
+              {[
+                { label: "aiWidth", value: reliefWidth, set: setReliefWidth, min: 40, max: 200, step: 5, unit: "mm" },
+                { label: "aiDepth", value: reliefDepth, set: setReliefDepth, min: 1, max: 8, step: 0.5, unit: "mm" },
+                { label: "aiBase", value: reliefBase, set: setReliefBase, min: 1, max: 6, step: 0.5, unit: "mm" },
+              ].map((ctrl) => (
+                <div key={ctrl.label} className="space-y-1">
+                  <div className="flex justify-between text-[11px]">
+                    <span className="font-semibold text-muted-foreground">{q(ctrl.label)}</span>
+                    <span className="font-bold">{ctrl.value} {ctrl.unit}</span>
+                  </div>
+                  <input
+                    type="range"
+                    min={ctrl.min}
+                    max={ctrl.max}
+                    step={ctrl.step}
+                    value={ctrl.value}
+                    onChange={(e) => ctrl.set(Number(e.target.value))}
+                    className="w-full accent-amber-500"
+                  />
+                </div>
+              ))}
+
+              <label className="flex items-center gap-2 text-[11px] font-semibold text-muted-foreground cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={reliefInvert}
+                  onChange={(e) => setReliefInvert(e.target.checked)}
+                  className="accent-amber-500 w-3.5 h-3.5"
+                />
+                {q("aiInvert")}
+              </label>
+            </div>
+          </div>
+
+          {/* Preview column */}
+          <div className="space-y-3">
+            <div className="relative aspect-square w-full rounded-2xl overflow-hidden border border-border/60 bg-muted/40 flex items-center justify-center">
+              {designImage ? (
+                <img
+                  src={designImage}
+                  alt={designPrompt || "AI design preview"}
+                  className={`w-full h-full object-cover transition-[filter] duration-500 ${designIsFinal ? "blur-0" : "blur-xl"}`}
+                />
+              ) : (
+                <div className="text-center px-6 text-muted-foreground">
+                  <ImageIcon className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                  <p className="text-xs">{q("aiEmpty")}</p>
+                </div>
+              )}
+              {isGenerating && (
+                <div className="absolute bottom-3 left-3 px-3 py-1.5 rounded-xl bg-background/85 backdrop-blur-md text-[11px] font-bold flex items-center gap-2">
+                  <Loader2 className="w-3.5 h-3.5 animate-spin text-rose-500" />
+                  {q("aiGenerating")}
+                </div>
+              )}
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={handleValidateIn3D}
+                disabled={!designImage || !designIsFinal || isBuildingRelief}
+                className="flex-1 min-w-[160px] py-3 px-4 rounded-2xl bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 transition-all active:scale-[0.99]"
+              >
+                {isBuildingRelief ? <Loader2 className="w-4 h-4 animate-spin" /> : <Box className="w-4 h-4" />}
+                <span>{isBuildingRelief ? q("aiBuilding") : q("aiValidate")}</span>
+              </button>
+              {hasRelief && (
+                <button
+                  onClick={handleDownloadStl}
+                  className="py-3 px-4 rounded-2xl bg-background border border-border/60 hover:bg-muted text-xs font-bold text-muted-foreground flex items-center gap-2"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  {q("downloadStl")}
+                </button>
+              )}
+            </div>
+          </div>
         </div>
       </div>
 
