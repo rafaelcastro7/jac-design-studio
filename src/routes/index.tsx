@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useRef, useState } from "react";
+import { Quoter3D } from "@/components/Quoter3D";
 
 import hero from "@/assets/hero-jac.jpg";
 
@@ -164,12 +165,6 @@ function JacDesign() {
   const [font, setFont] = useState(FONTS[0]!);
   const [theme, setTheme] = useState(THEMES[0]!);
 
-  // 3D quoter
-  const [file, setFile] = useState<string | null>(null);
-  const [material, setMaterial] = useState("PLA Ecológico");
-  const [infill, setInfill] = useState("40");
-  const [dragging, setDragging] = useState(false);
-
   const toast = (text: string) => {
     const id = ++toastId.current;
     setToasts((t) => [...t, { id, text }]);
@@ -228,12 +223,6 @@ function JacDesign() {
     const extra = Math.min(text.trim().length, 40) * 0.6 + (font.id === "serif" ? 4 : 0);
     return Math.round((base.price + extra) * 100) / 100;
   }, [base, text, font]);
-
-  const quote = () => {
-    const vol = 42 + infill.length * 7 + material.length * 3;
-    const price = Math.round(vol * (material.startsWith("Resina") ? 1.9 : 1.1) * 0.9);
-    toast(`Volumen ≈ ${vol} cm³ · Presupuesto USD ${price}`);
-  };
 
   return (
     <div className="min-h-screen bg-background text-foreground dark:bg-dark text-dark">
@@ -724,106 +713,26 @@ function JacDesign() {
       </section>
 
 {/* 3D QUOTER */}
-      <section id="cotizador" className="py-24 lg:py-32 bg-muted/60 dark:bg-dark/60">
+      <section id="cotizador" className="py-24 lg:py-32 bg-muted/40 dark:bg-dark/60">
         <div className="mx-auto max-w-7xl px-4 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-8 items-start">
-            <div>
-              <h2 className="text-4xl font-black tracking-tight sm:text-5xl mb-4">
-                Maker Studio · Cotizador 3D instantáneo
-              </h2>
-              <p className="text-muted-foreground text-lg max-w-xl">
-                Sube tu modelo, elige material y densidad de relleno, y recibe el presupuesto
-                estimado en segundos. Compatible con formatos STL, OBJ y GLTF.
-              </p>
-              <ul className="mt-6 space-y-3 text-sm text-muted-foreground">
-                <li className="flex gap-3">
-                  <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-gradient-warm" />
-                  <span>Formatos STL, OBJ y GLTF hasta 120 MB</span>
-                </li>
-                <li className="flex gap-3">
-                  <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-gradient-warm" />
-                  <span>Revisión de geometría y espesores antes de imprimir</span>
-                </li>
-                <li className="flex gap-3">
-                  <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-gradient-warm" />
-                  <span>Impresión FDM y resina UV en el mismo taller</span>
-                </li>
-              </ul>
+          <div className="max-w-3xl mb-12">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-xs font-bold uppercase tracking-wider mb-3">
+              Studio 3D en Tiempo Real
             </div>
-
-            <div className="space-y-6">
-
-
-              
-              <label
-                className="cursor-pointer flex flex-col items-center gap-3 rounded-[1.5rem] border-2 border-dashed p-8 text-center transition-colors border-border bg-muted/50 dark:bg-muted/80 hover:bg-muted"
-                onDragOver={(e) => {
-                  e.preventDefault();
-                  setDragging(true);
-                }}
-                onDragLeave={() => setDragging(false)}
-                onDrop={(e) => {
-                  e.preventDefault();
-                  setDragging(false);
-                  const f = e.dataTransfer.files?.[0];
-                  if (f) {
-                    setFile(f.name);
-                    toast("Archivo cargado y analizado");
-                  }
-                }}
-              >
-                <input
-                  type="file"
-                  accept=".stl,.obj,.gltf,.glb"
-                  className="hidden"
-                  onChange={(e) => {
-                    const f = e.target.files?.[0];
-                    if (f) {
-                      setFile(f.name);
-                      toast("Archivo cargado y analizado");
-                    }
-                  }}
-                />
-                <div className="flex flex-col items-center gap-2">
-                  {Icon.upload("h-9 w-9 text-muted-foreground")}
-                  <span className="text-sm font-bold">{file ?? "Arrastra tu archivo STL, OBJ o GLTF"}</span>
-                  <span className="text-xs text-muted-foreground">o haz clic para seleccionarlo</span>
-                </div>
-              </label>
-
-              <div className="grid grid-cols-2 gap-4">
-                <Field label="Material">
-                  <select
-                    value={material}
-                    onChange={(e) => setMaterial(e.target.value)}
-                    className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-amber dark:text-dark dark:bg-dark dark:focus:ring-amber"
-                  >
-                    <option>PLA Ecológico</option>
-                    <option>PETG Alta Resistencia</option>
-                    <option>Resina UV Detalle Fino</option>
-                  </select>
-                </Field>
-                <Field label="Densidad de relleno">
-                  <select
-                    value={infill}
-                    onChange={(e) => setInfill(e.target.value)}
-                    className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-amber dark:text-dark dark:bg-dark dark:focus:ring-amber"
-                  >
-                    <option value="20">Infill 20%</option>
-                    <option value="40">Infill 40%</option>
-                    <option value="100">Infill 100%</option>
-                  </select>
-                </Field>
-              </div>
-
-              <button
-                onClick={quote}
-                className="w-full rounded-2xl bg-primary py-4 text-sm font-bold text-primary-foreground transition-transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 mt-4"
-              >
-                Calcular presupuesto al instante
-              </button>
-            </div>
+            <h2 className="text-4xl font-black tracking-tight sm:text-5xl mb-4">
+              Maker Studio · Cotizador 3D Interactivo
+            </h2>
+            <p className="text-muted-foreground text-lg">
+              Visualiza geometrías en 3D con shaders en vivo, sube tus archivos STL con cálculo automático de volumen, ajusta materiales de ingeniería e infill, y obtén presupuestos precisos al instante.
+            </p>
           </div>
+
+          <Quoter3D
+            onAddToCart={(item) => {
+              addToCart(item);
+              setCartOpen(true);
+            }}
+          />
         </div>
       </section>
 
