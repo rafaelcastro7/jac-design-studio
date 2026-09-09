@@ -205,7 +205,7 @@ export function buildReliefGeometry(field: HeightField, opts: ReliefOptions): Re
       const w1 = [rw * Math.cos(a1), rw * Math.sin(a1)] as const;
       const yw0 = sampleAt(rw, a0);
       const yw1 = sampleAt(rw, a1);
-      tri(w0[0], 0, w0[1], w0[1] * 0 + w0[0], yw0, w0[1], w1[0], yw1, w1[1]);
+      tri(w0[0], 0, w0[1], w0[0], yw0, w0[1], w1[0], yw1, w1[1]);
       tri(w0[0], 0, w0[1], w1[0], yw1, w1[1], w1[0], 0, w1[1]);
     }
   }
