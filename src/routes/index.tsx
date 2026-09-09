@@ -8,7 +8,7 @@ import p3d from "@/assets/p-3d.jpg";
 import pPostres from "@/assets/p-postres.jpg";
 import pPocillo from "@/assets/p-pocillo.jpg";
 import pIcopor from "@/assets/p-icopor.jpg";
-import ModelViewer from "@/components/ModelViewer";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -32,10 +32,6 @@ export const Route = createFileRoute("/")({
   component: JacDesign,
 });
 
-export const ModelRoute = createFileRoute("/modelo/:id")({
-  component: async () => import("@/components/ModelViewer").then(mod => mod.ModelViewer),
-  shouldLoad: () => true,
-});
 
 /* ── data ─────────────────────────────────────────────── */
 
@@ -700,7 +696,8 @@ function JacDesign() {
             </div>
 
             <div className="space-y-6">
-              <ModelViewer id="preview-model" onSelect={(url) => toast(`Modelo: ${url.split('/').pop()}`)} />
+
+
               
               <label
                 className="cursor-pointer flex flex-col items-center gap-3 rounded-[1.5rem] border-2 border-dashed p-8 text-center transition-colors border-border bg-muted/50 dark:bg-muted/80 hover:bg-muted"
@@ -732,7 +729,7 @@ function JacDesign() {
                   }}
                 />
                 <div className="flex flex-col items-center gap-2">
-                  <Icon.upload className="h-9 w-9 text-muted-foreground" />
+                  {Icon.upload("h-9 w-9 text-muted-foreground")}
                   <span className="text-sm font-bold">{file ?? "Arrastra tu archivo STL, OBJ o GLTF"}</span>
                   <span className="text-xs text-muted-foreground">o haz clic para seleccionarlo</span>
                 </div>
@@ -806,7 +803,7 @@ function JacDesign() {
                 <div className="flex gap-2">
                   {[0, 1, 2, 3, 4].map((i) => (
                     <span key={i} className="text-amber-500 text-xs">
-                      <Icon.star className="h-3 w-3" />
+                      {Icon.star("h-3 w-3")}
                     </span>
                   ))}
                 </div>
