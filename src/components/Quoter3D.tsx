@@ -21,8 +21,20 @@ import {
   Scale, 
   ShieldCheck, 
   ShoppingCart,
-  Maximize2
+  Maximize2,
+  Wand2,
+  Download,
+  Loader2,
+  Image as ImageIcon,
+  RefreshCw
 } from "lucide-react";
+import { streamImage } from "@/lib/streamImage";
+import {
+  sampleHeightField,
+  buildReliefGeometry,
+  exportGeometryToStl,
+  type ReliefShape,
+} from "@/lib/relief";
 
 export interface QuotedItem {
   id: string;
