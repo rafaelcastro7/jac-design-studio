@@ -939,8 +939,23 @@ export function Quoter3D({ onAddToCart }: Quoter3DProps) {
           </div>
         </div>
 
+        {/* Mode switch */}
+        <div className="flex items-center gap-1 rounded-2xl border border-border/60 bg-background/80 p-1">
+          {(["basic", "pro"] as const).map((m) => (
+            <button
+              key={m}
+              onClick={() => changeMode(m)}
+              className={`px-3 py-1.5 text-[11px] font-bold rounded-xl transition-colors ${
+                mode === m ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {q(m === "basic" ? "modeBasic" : "modePro")}
+            </button>
+          ))}
+        </div>
+
         {/* Preset Selector */}
-        <div className="flex items-center gap-2 overflow-x-auto py-1">
+        <div className={`items-center gap-2 overflow-x-auto py-1 ${isBasic ? "hidden" : "flex"}`}>
           <span className="text-xs font-semibold text-muted-foreground mr-1 hidden sm:inline">{q("models")}</span>
           {PRESETS.map((p) => (
             <button
@@ -956,6 +971,29 @@ export function Quoter3D({ onAddToCart }: Quoter3DProps) {
             </button>
           ))}
         </div>
+      </div>
+
+      {/* ---------- Guided steps ---------- */}
+      <div className="px-5 sm:px-6 py-3 border-b border-border/60 flex flex-wrap items-center gap-x-4 gap-y-2">
+        {[
+          { n: 1, label: "stepDesignLabel", done: Boolean(designImage && designIsFinal) },
+          { n: 2, label: "stepViewLabel", done: hasRelief },
+          { n: 3, label: "stepQuoteLabel", done: hasRelief },
+        ].map((st) => (
+          <div key={st.n} className="flex items-center gap-2">
+            <span
+              className={`grid h-6 w-6 place-items-center rounded-full text-[11px] font-black ${
+                st.done ? "bg-amber-500 text-white" : "bg-muted text-muted-foreground"
+              }`}
+            >
+              {st.done ? <Check className="h-3.5 w-3.5" /> : st.n}
+            </span>
+            <span className={`text-xs font-bold ${st.done ? "text-foreground" : "text-muted-foreground"}`}>{q(st.label)}</span>
+          </div>
+        ))}
+        <p className="text-[11px] text-muted-foreground sm:ml-auto max-w-md">
+          {q(isBasic ? "modeBasicHint" : "modeProHint")}
+        </p>
       </div>
 
       {/* ---------- Step 1: AI design studio ---------- */}
