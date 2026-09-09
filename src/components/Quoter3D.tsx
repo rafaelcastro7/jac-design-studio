@@ -233,6 +233,32 @@ const QT: Record<string, Tri> = {
   downloadStl: { en: "Download STL", fr: "Télécharger le STL", es: "Descargar STL" },
   aiBuilding: { en: "Building 3D relief...", fr: "Construction du relief 3D...", es: "Construyendo relieve 3D..." },
 
+  // Modes
+  modeBasic: { en: "Easy mode", fr: "Mode simple", es: "Modo fácil" },
+  modePro: { en: "Advanced", fr: "Avancé", es: "Avanzado" },
+  modeBasicHint: { en: "Three steps: describe it, see it in 3D, get your price. We choose the technical settings for you.", fr: "Trois étapes : décrivez, visualisez en 3D, obtenez le prix. Nous choisissons les réglages techniques.", es: "Tres pasos: descríbelo, míralo en 3D y recibe el precio. Nosotros elegimos los ajustes técnicos." },
+  modeProHint: { en: "Full control: materials, infill, layer height, presets and your own STL files.", fr: "Contrôle total : matériaux, remplissage, hauteur de couche, modèles et vos fichiers STL.", es: "Control total: materiales, relleno, altura de capa, modelos y tus propios archivos STL." },
+  stepDesignLabel: { en: "Describe", fr: "Décrire", es: "Describir" },
+  stepViewLabel: { en: "See in 3D", fr: "Voir en 3D", es: "Ver en 3D" },
+  stepQuoteLabel: { en: "Price", fr: "Prix", es: "Precio" },
+  sizeLabel: { en: "Size", fr: "Taille", es: "Tamaño" },
+  sizeS: { en: "Small · 70 mm", fr: "Petit · 70 mm", es: "Pequeño · 70 mm" },
+  sizeM: { en: "Medium · 110 mm", fr: "Moyen · 110 mm", es: "Mediano · 110 mm" },
+  sizeL: { en: "Large · 160 mm", fr: "Grand · 160 mm", es: "Grande · 160 mm" },
+  qualityLabel: { en: "Finish quality", fr: "Qualité de finition", es: "Calidad del acabado" },
+  qualityEco: { en: "Economy", fr: "Économique", es: "Económico" },
+  qualityBalanced: { en: "Recommended", fr: "Recommandé", es: "Recomendado" },
+  qualityPremium: { en: "Premium detail", fr: "Détail premium", es: "Detalle premium" },
+  qualityEcoHint: { en: "Lighter piece, lowest price", fr: "Pièce légère, prix minimal", es: "Pieza ligera, precio mínimo" },
+  qualityBalancedHint: { en: "Best balance of detail and price", fr: "Meilleur équilibre détail/prix", es: "Mejor equilibrio entre detalle y precio" },
+  qualityPremiumHint: { en: "Sharpest detail, sturdier part", fr: "Détail maximal, pièce plus solide", es: "Máximo detalle, pieza más resistente" },
+  matEveryday: { en: "Everyday", fr: "Quotidien", es: "Uso diario" },
+  matStrong: { en: "Extra strong", fr: "Très résistant", es: "Extra resistente" },
+  matDetail: { en: "Fine detail", fr: "Détail fin", es: "Detalle fino" },
+  autoTuned: { en: "Technical settings tuned automatically", fr: "Réglages techniques ajustés automatiquement", es: "Ajustes técnicos configurados automáticamente" },
+  seeAllOptions: { en: "Need more control? Switch to Advanced", fr: "Besoin de plus de contrôle ? Passez en Avancé", es: "¿Quieres más control? Cambia a Avanzado" },
+  ready: { en: "Ready", fr: "Prêt", es: "Listo" },
+
 
   // Materials
   "Standard & decorative": { en: "Standard & decorative", fr: "Standard et décoratif", es: "Estándar y decorativo" },
@@ -307,6 +333,18 @@ export function Quoter3D({ onAddToCart }: Quoter3DProps) {
   const [reliefInvert, setReliefInvert] = useState<boolean>(false);
   const [hasRelief, setHasRelief] = useState<boolean>(false);
   const reliefGeoRef = useRef<any>(null);
+
+  // Studio mode: basic (guided) or pro (full control)
+  const [mode, setMode] = useState<"basic" | "pro">("basic");
+  useEffect(() => {
+    const saved = typeof window !== "undefined" ? window.localStorage.getItem("jd-studio-mode") : null;
+    if (saved === "pro" || saved === "basic") setMode(saved);
+  }, []);
+  const changeMode = (next: "basic" | "pro") => {
+    setMode(next);
+    if (typeof window !== "undefined") window.localStorage.setItem("jd-studio-mode", next);
+  };
+  const isBasic = mode === "basic";
 
   // Viewport toggles
   const [autoRotate, setAutoRotate] = useState<boolean>(true);
@@ -792,6 +830,13 @@ export function Quoter3D({ onAddToCart }: Quoter3DProps) {
     }
   };
 
+  // Easy mode: the moment the AI image is ready, show it in 3D automatically
+  useEffect(() => {
+    if (!isBasic || !designImage || !designIsFinal || isBuildingRelief) return;
+    void buildReliefFromDesign(designImage, !hasRelief);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isBasic, designImage, designIsFinal]);
+
   const handleValidateIn3D = () => {
     if (!designImage) return;
     void buildReliefFromDesign(designImage, true);
@@ -816,6 +861,31 @@ export function Quoter3D({ onAddToCart }: Quoter3DProps) {
     a.click();
     URL.revokeObjectURL(url);
   };
+
+  // Easy-mode presets that drive the technical parameters
+  const QUALITY_PRESETS = [
+    { id: "eco", label: "qualityEco", hint: "qualityEcoHint", infill: 15, layer: 0.28 },
+    { id: "balanced", label: "qualityBalanced", hint: "qualityBalancedHint", infill: 25, layer: 0.2 },
+    { id: "premium", label: "qualityPremium", hint: "qualityPremiumHint", infill: 40, layer: 0.12 },
+  ] as const;
+  const activeQuality =
+    QUALITY_PRESETS.find((p) => p.infill === infillPercent && p.layer === layerHeight)?.id ?? null;
+  const applyQuality = (preset: (typeof QUALITY_PRESETS)[number]) => {
+    setInfillPercent(preset.infill);
+    setLayerHeight(preset.layer);
+  };
+
+  const SIZE_PRESETS = [
+    { id: "s", label: "sizeS", width: 70 },
+    { id: "m", label: "sizeM", width: 110 },
+    { id: "l", label: "sizeL", width: 160 },
+  ] as const;
+
+  const BASIC_MATERIALS = [
+    { id: "pla-eco", label: "matEveryday" },
+    { id: "petg-tough", label: "matStrong" },
+    { id: "resin-12k", label: "matDetail" },
+  ];
 
   // Camera Reset
   const handleResetCamera = () => {
@@ -869,8 +939,23 @@ export function Quoter3D({ onAddToCart }: Quoter3DProps) {
           </div>
         </div>
 
+        {/* Mode switch */}
+        <div className="flex items-center gap-1 rounded-2xl border border-border/60 bg-background/80 p-1">
+          {(["basic", "pro"] as const).map((m) => (
+            <button
+              key={m}
+              onClick={() => changeMode(m)}
+              className={`px-3 py-1.5 text-[11px] font-bold rounded-xl transition-colors ${
+                mode === m ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {q(m === "basic" ? "modeBasic" : "modePro")}
+            </button>
+          ))}
+        </div>
+
         {/* Preset Selector */}
-        <div className="flex items-center gap-2 overflow-x-auto py-1">
+        <div className={`items-center gap-2 overflow-x-auto py-1 ${isBasic ? "hidden" : "flex"}`}>
           <span className="text-xs font-semibold text-muted-foreground mr-1 hidden sm:inline">{q("models")}</span>
           {PRESETS.map((p) => (
             <button
@@ -886,6 +971,29 @@ export function Quoter3D({ onAddToCart }: Quoter3DProps) {
             </button>
           ))}
         </div>
+      </div>
+
+      {/* ---------- Guided steps ---------- */}
+      <div className="px-5 sm:px-6 py-3 border-b border-border/60 flex flex-wrap items-center gap-x-4 gap-y-2">
+        {[
+          { n: 1, label: "stepDesignLabel", done: Boolean(designImage && designIsFinal) },
+          { n: 2, label: "stepViewLabel", done: hasRelief },
+          { n: 3, label: "stepQuoteLabel", done: hasRelief },
+        ].map((st) => (
+          <div key={st.n} className="flex items-center gap-2">
+            <span
+              className={`grid h-6 w-6 place-items-center rounded-full text-[11px] font-black ${
+                st.done ? "bg-amber-500 text-white" : "bg-muted text-muted-foreground"
+              }`}
+            >
+              {st.done ? <Check className="h-3.5 w-3.5" /> : st.n}
+            </span>
+            <span className={`text-xs font-bold ${st.done ? "text-foreground" : "text-muted-foreground"}`}>{q(st.label)}</span>
+          </div>
+        ))}
+        <p className="text-[11px] text-muted-foreground sm:ml-auto max-w-md">
+          {q(isBasic ? "modeBasicHint" : "modeProHint")}
+        </p>
       </div>
 
       {/* ---------- Step 1: AI design studio ---------- */}
@@ -966,7 +1074,28 @@ export function Quoter3D({ onAddToCart }: Quoter3DProps) {
                 ))}
               </div>
 
-              {[
+              {isBasic && (
+                <div className="space-y-1.5">
+                  <span className="text-[11px] font-semibold text-muted-foreground">{q("sizeLabel")}</span>
+                  <div className="grid grid-cols-3 gap-1.5">
+                    {SIZE_PRESETS.map((sp) => (
+                      <button
+                        key={sp.id}
+                        onClick={() => setReliefWidth(sp.width)}
+                        className={`py-2 text-[11px] font-bold rounded-xl border transition-colors ${
+                          reliefWidth === sp.width
+                            ? "bg-amber-500 border-amber-500 text-white"
+                            : "bg-background border-border/60 text-muted-foreground hover:bg-muted"
+                        }`}
+                      >
+                        {q(sp.label)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {!isBasic && [
                 { label: "aiWidth", value: reliefWidth, set: setReliefWidth, min: 40, max: 200, step: 5, unit: "mm" },
                 { label: "aiDepth", value: reliefDepth, set: setReliefDepth, min: 1, max: 8, step: 0.5, unit: "mm" },
                 { label: "aiBase", value: reliefBase, set: setReliefBase, min: 1, max: 6, step: 0.5, unit: "mm" },
@@ -988,7 +1117,7 @@ export function Quoter3D({ onAddToCart }: Quoter3DProps) {
                 </div>
               ))}
 
-              <label className="flex items-center gap-2 text-[11px] font-semibold text-muted-foreground cursor-pointer">
+              <label className={`items-center gap-2 text-[11px] font-semibold text-muted-foreground cursor-pointer ${isBasic ? "hidden" : "flex"}`}>
                 <input
                   type="checkbox"
                   checked={reliefInvert}
@@ -1027,6 +1156,7 @@ export function Quoter3D({ onAddToCart }: Quoter3DProps) {
               <button
                 onClick={handleValidateIn3D}
                 disabled={!designImage || !designIsFinal || isBuildingRelief}
+                hidden={isBasic && hasRelief}
                 className="flex-1 min-w-[160px] py-3 px-4 rounded-2xl bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 transition-all active:scale-[0.99]"
               >
                 {isBuildingRelief ? <Loader2 className="w-4 h-4 animate-spin" /> : <Box className="w-4 h-4" />}
@@ -1074,6 +1204,7 @@ export function Quoter3D({ onAddToCart }: Quoter3DProps) {
             <button
               onClick={() => setWireframe((v) => !v)}
               title={q("wire")}
+              hidden={isBasic}
               className={`p-2 rounded-xl text-xs transition-colors ${
                 wireframe ? "bg-amber-500/20 text-amber-500 font-semibold" : "text-muted-foreground hover:text-foreground hover:bg-muted"
               }`}
@@ -1083,6 +1214,7 @@ export function Quoter3D({ onAddToCart }: Quoter3DProps) {
             <button
               onClick={() => setShowGrid((v) => !v)}
               title={q("grid")}
+              hidden={isBasic}
               className={`p-2 rounded-xl text-xs transition-colors ${
                 showGrid ? "bg-amber-500/20 text-amber-500 font-semibold" : "text-muted-foreground hover:text-foreground hover:bg-muted"
               }`}
@@ -1108,7 +1240,7 @@ export function Quoter3D({ onAddToCart }: Quoter3DProps) {
           </div>
 
           {/* Floating STL Drag & Drop Bar at Bottom Right */}
-          <div className="absolute bottom-4 right-4 z-10">
+          <div className={`absolute bottom-4 right-4 z-10 ${isBasic ? "hidden" : ""}`}>
             <label className="cursor-pointer flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs shadow-lg transition-transform hover:scale-105 active:scale-95">
               <UploadCloud className="w-4 h-4" />
               <span>{isAnalyzing ? q("analyzingShort") : q("upload")}</span>
@@ -1145,7 +1277,7 @@ export function Quoter3D({ onAddToCart }: Quoter3DProps) {
                 {q("step1")}
               </label>
               <div className="space-y-2">
-                {MATERIALS.map((mat) => (
+                {(isBasic ? MATERIALS.filter((m) => BASIC_MATERIALS.some((b) => b.id === m.id)) : MATERIALS).map((mat) => (
                   <div
                     key={mat.id}
                     onClick={() => setMaterialId(mat.id)}
@@ -1159,11 +1291,11 @@ export function Quoter3D({ onAddToCart }: Quoter3DProps) {
                       <div className="flex items-center gap-2">
                         <span className="font-bold text-sm">{mat.name}</span>
                         <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-muted text-muted-foreground border border-border/40">
-                          {q(mat.tag)}
+                          {q(isBasic ? (BASIC_MATERIALS.find((b) => b.id === mat.id)?.label ?? mat.tag) : mat.tag)}
                         </span>
                       </div>
                       <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{q(mat.desc)}</p>
-                      <div className="flex items-center gap-2 mt-1.5">
+                      <div className={`items-center gap-2 mt-1.5 ${isBasic ? "hidden" : "flex"}`}>
                         {mat.properties.map((prop, idx) => (
                           <span key={idx} className="text-[10px] text-amber-600 dark:text-amber-400 font-medium">
                             ✓ {q(prop)}
@@ -1209,8 +1341,41 @@ export function Quoter3D({ onAddToCart }: Quoter3DProps) {
               </div>
             </div>
 
+            {/* Easy mode: one single quality decision */}
+            {isBasic && (
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">{q("qualityLabel")}</label>
+                <div className="grid gap-2 sm:grid-cols-3">
+                  {QUALITY_PRESETS.map((preset) => (
+                    <button
+                      key={preset.id}
+                      onClick={() => applyQuality(preset)}
+                      className={`rounded-2xl border p-3 text-left transition-all ${
+                        activeQuality === preset.id
+                          ? "border-amber-500 bg-amber-500/10 shadow-sm"
+                          : "border-border/60 bg-muted/20 hover:bg-muted/50"
+                      }`}
+                    >
+                      <span className="block text-xs font-bold">{q(preset.label)}</span>
+                      <span className="mt-0.5 block text-[10px] leading-snug text-muted-foreground">{q(preset.hint)}</span>
+                    </button>
+                  ))}
+                </div>
+                <p className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                  <ShieldCheck className="h-3.5 w-3.5 text-amber-500" />
+                  {q("autoTuned")}
+                </p>
+                <button
+                  onClick={() => changeMode("pro")}
+                  className="text-[11px] font-bold text-amber-600 underline decoration-dotted hover:text-amber-700 dark:text-amber-400"
+                >
+                  {q("seeAllOptions")}
+                </button>
+              </div>
+            )}
+
             {/* Infill & Layer Height Sliders */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+            <div className={`grid-cols-1 sm:grid-cols-2 gap-4 pt-2 ${isBasic ? "hidden" : "grid"}`}>
               {/* Infill Density Slider */}
               <div className="space-y-2 p-3 rounded-2xl bg-muted/30 border border-border/60">
                 <div className="flex justify-between items-center text-xs">
