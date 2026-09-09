@@ -393,19 +393,19 @@ export function Customizer({ onAddToCart }: Props) {
                 <div className={`absolute ${mockup.area} grid place-items-center text-center`}>
                   <div className="px-2">
                     <p
-                      className="break-words font-black leading-tight drop-shadow-[0_2px_6px_rgba(0,0,0,0.35)]"
+                      className="break-words font-black leading-tight drop-shadow-[0_1px_2px_rgba(255,255,255,0.55)]"
                       style={{
                         fontFamily: font.css,
                         fontSize: `min(${fs}, ${mockup.maxFs}rem)`,
-                        color: `color-mix(in oklab, ${finish.token} 45%, white)`,
+                        color: `color-mix(in oklab, ${finish.token} 72%, black)`,
                       }}
                     >
                       {line1.trim() || tr(C.yourText)}
                     </p>
                     {line2.trim() && (
                       <p
-                        className="mt-1 break-words text-[0.65rem] font-semibold uppercase tracking-[0.18em] drop-shadow-[0_2px_5px_rgba(0,0,0,0.4)] sm:text-xs"
-                        style={{ fontFamily: font.css, color: `color-mix(in oklab, ${finish.token} 30%, white)` }}
+                        className="mt-1 break-words text-[0.65rem] font-semibold uppercase tracking-[0.18em] drop-shadow-[0_1px_2px_rgba(255,255,255,0.5)] sm:text-xs"
+                        style={{ fontFamily: font.css, color: `color-mix(in oklab, ${finish.token} 55%, black)` }}
                       >
                         {line2.trim()}
                       </p>
