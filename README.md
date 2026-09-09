@@ -6,7 +6,7 @@ Utiliza este prompt detallado y estructurado para generar la aplicación complet
 
 🚀 Prompt Principal para Lovable (Copia y Pega)
 
-"Crea una aplicación web de comercio electrónico de página única (Single Page Application) moderna, elegante y totalmente funcional llamada Jac Design, especializada en fabricación digital (Impresión 3D), decoración de fiestas, letreros en icopor y madera, y repostería saludable.
+"Crea una aplicación web de comercio electrónico de página única (Single Page Application) moderna, elegante y totalmente funcional llamada Jac Design, especializada en fabricación digital (Impresión 3D), decoración de fiestas, letreros en foam y madera, y repostería saludable.
 
 El diseño debe tener una estética impecable (estilo Tailwind CSS con paleta Slate, Amber y Rose), tipografía limpia (Inter), diseño responsive perfecto para móviles y escritorio, y transiciones fluidas.
 
@@ -14,7 +14,7 @@ La aplicación debe incluir obligatoriamente los siguientes módulos interactivo
 
 Barra de Navegación Sticky con Insignias Dinámicas:
 
-Logotipo con monograma 'JD' en degradado cálido y subtítulo de servicios (3D • Fiestas • Láser • Icopor • Postres).
+Logotipo con monograma 'JD' en degradado cálido y subtítulo de servicios (3D • Fiestas • Láser • Foam • Postres).
 
 Enlaces de anclaje fluidos: Inicio, Servicios y Colecciones, Personalizador en Vivo, Cotizador 3D IA, Galería de Clientes.
 
