@@ -367,70 +367,52 @@ export function Customizer({ onAddToCart }: Props) {
                 </button>
               </div>
 
-              <div
-                className="grid min-h-[300px] place-items-center p-6"
-                style={{
-                  background: `radial-gradient(circle at 50% 30%, color-mix(in oklab, ${finish.token} 18%, white), color-mix(in oklab, ${finish.token} 6%, white))`,
-                }}
-              >
-                {/* artwork */}
-                <div className="relative">
-                  <div
-                    className={`relative grid place-items-center overflow-hidden text-center ${
-                      isSign
-                        ? "h-40 w-[17rem] rounded-xl sm:h-44 sm:w-80"
-                        : isMug
-                          ? "h-40 w-44 rounded-b-[1.6rem] rounded-t-lg sm:h-44 sm:w-48"
-                          : "h-40 w-64 rounded-2xl sm:h-44 sm:w-72"
-                    }`}
-                    style={{
-                      background: isSign
-                        ? `repeating-linear-gradient(93deg, color-mix(in oklab, ${finish.token} 16%, white) 0 6px, color-mix(in oklab, ${finish.token} 9%, white) 6px 13px)`
-                        : `color-mix(in oklab, ${finish.token} 6%, white)`,
-                      border: `3px solid color-mix(in oklab, ${finish.token} 55%, white)`,
-                      boxShadow: `0 18px 40px -18px color-mix(in oklab, ${finish.token} 55%, transparent)`,
-                    }}
-                  >
-                    {/* dessert box lid band */}
-                    {base.id === "box" && (
-                      <span
-                        className="absolute inset-x-0 top-0 h-8"
-                        style={{ backgroundColor: `color-mix(in oklab, ${finish.token} 35%, white)` }}
-                      />
-                    )}
-                    <div className="relative z-10 px-4">
+              {/* real photo of the selected product with the live personalization on top */}
+              <div className="relative aspect-[4/3] w-full overflow-hidden">
+                <img
+                  key={mockup.photo}
+                  src={mockup.photo}
+                  alt={tr(mockup.alt)}
+                  loading="lazy"
+                  className="absolute inset-0 h-full w-full animate-fade-in object-cover"
+                />
+                {/* finish tint so the chosen colour reads on the photo */}
+                <span
+                  aria-hidden
+                  className="absolute inset-0 mix-blend-soft-light"
+                  style={{ backgroundColor: `color-mix(in oklab, ${finish.token} 45%, transparent)` }}
+                />
+                <span aria-hidden className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent" />
+
+                {/* personalization area, positioned over the product in the photo */}
+                <div className={`absolute ${mockup.area} grid place-items-center text-center`}>
+                  <div className="px-2">
+                    <p
+                      className="break-words font-black leading-tight drop-shadow-[0_2px_6px_rgba(0,0,0,0.35)]"
+                      style={{
+                        fontFamily: font.css,
+                        fontSize: `min(${fs}, ${mockup.maxFs}rem)`,
+                        color: `color-mix(in oklab, ${finish.token} 45%, white)`,
+                      }}
+                    >
+                      {line1.trim() || tr(C.yourText)}
+                    </p>
+                    {line2.trim() && (
                       <p
-                        className="break-words font-black leading-tight"
-                        style={{ fontFamily: font.css, fontSize: fs, color: `color-mix(in oklab, ${finish.token} 88%, black)` }}
+                        className="mt-1 break-words text-[0.65rem] font-semibold uppercase tracking-[0.18em] drop-shadow-[0_2px_5px_rgba(0,0,0,0.4)] sm:text-xs"
+                        style={{ fontFamily: font.css, color: `color-mix(in oklab, ${finish.token} 30%, white)` }}
                       >
-                        {line1.trim() || tr(C.yourText)}
+                        {line2.trim()}
                       </p>
-                      {line2.trim() && (
-                        <p
-                          className="mt-1.5 break-words text-xs font-semibold uppercase tracking-[0.18em]"
-                          style={{ fontFamily: font.css, color: `color-mix(in oklab, ${finish.token} 70%, black)` }}
-                        >
-                          {line2.trim()}
-                        </p>
-                      )}
-                    </div>
-                    {/* sign mounting holes */}
-                    {isSign && (
-                      <>
-                        <span className="absolute left-3 top-3 h-2 w-2 rounded-full bg-foreground/25" />
-                        <span className="absolute right-3 top-3 h-2 w-2 rounded-full bg-foreground/25" />
-                      </>
                     )}
                   </div>
-                  {/* mug handle */}
-                  {isMug && (
-                    <span
-                      className="absolute -right-7 top-10 h-16 w-10 rounded-r-full border-[6px] border-l-0"
-                      style={{ borderColor: `color-mix(in oklab, ${finish.token} 55%, white)` }}
-                    />
-                  )}
                 </div>
+
+                <span className="absolute bottom-3 left-3 rounded-full bg-background/85 px-3 py-1 text-[11px] font-bold backdrop-blur-md">
+                  {tr(base.name)} · {tr(size.label)}
+                </span>
               </div>
+
 
               {/* pricing */}
               <div className="border-t border-border p-5">
