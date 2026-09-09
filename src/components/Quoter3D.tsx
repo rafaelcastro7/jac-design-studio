@@ -157,7 +157,7 @@ export function Quoter3D({ onAddToCart }: Quoter3DProps) {
 
   // Print Configuration state
   const [materialId, setMaterialId] = useState<string>("pla-eco");
-  const [selectedColor, setSelectedColor] = useState(COLOR_OPTIONS[2]); // Naranja Neón Studio
+  const [selectedColor, setSelectedColor] = useState(COLOR_OPTIONS[2]!); // Naranja Neón Studio
   const [infillPercent, setInfillPercent] = useState<number>(20);
   const [layerHeight, setLayerHeight] = useState<number>(0.20);
   const [quantity, setQuantity] = useState<number>(1);
@@ -179,7 +179,7 @@ export function Quoter3D({ onAddToCart }: Quoter3DProps) {
 
   // Active Material Info
   const activeMaterial = useMemo(() => {
-    return MATERIALS.find((m) => m.id === materialId) || MATERIALS[0];
+    return MATERIALS.find((m) => m.id === materialId) || MATERIALS[0]!;
   }, [materialId]);
 
   // Pricing & Metrics Formula
