@@ -127,6 +127,8 @@ export const UI: Dict = {
   total: { en: "Total", fr: "Total", es: "Total" },
   checkout: { en: "Secure checkout", fr: "Paiement sécurisé", es: "Proceder al pago seguro" },
   checkoutDone: { en: "Order confirmed! Check your email for tracking.", fr: "Commande confirmée ! Vérifiez votre courriel.", es: "¡Pedido confirmado! Revisa tu correo." },
+  saveError: { en: "We couldn't save that. Please try again.", fr: "Enregistrement impossible. Réessayez.", es: "No se pudo guardar. Inténtalo de nuevo." },
+  adminAccess: { en: "Business panel", fr: "Panneau de gestion", es: "Panel de gestión" },
   addedToCart: { en: "added to cart", fr: "ajouté au panier", es: "añadido al carrito" },
   addedToWishlist: { en: "saved to wishlist", fr: "ajouté aux favoris", es: "guardado en favoritos" },
   removedFromWishlist: { en: "removed from wishlist", fr: "retiré des favoris", es: "quitado de favoritos" },
