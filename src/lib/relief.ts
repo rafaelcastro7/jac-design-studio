@@ -17,7 +17,7 @@ export interface ReliefOptions {
 }
 
 export interface ReliefResult {
-  geometry: THREE.BufferGeometry;
+  geometry: any;
   /** Analytic volume in cm³ (independent from the mesh tetrahedron sum). */
   volumeCm3: number;
   widthMm: number;
@@ -225,7 +225,7 @@ export function buildReliefGeometry(field: HeightField, opts: ReliefOptions): Re
 }
 
 /** Exports a mesh geometry as a binary STL blob. */
-export async function exportGeometryToStl(geometry: THREE.BufferGeometry): Promise<Blob> {
+export async function exportGeometryToStl(geometry: any): Promise<Blob> {
   const { STLExporter } = await import("three-stdlib");
   const mesh = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial());
   const result = new STLExporter().parse(mesh, { binary: true }) as unknown as DataView;

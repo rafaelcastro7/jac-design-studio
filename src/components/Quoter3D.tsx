@@ -306,7 +306,7 @@ export function Quoter3D({ onAddToCart }: Quoter3DProps) {
   const [reliefBase, setReliefBase] = useState<number>(2);
   const [reliefInvert, setReliefInvert] = useState<boolean>(false);
   const [hasRelief, setHasRelief] = useState<boolean>(false);
-  const reliefGeoRef = useRef<THREE.BufferGeometry | null>(null);
+  const reliefGeoRef = useRef<any>(null);
 
   // Viewport toggles
   const [autoRotate, setAutoRotate] = useState<boolean>(true);
