@@ -168,8 +168,7 @@ export function Customizer({ onAddToCart }: Props) {
   }, [base, size, line1, line2, finish, font, qty]);
 
   const hasText = line1.trim().length > 0;
-  const isSign = base.id === "sign";
-  const isMug = base.id === "mug";
+  const mockup = MOCKUP[base.id];
 
   const reset = () => {
     setBaseId("sign");
