@@ -337,7 +337,7 @@ function JacDesign() {
       </section>
 
 {/* CATALOG */}
-      <section id="colecciones" className="py-24 lg:py-32 bg-muted/60 dark:bg-dark/60">
+      <section id="colecciones" className="py-14 sm:py-20 lg:py-32 bg-muted/60 dark:bg-dark/60">
         <div className="mx-auto max-w-7xl px-4 lg:px-8">
           <div className="max-w-3xl mx-auto mb-12 text-center">
             <span className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.14em] text-primary mb-3">
@@ -571,7 +571,7 @@ function JacDesign() {
       </section>
 
 {/* CUSTOMIZER */}
-      <section id="personalizador" className="py-24 lg:py-32 bg-muted/60 dark:bg-dark/60">
+      <section id="personalizador" className="py-14 sm:py-20 lg:py-32 bg-muted/60 dark:bg-dark/60">
         <div className="mx-auto max-w-7xl px-4 lg:px-8">
           <div className="max-w-3xl mx-auto mb-12">
             <h2 className="text-4xl font-black tracking-tight sm:text-5xl mb-4">
@@ -656,7 +656,7 @@ function JacDesign() {
                 }
                 className="w-full rounded-2xl bg-gradient-warm py-4 text-sm font-bold text-rose-foreground shadow-soft transition-transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-amber focus:ring-offset-2 mt-4"
               >
-                Añadir personalización — USD {customPrice.toFixed(2)}
+                Añadir personalización — CAD ${customPrice.toFixed(2)}
               </button>
             </div>
 
@@ -699,7 +699,7 @@ function JacDesign() {
                 {[
                   ["Base", base.label],
                   ["Tipografía", font.label],
-                  ["Precio", `USD ${customPrice.toFixed(2)}`],
+                  ["Precio", `CAD $${customPrice.toFixed(2)}`],
                 ].map(([k, v]) => (
                   <div key={k} className="rounded-xl bg-muted p-3">
                     <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{k}</p>
@@ -713,7 +713,7 @@ function JacDesign() {
       </section>
 
 {/* 3D QUOTER */}
-      <section id="cotizador" className="py-24 lg:py-32 bg-muted/40 dark:bg-dark/60">
+      <section id="cotizador" className="py-14 sm:py-20 lg:py-32 bg-muted/40 dark:bg-dark/60">
         <div className="mx-auto max-w-7xl px-4 lg:px-8">
           <div className="max-w-3xl mb-12">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-xs font-bold uppercase tracking-wider mb-3">
@@ -737,7 +737,7 @@ function JacDesign() {
       </section>
 
       {/* REVIEWS */}
-      <section id="galeria" className="py-24 lg:py-32 bg-muted/60 dark:bg-dark/60">
+      <section id="galeria" className="py-14 sm:py-20 lg:py-32 bg-muted/60 dark:bg-dark/60">
         <div className="mx-auto max-w-7xl px-4 lg:px-8">
           <div className="max-w-2xl mx-auto mb-12 text-center">
             <h2 className="text-4xl font-black tracking-tight sm:text-5xl mb-4">
@@ -908,7 +908,7 @@ function JacDesign() {
                   <span className="text-[10px] uppercase font-bold text-muted-foreground block">
                     Precio total
                   </span>
-                  <p className="text-3xl font-black tracking-tight">USD {quick.price}</p>
+                  <p className="text-3xl font-black tracking-tight">CAD ${quick.price}</p>
                 </div>
                 <button
                   onClick={() => {
@@ -940,7 +940,7 @@ function JacDesign() {
                     <span className="min-w-0 flex-1 truncate text-sm font-semibold">
                       {item.name}
                     </span>
-                    <span className="text-sm font-bold">USD {item.price.toFixed(2)}</span>
+                    <span className="text-sm font-bold">CAD ${item.price.toFixed(2)}</span>
                     <button
                       onClick={() => setCart((c) => c.filter((_, idx) => idx !== i))}
                       aria-label="Eliminar"
@@ -953,7 +953,7 @@ function JacDesign() {
               </ul>
               <div className="mt-4 flex items-center justify-between rounded-2xl bg-muted p-4">
                 <span className="text-sm font-semibold text-muted-foreground">Total</span>
-                <span className="text-xl font-black">USD {total.toFixed(2)}</span>
+                <span className="text-xl font-black">CAD ${total.toFixed(2)}</span>
               </div>
               <button
                 onClick={() => {
