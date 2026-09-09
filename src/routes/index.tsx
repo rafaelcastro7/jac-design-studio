@@ -2,12 +2,6 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useRef, useState } from "react";
 
 import hero from "@/assets/hero-jac.jpg";
-import pFiestas from "@/assets/p-fiestas.jpg";
-import pMadera from "@/assets/p-madera.jpg";
-import p3d from "@/assets/p-3d.jpg";
-import pPostres from "@/assets/p-postres.jpg";
-import pPocillo from "@/assets/p-pocillo.jpg";
-import pIcopor from "@/assets/p-icopor.jpg";
 
 
 export const Route = createFileRoute("/")({
@@ -33,138 +27,7 @@ export const Route = createFileRoute("/")({
 });
 
 
-/* ── data ─────────────────────────────────────────────── */
-
-type Cat = "fiestas" | "madera" | "3d" | "postres" | "juguetes";
-
-type Product = {
-  id: string;
-  name: string;
-  cat: Cat;
-  price: number;
-  img: string;
-  tag: string;
-  desc: string;
-  popular: boolean;
-};
-
-const CATS: { id: "todos" | Cat; label: string }[] = [
-  { id: "todos", label: "Todos" },
-  { id: "fiestas", label: "Fiestas & Eventos" },
-  { id: "madera", label: "Madera & Láser" },
-  { id: "3d", label: "Impresión 3D" },
-  { id: "postres", label: "Postres Saludables" },
-  { id: "juguetes", label: "Juguetes 3D" },
-];
-
-const PRODUCTS: Product[] = [
-  {
-    id: "backdrop",
-    name: "Backdrop de globos personalizado",
-    cat: "fiestas",
-    price: 189,
-    img: pFiestas,
-    tag: "Montaje incluido",
-    desc: "Arco orgánico de globos con panel impreso y nombre en tipografía script. Incluye diseño, montaje y desmontaje en tu evento.",
-  },
-  {
-    id: "icopor",
-    name: "Letras en icopor 3D (30 cm)",
-    cat: "fiestas",
-    price: 12,
-    img: pIcopor,
-    tag: "Precio por letra",
-    desc: "Letras talladas en icopor de alta densidad, acabado sellado y pintado al color de tu fiesta. Ligeras y reutilizables.",
-  },
-  {
-    id: "logo-madera",
-    name: "Letrero corporativo en madera láser",
-    cat: "madera",
-    price: 240,
-    img: pMadera,
-    tag: "Corte de precisión",
-    desc: "Logotipo cortado a láser en nogal o roble, con separadores ocultos para efecto flotante en recepción u oficina.",
-  },
-  {
-    id: "pocillo",
-    name: "Pocillo cerámico personalizado",
-    cat: "madera",
-    price: 16,
-    img: pPocillo,
-    tag: "Sublimación premium",
-    desc: "Pocillo de 11 oz con tu nombre, frase o logotipo. Tinta apta para lavavajillas y microondas.",
-  },
-  {
-    id: "soporte3d",
-    name: "Soporte 3D para escritorio",
-    cat: "3d",
-    price: 34,
-    img: p3d,
-    tag: "PLA ecológico",
-    desc: "Soporte modular impreso en 3D para celular, audífonos y lápices. Disponible en grafito, ámbar y rosa.",
-  },
-{
-    id: "postres",
-    name: "Caja de postres fit (6 unidades)",
-    cat: "postres",
-    price: 28,
-    img: pPostres,
-    tag: "Sin azúcar añadida",
-    desc: "Brownies de cacao y cupcakes proteicos con frutos rojos. Endulzados con stevia y empaque personalizado.",
-    popular: false,
-  },
-  /* ── NUEVOS PRODUCTOS JUGUETES 3D - MÁS VENDIDOS ───────────────────── */
-  {
-    id: "accion-personalizable",
-    name: "Figura de Acción Personalizable",
-    cat: "juguetes",
-    price: 45,
-    img: pFiestas,
-    tag: "Personalización disponible",
-    desc: "Figura de acción imprimible en 3D con nombre y diseño personalizado. Disponible en 5 temas: héroes, espacio, dinosaurios, superhéroes y deportes.",
-    popular: true,
-  },
-  {
-    id: "rompecabezas-3d",
-    name: "Rompecabezas 3D Personalizado",
-    cat: "juguetes",
-    price: 22,
-    img: pMadera,
-    tag: "90 piezas",
-    desc: "Rompecabezas 3D con diseño propio. Elige una foto, nombre o motivo. 90 piezas de alta calidad, ensamblaje sin herramientas necesario.",
-    popular: true,
-  },
-  {
-    id: "juguete-educativo",
-    name: "Bloques Educativos 3D",
-    cat: "juguetes",
-    price: 38,
-    img: pPostres,
-    tag: "Set de 100 piezas",
-    desc: "Bloques interconectantes para desarrollar creatividad y habilidades espaciales. Material PLA ecológico, seguro para niños +3 años. Incluye guía de actividades.",
-    popular: true,
-  },
-  {
-    id: "figura-colleccionable",
-    name: "Figura Coleccionable Edición Limitada",
-    cat: "juguetes",
-    price: 65,
-    img: pIcopor,
-    tag: "Edición Limitada 50 u.",
-    desc: "Figura coleccionable numerada de 50 unidades. Diseños exclusivos de personajes famosos, héroes de cine y personajes de ficción. Altamente detallado, 15cm de altura.",
-    popular: true,
-  },
-  {
-    id: "juguete-mascota",
-    name: "Juguete para Mascota Personalizado",
-    cat: "juguetes",
-    price: 18,
-    img: pPocillo,
-    tag: "Grabado con nombre",
-    desc: "Juguete masticable y duradero para perros. Nombre del dueño grabado en relieve. Material resistente y seguro. Disponible en 3 tamaños.",
-    popular: true,
-  },
-];
+import { CATS, PRODUCTS, type Cat, type Product } from "@/data/products";
 
 const FONTS = [
   { id: "sans", label: "Moderna Sans", css: "var(--font-sans)" },
@@ -261,12 +124,33 @@ const Icon = {
       <path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.9-5.2-2.8-5.2 2.8 1-5.9L3.5 9.7l5.9-.8z" />
     </svg>
   ),
+  truck: (c = "") => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={c}>
+      <path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2" strokeLinecap="round" />
+      <path d="M14 9h4.5a2 2 0 0 1 1.8 1.1l1.6 3.1a2 2 0 0 1 .1.8V17a1 1 0 0 1-1 1h-2" strokeLinecap="round" />
+      <circle cx="7.5" cy="18.5" r="2.5" />
+      <circle cx="17.5" cy="18.5" r="2.5" />
+    </svg>
+  ),
+  filter: (c = "") => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={c}>
+      <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  ),
+  sparkles: (c = "") => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={c}>
+      <path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3z" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  ),
 };
 
 /* ── page ─────────────────────────────────────────────── */
 
 function JacDesign() {
   const [cat, setCat] = useState<"todos" | Cat>("todos");
+  const [search, setSearch] = useState("");
+  const [sort, setSort] = useState<"featured" | "price-asc" | "price-desc" | "rating">("featured");
+  const [onlyPopular, setOnlyPopular] = useState(false);
   const [wish, setWish] = useState<string[]>([]);
   const [cart, setCart] = useState<{ id: string; name: string; price: number }[]>([]);
   const [quick, setQuick] = useState<Product | null>(null);
@@ -292,10 +176,42 @@ function JacDesign() {
     setTimeout(() => setToasts((t) => t.filter((x) => x.id !== id)), 2600);
   };
 
-  const filtered = useMemo(
-    () => (cat === "todos" ? PRODUCTS : PRODUCTS.filter((p) => p.cat === cat)),
-    [cat],
-  );
+  const categoryTabs = useMemo(() => {
+    return CATS.map((c) => ({
+      ...c,
+      count: c.id === "todos" ? PRODUCTS.length : PRODUCTS.filter((p) => p.cat === c.id).length,
+    }));
+  }, []);
+
+  const filtered = useMemo(() => {
+    let list = PRODUCTS;
+    if (cat !== "todos") {
+      list = list.filter((p) => p.cat === cat);
+    }
+    if (onlyPopular) {
+      list = list.filter((p) => p.popular);
+    }
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      list = list.filter(
+        (p) =>
+          p.name.toLowerCase().includes(q) ||
+          p.desc.toLowerCase().includes(q) ||
+          p.tag.toLowerCase().includes(q) ||
+          p.material.toLowerCase().includes(q)
+      );
+    }
+    if (sort === "price-asc") {
+      return [...list].sort((a, b) => a.price - b.price);
+    }
+    if (sort === "price-desc") {
+      return [...list].sort((a, b) => b.price - a.price);
+    }
+    if (sort === "rating") {
+      return [...list].sort((a, b) => b.rating - a.rating || b.reviewCount - a.reviewCount);
+    }
+    return list;
+  }, [cat, onlyPopular, search, sort]);
   const total = cart.reduce((s, i) => s + i.price, 0);
 
   const addToCart = (p: { id: string; name: string; price: number }) => {
@@ -434,94 +350,234 @@ function JacDesign() {
 {/* CATALOG */}
       <section id="colecciones" className="py-24 lg:py-32 bg-muted/60 dark:bg-dark/60">
         <div className="mx-auto max-w-7xl px-4 lg:px-8">
-          <div className="max-w-2xl mx-auto mb-12">
+          <div className="max-w-3xl mx-auto mb-12 text-center">
+            <span className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.14em] text-primary mb-3">
+              Catálogo Exclusivo 2026
+            </span>
             <h2 className="text-4xl font-black tracking-tight sm:text-5xl mb-4">
-              Servicios y colecciones
+              Servicios y colecciones premium
             </h2>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              Filtra por línea de trabajo y arma tu pedido: eventos, madera, impresión 3D o repostería fit.
+              50 productos de alta demanda organizados en nuestras 5 líneas especializadas: eventos, madera láser, impresión 3D, repostería fit y juguetes sensoriales.
             </p>
           </div>
 
-          <div className="mb-12">
-            <div className="flex flex-wrap gap-2 mb-6">
-              {CATS.map((c) => (
+          {/* Categorías con contadores */}
+          <div className="mb-8">
+            <div className="flex flex-wrap gap-2 justify-center">
+              {categoryTabs.map((c) => (
                 <button
                   key={c.id}
                   onClick={() => setCat(c.id)}
                   className={`
-                    rounded-full px-4 py-2 text-sm font-medium transition-all
-                    ${cat === c.id ? 'bg-gradient-warm text-rose-foreground shadow-soft' : 'border border-border bg-card text-muted-foreground hover:text-foreground dark:text-dark'}
+                    inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold transition-all
+                    ${
+                      cat === c.id
+                        ? "bg-gradient-warm text-rose-foreground shadow-soft scale-105"
+                        : "border border-border bg-card text-muted-foreground hover:text-foreground dark:text-dark hover:border-amber/50"
+                    }
                   `}
                 >
-                  {c.label}
+                  <span>{c.label}</span>
+                  <span
+                    className={`rounded-full px-2 py-0.5 text-xs font-extrabold ${
+                      cat === c.id
+                        ? "bg-black/20 text-white"
+                        : "bg-muted text-muted-foreground"
+                    }`}
+                  >
+                    {c.count}
+                  </span>
                 </button>
               ))}
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filtered.map((p) => (
-              <article
-                key={p.id}
-                className="group rounded-3xl border border-border bg-card shadow-soft dark:border-dark/50 dark:bg-dark overflow-hidden transition-all hover:shadow-lg hover:border-amber"
+          {/* Toolbar de búsqueda, filtros y ordenamiento */}
+          <div className="mb-10 flex flex-col md:flex-row items-center justify-between gap-4 rounded-3xl border border-border bg-card p-4 shadow-soft">
+            <div className="relative w-full md:w-80">
+              <div className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-muted-foreground">
+                {Icon.search("h-4 w-4")}
+              </div>
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Buscar por nombre, material..."
+                className="w-full rounded-2xl border border-input bg-background pl-10 pr-10 py-2.5 text-sm outline-none transition-shadow focus:ring-2 focus:ring-amber"
+              />
+              {search && (
+                <button
+                  onClick={() => setSearch("")}
+                  className="absolute inset-y-0 right-3 flex items-center text-muted-foreground hover:text-foreground"
+                >
+                  {Icon.close("h-4 w-4")}
+                </button>
+              )}
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3 w-full md:w-auto justify-between md:justify-end">
+              <button
+                onClick={() => setOnlyPopular(!onlyPopular)}
+                className={`inline-flex items-center gap-2 rounded-2xl px-4 py-2.5 text-xs font-bold transition-colors ${
+                  onlyPopular
+                    ? "bg-amber-500 text-white shadow-soft"
+                    : "border border-border bg-muted/40 text-muted-foreground hover:text-foreground"
+                }`}
               >
-                <div className="relative overflow-hidden">
-                  <img
-                    src={p.img}
-                    width={900}
-                    height={700}
-                    loading="lazy"
-                    alt={p.name}
-                    className="h-64 w-full object-cover transition-transform duration-500 ease-in-out hover:scale-105 hover:brightness-110 group-hover:scale-105 group-hover:brightness-110"
-                  />
-                  <span className="absolute left-3 top-3 rounded-full bg-card/85 px-3 py-1 text-[10px] font-bold uppercase tracking-wider backdrop-blur-md">
-                    {p.tag}
-                  </span>
-                  <div className="absolute right-3 top-3 flex flex-col gap-2">
-                    <button
-                      onClick={() => toggleWish(p)}
-                      aria-label="Añadir a favoritos"
-                      className="grid h-9 w-9 place-items-center rounded-full bg-card/85 text-rose backdrop-blur-md transition-transform hover:scale-110"
-                    >
-                      {Icon.heart("h-4 w-4", wish.includes(p.id))}
-                    </button>
-                    <button
-                      onClick={() => setQuick(p)}
-                      aria-label="Vista rápida"
-                      className="grid h-9 w-9 place-items-center rounded-full bg-card/85 backdrop-blur-md transition-transform hover:scale-110"
-                    >
-                      {Icon.search("h-4 w-4")}
-                    </button>
-                  </div>
-                </div>
-                <div className="p-5">
-                  <h3 className="text-lg font-bold leading-snug tracking-tight">{p.name}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground line-clamp-2">
-                    {p.desc}
-                  </p>
-                  <div className="mt-4 flex items-center justify-between">
-                    <span className="text-xl font-black tracking-tight">USD {p.price}</span>
-                    <div className="flex items-center gap-2">
+                {Icon.sparkles("h-3.5 w-3.5")}
+                <span>Solo Más Vendidos</span>
+              </button>
+
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-semibold text-muted-foreground hidden sm:inline">
+                  Ordenar:
+                </span>
+                <select
+                  value={sort}
+                  onChange={(e) => setSort(e.target.value as typeof sort)}
+                  className="rounded-2xl border border-input bg-background px-3 py-2 text-xs font-semibold outline-none focus:ring-2 focus:ring-amber"
+                >
+                  <option value="featured">Destacados</option>
+                  <option value="price-asc">Precio: menor a mayor</option>
+                  <option value="price-desc">Precio: mayor a menor</option>
+                  <option value="rating">Mejor valorados (★)</option>
+                </select>
+              </div>
+
+              <span className="text-xs font-bold text-muted-foreground px-2">
+                {filtered.length} {filtered.length === 1 ? "resultado" : "productos"}
+              </span>
+            </div>
+          </div>
+
+          {/* Grid de Productos */}
+          {filtered.length === 0 ? (
+            <div className="rounded-3xl border border-dashed border-border p-12 text-center bg-card">
+              <div className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-muted text-muted-foreground">
+                {Icon.search("h-7 w-7")}
+              </div>
+              <h3 className="text-xl font-bold">No se encontraron productos</h3>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Intenta con otro término de búsqueda o restablece los filtros.
+              </p>
+              <button
+                onClick={() => {
+                  setCat("todos");
+                  setSearch("");
+                  setOnlyPopular(false);
+                  setSort("featured");
+                }}
+                className="mt-6 rounded-2xl bg-gradient-warm px-6 py-2.5 text-sm font-bold text-rose-foreground shadow-soft"
+              >
+                Restablecer todos los filtros
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filtered.map((p) => (
+                <article
+                  key={p.id}
+                  className="group flex flex-col rounded-3xl border border-border bg-card shadow-soft dark:border-dark/50 dark:bg-dark overflow-hidden transition-all duration-300 hover:shadow-xl hover:border-amber hover:-translate-y-1"
+                >
+                  <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted">
+                    <img
+                      src={p.img}
+                      width={800}
+                      height={600}
+                      loading="lazy"
+                      alt={p.name}
+                      className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-108"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+
+                    {/* Tag badge */}
+                    <div className="absolute left-3 top-3 flex flex-col gap-1.5 items-start">
+                      <span className="rounded-full bg-card/90 px-3 py-1 text-[10px] font-bold uppercase tracking-wider backdrop-blur-md shadow-sm">
+                        {p.tag}
+                      </span>
+                      {p.popular && (
+                        <span className="rounded-full bg-amber-500 text-white px-2.5 py-0.5 text-[9px] font-black uppercase tracking-wider shadow-sm flex items-center gap-1">
+                          {Icon.sparkles("h-2.5 w-2.5")} Bestseller
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Actions on top-right */}
+                    <div className="absolute right-3 top-3 flex flex-col gap-2 z-10">
                       <button
-                        onClick={() => addToCart(p)}
-                        className="inline-flex items-center gap-2 rounded-2xl bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground transition-transform hover:scale-[1.04]"
+                        onClick={() => toggleWish(p)}
+                        aria-label="Añadir a favoritos"
+                        className="grid h-9 w-9 place-items-center rounded-full bg-card/90 text-rose backdrop-blur-md transition-transform hover:scale-115 shadow-sm"
                       >
-                        {Icon.cart("h-4 w-4")} Añadir
+                        {Icon.heart("h-4 w-4", wish.includes(p.id))}
                       </button>
                       <button
                         onClick={() => setQuick(p)}
-                        className="inline-flex items-center gap-2 rounded-2xl bg-muted px-4 py-2.5 text-sm font-bold transition-colors hover:bg-muted"
-                        title="Vista rápida"
+                        aria-label="Vista rápida"
+                        className="grid h-9 w-9 place-items-center rounded-full bg-card/90 backdrop-blur-md transition-transform hover:scale-115 shadow-sm hover:text-primary"
                       >
-                        {Icon.search("h-4 w-4")} Ver
+                        {Icon.search("h-4 w-4")}
                       </button>
                     </div>
+
+                    {/* Rating badge bottom right */}
+                    <div className="absolute right-3 bottom-3 rounded-full bg-black/60 text-white px-2.5 py-1 text-[11px] font-bold backdrop-blur-md flex items-center gap-1">
+                      <span className="text-amber-400">{Icon.star("h-3 w-3")}</span>
+                      <span>{p.rating.toFixed(1)}</span>
+                      <span className="text-white/70 text-[10px]">({p.reviewCount})</span>
+                    </div>
                   </div>
-                </div>
-              </article>
-            ))}
-          </div>
+
+                  <div className="flex flex-1 flex-col p-5">
+                    <div className="flex items-center gap-2 mb-1.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+                      <span className="text-primary font-bold">
+                        {CATS.find((c) => c.id === p.cat)?.label}
+                      </span>
+                      <span>•</span>
+                      <span className="flex items-center gap-1">
+                        {Icon.truck("h-3 w-3")} {p.leadTime}
+                      </span>
+                    </div>
+
+                    <h3 className="text-lg font-bold leading-snug tracking-tight group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+                      {p.name}
+                    </h3>
+
+                    <p className="mt-2 text-xs leading-relaxed text-muted-foreground line-clamp-2 flex-1">
+                      {p.desc}
+                    </p>
+
+                    <div className="mt-3 pt-3 border-t border-border/60 flex items-center justify-between">
+                      <div>
+                        <span className="text-[10px] uppercase font-bold text-muted-foreground block">
+                          Precio
+                        </span>
+                        <span className="text-xl font-black tracking-tight">
+                          USD {p.price}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => addToCart(p)}
+                          className="inline-flex items-center gap-1.5 rounded-2xl bg-primary px-3.5 py-2 text-xs font-bold text-primary-foreground transition-transform hover:scale-[1.04] shadow-sm"
+                        >
+                          {Icon.cart("h-3.5 w-3.5")} Añadir
+                        </button>
+                        <button
+                          onClick={() => setQuick(p)}
+                          className="inline-flex items-center gap-1 rounded-2xl bg-muted px-3 py-2 text-xs font-bold transition-colors hover:bg-muted/80"
+                          title="Vista rápida"
+                        >
+                          {Icon.search("h-3.5 w-3.5")} Ver
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -754,7 +810,7 @@ function JacDesign() {
                     className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-amber dark:text-dark dark:bg-dark dark:focus:ring-amber"
                   >
                     <option value="20">Infill 20%</option>
-                    <option value="40" selected>Infill 40%</option>
+                    <option value="40">Infill 40%</option>
                     <option value="100">Infill 100%</option>
                   </select>
                 </Field>
@@ -870,34 +926,91 @@ function JacDesign() {
 
       {/* QUICK VIEW MODAL */}
       {quick && (
-        <Modal onClose={() => setQuick(null)} title="Vista rápida">
-          <div className="grid gap-6 sm:grid-cols-2">
-            <img
-              src={quick.img}
-              width={900}
-              height={700}
-              loading="lazy"
-              alt={quick.name}
-              className="h-56 w-full rounded-2xl object-cover sm:h-full"
-            />
-            <div className="flex flex-col">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+        <Modal onClose={() => setQuick(null)} title="Detalle de producto">
+          <div className="grid gap-6 sm:grid-cols-2 items-start">
+            <div className="relative overflow-hidden rounded-2xl bg-muted">
+              <img
+                src={quick.img}
+                width={900}
+                height={700}
+                loading="lazy"
+                alt={quick.name}
+                className="aspect-[4/3] w-full rounded-2xl object-cover shadow-sm"
+              />
+              <span className="absolute left-3 top-3 rounded-full bg-card/90 px-3 py-1 text-[10px] font-bold uppercase tracking-wider backdrop-blur-md shadow-sm">
                 {quick.tag}
               </span>
-              <h3 className="mt-2 text-2xl font-black tracking-tight">{quick.name}</h3>
-              <p className="mt-3 flex-1 text-sm leading-relaxed text-muted-foreground">
+            </div>
+
+            <div className="flex flex-col">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="rounded-full bg-primary/10 text-primary px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider">
+                  {CATS.find((c) => c.id === quick.cat)?.label}
+                </span>
+                <div className="flex items-center gap-1 text-amber-500 text-xs font-bold">
+                  {Icon.star("h-3.5 w-3.5")}
+                  <span>{quick.rating.toFixed(1)}</span>
+                  <span className="text-muted-foreground font-normal text-[11px]">
+                    ({quick.reviewCount} opiniones verificadas)
+                  </span>
+                </div>
+              </div>
+
+              <h3 className="text-2xl font-black tracking-tight">{quick.name}</h3>
+
+              <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
                 {quick.desc}
               </p>
-              <p className="mt-4 text-2xl font-black">USD {quick.price}</p>
-              <button
-                onClick={() => {
-                  addToCart(quick);
-                  setQuick(null);
-                }}
-                className="mt-4 rounded-2xl bg-gradient-warm py-3.5 text-sm font-bold text-rose-foreground shadow-soft transition-transform hover:scale-[1.02]"
-              >
-                Comprar ahora
-              </button>
+
+              {/* Ficha técnica */}
+              <div className="mt-4 grid grid-cols-2 gap-2.5 rounded-2xl bg-muted/50 p-3.5 border border-border/70 text-xs">
+                <div>
+                  <span className="text-[10px] uppercase font-bold text-muted-foreground block">
+                    Material / Base
+                  </span>
+                  <span className="font-semibold text-foreground">{quick.material}</span>
+                </div>
+                {quick.dimensions && (
+                  <div>
+                    <span className="text-[10px] uppercase font-bold text-muted-foreground block">
+                      Dimensiones
+                    </span>
+                    <span className="font-semibold text-foreground">{quick.dimensions}</span>
+                  </div>
+                )}
+                <div>
+                  <span className="text-[10px] uppercase font-bold text-muted-foreground block">
+                    Tiempo de producción
+                  </span>
+                  <span className="font-semibold text-foreground">{quick.leadTime}</span>
+                </div>
+                <div>
+                  <span className="text-[10px] uppercase font-bold text-muted-foreground block">
+                    Disponibilidad
+                  </span>
+                  <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+                    Bajo demanda / Inmediata
+                  </span>
+                </div>
+              </div>
+
+              <div className="mt-6 flex items-center justify-between pt-4 border-t border-border">
+                <div>
+                  <span className="text-[10px] uppercase font-bold text-muted-foreground block">
+                    Precio total
+                  </span>
+                  <p className="text-3xl font-black tracking-tight">USD {quick.price}</p>
+                </div>
+                <button
+                  onClick={() => {
+                    addToCart(quick);
+                    setQuick(null);
+                  }}
+                  className="rounded-2xl bg-gradient-warm px-6 py-3.5 text-sm font-bold text-rose-foreground shadow-soft transition-transform hover:scale-[1.03] active:scale-[0.98]"
+                >
+                  {Icon.cart("h-4 w-4 inline mr-2")} Añadir al carrito
+                </button>
+              </div>
             </div>
           </div>
         </Modal>
