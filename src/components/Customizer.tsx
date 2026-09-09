@@ -108,6 +108,28 @@ const FINISHES: { id: string; token: string; name: Tri; extra: number }[] = [
   { id: "graphite", token: "var(--graphite)", name: { en: "Graphite black", fr: "Noir graphite", es: "Negro grafito" }, extra: 4 },
 ];
 
+/* real photo of each base product + where the personalization sits on it */
+const MOCKUP: Record<BaseId, { photo: string; area: string; maxFs: number; alt: Tri }> = {
+  sign: {
+    photo: imgSign,
+    area: "left-[14%] right-[14%] top-[30%] bottom-[34%]",
+    maxFs: 2,
+    alt: { en: "Laser-cut wood sign photo", fr: "Photo d'enseigne en bois", es: "Foto de letrero en madera" },
+  },
+  mug: {
+    photo: imgMug,
+    area: "left-[26%] right-[26%] top-[38%] bottom-[30%]",
+    maxFs: 1.5,
+    alt: { en: "Ceramic mug photo", fr: "Photo de tasse en céramique", es: "Foto de pocillo de cerámica" },
+  },
+  box: {
+    photo: imgBox,
+    area: "left-[18%] right-[18%] top-[42%] bottom-[28%]",
+    maxFs: 1.6,
+    alt: { en: "Fit dessert box photo", fr: "Photo de boîte de desserts", es: "Foto de caja de postres fit" },
+  },
+};
+
 const FREE_CHARS = 14;
 const PER_CHAR = 0.65;
 const LINE2 = 6;
