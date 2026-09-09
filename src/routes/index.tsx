@@ -1,16 +1,11 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useRef, useState } from "react";
 import { Quoter3D } from "@/components/Quoter3D";
 import { useI18n, LANGS } from "@/i18n";
 import type { Tri } from "@/i18n/lang";
-import {
-  CATS,
-  CAT_LABELS,
-  LEAD_LABELS,
-  PRODUCTS,
-  type Cat,
-  type Product,
-} from "@/data/products";
+import { CATS, CAT_LABELS, LEAD_LABELS, type Cat, type Product } from "@/data/products";
+import { useCatalog } from "@/hooks/useCatalog";
+import { supabase } from "@/integrations/supabase/client";
 
 import hero from "@/assets/hero-jac.jpg";
 
@@ -229,6 +224,7 @@ const FREE_SHIP_THRESHOLD = 150;
 
 function JacDesign() {
   const { t, tr, money, lang, setLang } = useI18n();
+  const { products } = useCatalog();
 
   const [cat, setCat] = useState<"todos" | Cat>("todos");
   const [search, setSearch] = useState("");
@@ -241,6 +237,8 @@ function JacDesign() {
   const [langOpen, setLangOpen] = useState(false);
   const [toasts, setToasts] = useState<{ id: number; text: string }[]>([]);
   const [contact, setContact] = useState({ name: "", email: "", phone: "", message: "" });
+  const [buyer, setBuyer] = useState({ name: "", email: "", phone: "" });
+  const [sending, setSending] = useState(false);
   const toastId = useRef(0);
 
   // customizer
@@ -260,13 +258,13 @@ function JacDesign() {
       CATS.map((c) => ({
         id: c.id,
         label: tr(CAT_LABELS[c.id]),
-        count: c.id === "todos" ? PRODUCTS.length : PRODUCTS.filter((p) => p.cat === c.id).length,
+        count: c.id === "todos" ? products.length : products.filter((p) => p.cat === c.id).length,
       })),
-    [tr]
+    [tr, products]
   );
 
   const filtered = useMemo(() => {
-    let list = PRODUCTS;
+    let list = products;
     if (cat !== "todos") list = list.filter((p) => p.cat === cat);
     if (onlyPopular) list = list.filter((p) => p.popular);
     if (search.trim()) {
@@ -283,7 +281,7 @@ function JacDesign() {
     if (sort === "rating")
       return [...list].sort((a, b) => b.rating - a.rating || b.reviewCount - a.reviewCount);
     return list;
-  }, [cat, onlyPopular, search, sort, lang]);
+  }, [products, cat, onlyPopular, search, sort, lang]);
 
   const total = cart.reduce((s, i) => s + i.price, 0);
   const missingForFree = Math.max(0, FREE_SHIP_THRESHOLD - total);
@@ -297,6 +295,70 @@ function JacDesign() {
     const saved = wish.includes(p.id);
     setWish((w) => (saved ? w.filter((x) => x !== p.id) : [...w, p.id]));
     toast(`${tr(p.name)} — ${saved ? t("removedFromWishlist") : t("addedToWishlist")}`);
+  };
+
+  /* ── orders are stored in the business panel ─────────── */
+  const placeOrder = async () => {
+    if (!buyer.name.trim() || !buyer.email.trim()) {
+      toast(t("contactIncomplete"));
+      return;
+    }
+    setSending(true);
+    try {
+      const { data, error } = await supabase
+        .from("orders")
+        .insert({
+          customer_name: buyer.name.trim(),
+          customer_email: buyer.email.trim(),
+          customer_phone: buyer.phone.trim() || null,
+          lang,
+          total_cad: total,
+        })
+        .select("id")
+        .single();
+      if (error) throw error;
+      const items = cart.map((i) => ({
+        order_id: data.id,
+        product_slug: i.id,
+        name: i.name,
+        unit_price_cad: i.price,
+        qty: 1,
+      }));
+      const res = await supabase.from("order_items").insert(items);
+      if (res.error) throw res.error;
+      setCart([]);
+      setCartOpen(false);
+      setBuyer({ name: "", email: "", phone: "" });
+      toast(t("checkoutDone"));
+    } catch {
+      toast(t("saveError"));
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const sendMessage = async () => {
+    if (!contact.name.trim() || !contact.email.trim() || !contact.message.trim()) {
+      toast(t("contactIncomplete"));
+      return;
+    }
+    setSending(true);
+    try {
+      const { error } = await supabase.from("messages").insert({
+        name: contact.name.trim(),
+        email: contact.email.trim(),
+        phone: contact.phone.trim() || null,
+        body: contact.message.trim(),
+        lang,
+      });
+      if (error) throw error;
+      setContact({ name: "", email: "", phone: "", message: "" });
+      toast(t("contactSent"));
+    } catch {
+      toast(t("saveError"));
+    } finally {
+      setSending(false);
+    }
   };
 
   const customPrice = useMemo(() => {
@@ -427,7 +489,7 @@ function JacDesign() {
               </div>
               <dl className="grid grid-cols-3 gap-2 text-center text-xs sm:text-sm">
                 <div className="rounded-2xl border border-border bg-card p-3">
-                  <dt className="text-lg font-black text-amber-600">{PRODUCTS.length}</dt>
+                  <dt className="text-lg font-black text-amber-600">{products.length}</dt>
                   <dd className="text-muted-foreground">{t("statProducts")}</dd>
                 </div>
                 <div className="rounded-2xl border border-border bg-card p-3">
@@ -825,6 +887,11 @@ function JacDesign() {
             onAddToCart={(item) => {
               addToCart(item);
               setCartOpen(true);
+              void supabase.from("quotes").insert({
+                file_name: item.name,
+                estimate_cad: item.price,
+                notes: item.details ?? null,
+              });
             }}
           />
         </div>
@@ -909,17 +976,18 @@ function JacDesign() {
                 </div>
               </dl>
               <p className="mt-4 text-[11px] italic text-muted-foreground">{t("placeholderNote")}</p>
+              <Link
+                to="/auth"
+                className="mt-4 inline-flex rounded-2xl border border-border px-4 py-2.5 text-xs font-bold hover:bg-muted"
+              >
+                {t("adminAccess")}
+              </Link>
             </div>
 
             <form
               onSubmit={(e) => {
                 e.preventDefault();
-                if (!contact.name.trim() || !contact.email.trim() || !contact.message.trim()) {
-                  toast(t("contactIncomplete"));
-                  return;
-                }
-                setContact({ name: "", email: "", phone: "", message: "" });
-                toast(t("contactSent"));
+                void sendMessage();
               }}
               className="grid gap-3"
             >
@@ -1121,15 +1189,41 @@ function JacDesign() {
                 <span className="text-sm font-semibold text-muted-foreground">{t("total")}</span>
                 <span className="text-xl font-black">{money(total)}</span>
               </div>
+              <div className="mt-4 grid gap-2">
+                <input
+                  value={buyer.name}
+                  onChange={(e) => setBuyer({ ...buyer, name: e.target.value })}
+                  placeholder={t("fieldName")}
+                  aria-label={t("fieldName")}
+                  maxLength={100}
+                  className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-amber"
+                />
+                <div className="grid gap-2 sm:grid-cols-2">
+                  <input
+                    type="email"
+                    value={buyer.email}
+                    onChange={(e) => setBuyer({ ...buyer, email: e.target.value })}
+                    placeholder={t("fieldEmail")}
+                    aria-label={t("fieldEmail")}
+                    className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-amber"
+                  />
+                  <input
+                    type="tel"
+                    value={buyer.phone}
+                    onChange={(e) => setBuyer({ ...buyer, phone: e.target.value })}
+                    placeholder={t("fieldPhone")}
+                    aria-label={t("fieldPhone")}
+                    maxLength={30}
+                    className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-amber"
+                  />
+                </div>
+              </div>
               <button
-                onClick={() => {
-                  setCart([]);
-                  setCartOpen(false);
-                  toast(t("checkoutDone"));
-                }}
-                className="mt-4 w-full rounded-2xl bg-gradient-warm py-4 text-sm font-bold text-rose-foreground shadow-soft transition-transform hover:scale-[1.02]"
+                onClick={() => void placeOrder()}
+                disabled={sending}
+                className="mt-3 w-full rounded-2xl bg-gradient-warm py-4 text-sm font-bold text-rose-foreground shadow-soft transition-transform hover:scale-[1.02] disabled:opacity-60"
               >
-                {t("checkout")}
+                {sending ? "…" : t("checkout")}
               </button>
             </>
           )}
