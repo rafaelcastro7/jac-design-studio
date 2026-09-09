@@ -190,11 +190,11 @@ export function buildReliefGeometry(field: HeightField, opts: ReliefOptions): Re
         const y11 = sampleAt(r1, a1), y10 = sampleAt(r1, a0);
 
         // Top (outward +Y)
-        tri(p00[0], y00, p00[1], p10[0], y10, p10[1], p11[0], y11, p11[1]);
-        tri(p00[0], y00, p00[1], p11[0], y11, p11[1], p01[0], y01, p01[1]);
+        tri(p00[0], y00, p00[1], p11[0], y11, p11[1], p10[0], y10, p10[1]);
+        tri(p00[0], y00, p00[1], p01[0], y01, p01[1], p11[0], y11, p11[1]);
         // Bottom (outward -Y)
-        tri(p00[0], 0, p00[1], p11[0], 0, p11[1], p10[0], 0, p10[1]);
-        tri(p00[0], 0, p00[1], p01[0], 0, p01[1], p11[0], 0, p11[1]);
+        tri(p00[0], 0, p00[1], p10[0], 0, p10[1], p11[0], 0, p11[1]);
+        tri(p00[0], 0, p00[1], p11[0], 0, p11[1], p01[0], 0, p01[1]);
 
         const cellArea = 0.5 * Math.abs(r1 * r1 - r0 * r0) * aStep;
         volumeMm3 += cellArea * ((y00 + y01 + y11 + y10) / 4);
