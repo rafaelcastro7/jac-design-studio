@@ -675,7 +675,7 @@ function JacDesign() {
                   }}
                 />
                 <div className="flex flex-col items-center gap-2">
-                  <Icon.upload className="h-9 w-9 text-muted-foreground" />
+                  {Icon.upload("h-9 w-9 text-muted-foreground")}
                   <span className="text-sm font-bold">{file ?? "Arrastra tu archivo STL, OBJ o GLTF"}</span>
                   <span className="text-xs text-muted-foreground">o haz clic para seleccionarlo</span>
                 </div>
@@ -749,7 +749,7 @@ function JacDesign() {
                 <div className="flex gap-2">
                   {[0, 1, 2, 3, 4].map((i) => (
                     <span key={i} className="text-amber-500 text-xs">
-                      <Icon.star className="h-3 w-3" />
+                      {Icon.star("h-3 w-3")}
                     </span>
                   ))}
                 </div>
