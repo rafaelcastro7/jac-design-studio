@@ -1,84 +1,163 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useRef, useState } from "react";
 import { Quoter3D } from "@/components/Quoter3D";
+import { useI18n, LANGS } from "@/i18n";
+import type { Tri } from "@/i18n/lang";
+import {
+  CATS,
+  CAT_LABELS,
+  LEAD_LABELS,
+  PRODUCTS,
+  type Cat,
+  type Product,
+} from "@/data/products";
 
 import hero from "@/assets/hero-jac.jpg";
-
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Jac Design — Impresión 3D, Fiestas, Láser y Postres Fit" },
+      { title: "Jac Design — 3D Printing, Party Decor, Laser Wood & Fit Desserts" },
       {
         name: "description",
         content:
-          "Jac Design: fabricación digital e impresión 3D, decoración de fiestas, letreros en icopor y madera láser, y repostería saludable. Personaliza en vivo y cotiza al instante.",
+          "Canadian digital fabrication studio: 3D printing, laser-cut wood, event styling and healthy desserts. Live customizer, instant 3D quote, prices in CAD.",
       },
-      { property: "og:title", content: "Jac Design — Diseño integral para tus ideas" },
+      { property: "og:title", content: "Jac Design — Custom design for your ideas" },
       {
         property: "og:description",
         content:
-          "Personalizador en vivo, cotizador 3D instantáneo y colecciones para fiestas, oficinas y repostería fit.",
+          "Shop 25 curated best sellers, customize live and get an instant 3D printing quote. Trilingual: EN / FR / ES.",
       },
-      { name: "format-detection", content: "telephone=no" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { name: "viewport", content: "width=device-width, initial-scale=1.0" },
     ],
   }),
   component: JacDesign,
 });
 
-
-import { CATS, PRODUCTS, type Cat, type Product } from "@/data/products";
+/* ── local trilingual copy ─────────────────────────────── */
 
 const FONTS = [
-  { id: "sans", label: "Moderna Sans", css: "var(--font-sans)" },
-  { id: "serif", label: "Elegante Serif", css: "var(--font-serif)" },
-  { id: "mono", label: "Técnica Mono", css: "var(--font-mono)" },
+  { id: "sans", key: "fontSans", css: "var(--font-sans)" },
+  { id: "serif", key: "fontSerif", css: "var(--font-serif)" },
+  { id: "mono", key: "fontMono", css: "var(--font-mono)" },
 ];
 
 const THEMES = [
-  { id: "amber", label: "Ámbar Madera", token: "var(--amber)" },
-  { id: "rose", label: "Rosa Fiesta", token: "var(--rose)" },
-  { id: "healthy", label: "Verde Healthy", token: "var(--healthy)" },
-  { id: "graphite", label: "Negro Grafito", token: "var(--graphite)" },
+  { id: "amber", key: "colAmber", token: "var(--amber)" },
+  { id: "rose", key: "colRose", token: "var(--rose)" },
+  { id: "healthy", key: "colGreen", token: "var(--healthy)" },
+  { id: "graphite", key: "colBlack", token: "var(--graphite)" },
 ];
 
 const BASES = [
-  { id: "letrero", label: "Letrero Personalizado", price: 58 },
-  { id: "pocillo", label: "Pocillo de Cerámica", price: 16 },
-  { id: "caja", label: "Caja de Postres Fit", price: 28 },
+  { id: "sign", key: "prodSign", price: 68 },
+  { id: "mug", key: "prodMug", price: 26 },
+  { id: "box", key: "prodBox", price: 34 },
 ];
 
-const REVIEWS = [
+const SORTS: { id: "featured" | "price-asc" | "price-desc" | "rating"; label: Tri }[] = [
+  { id: "featured", label: { en: "Featured", fr: "En vedette", es: "Destacados" } },
+  { id: "price-asc", label: { en: "Price: low to high", fr: "Prix : croissant", es: "Precio: menor a mayor" } },
+  { id: "price-desc", label: { en: "Price: high to low", fr: "Prix : décroissant", es: "Precio: mayor a menor" } },
+  { id: "rating", label: { en: "Top rated", fr: "Mieux notés", es: "Mejor valorados" } },
+];
+
+const SEARCH_PH: Tri = {
+  en: "Search by name or material…",
+  fr: "Rechercher par nom ou matériau…",
+  es: "Buscar por nombre o material…",
+};
+const ONLY_POPULAR: Tri = { en: "Best sellers only", fr: "Meilleures ventes", es: "Solo más vendidos" };
+const SORT_LABEL: Tri = { en: "Sort:", fr: "Trier :", es: "Ordenar:" };
+const RESULTS: Tri = { en: "results", fr: "résultats", es: "resultados" };
+const NO_RESULTS: Tri = { en: "No products found", fr: "Aucun produit trouvé", es: "No hay productos" };
+const NO_RESULTS_HINT: Tri = {
+  en: "Try another search term or reset the filters.",
+  fr: "Essayez un autre terme ou réinitialisez les filtres.",
+  es: "Prueba otro término o restablece los filtros.",
+};
+const RESET: Tri = { en: "Reset filters", fr: "Réinitialiser", es: "Restablecer filtros" };
+const QUOTER_KICKER: Tri = { en: "Real-time 3D studio", fr: "Studio 3D en temps réel", es: "Studio 3D en tiempo real" };
+const QUOTER_TITLE: Tri = { en: "Maker Studio · instant 3D quote", fr: "Maker Studio · devis 3D instantané", es: "Maker Studio · cotizador 3D al instante" };
+const QUOTER_TEXT: Tri = {
+  en: "Preview live 3D geometry, upload your STL for automatic volume analysis, choose engineering materials and infill, and get an exact price in CAD.",
+  fr: "Visualisez la géométrie 3D en direct, téléversez votre STL pour l'analyse du volume, choisissez matériaux et remplissage, et obtenez un prix exact en $ CA.",
+  es: "Visualiza la geometría 3D en vivo, sube tu STL para el análisis de volumen, elige materiales e infill y obtén el precio exacto en CAD.",
+};
+const AVAILABILITY: Tri = { en: "Availability", fr: "Disponibilité", es: "Disponibilidad" };
+const AVAILABILITY_V: Tri = { en: "Made to order", fr: "Fabriqué sur commande", es: "Hecho por encargo" };
+const QUICK_TITLE: Tri = { en: "Product details", fr: "Détails du produit", es: "Detalle del producto" };
+const VERIFIED: Tri = { en: "verified reviews", fr: "avis vérifiés", es: "opiniones verificadas" };
+const LINKS: Tri = { en: "Quick links", fr: "Liens rapides", es: "Enlaces rápidos" };
+const SERVICES: Tri = { en: "Services", fr: "Services", es: "Servicios" };
+const YOUR_TEXT_HERE: Tri = { en: "Your text here", fr: "Votre texte ici", es: "Tu texto aquí" };
+const NO_TEXT: Tri = { en: "No text", fr: "Sans texte", es: "Sin texto" };
+const WISH_TOAST: Tri = { en: "item(s) in your wishlist", fr: "article(s) dans vos favoris", es: "artículo(s) en favoritos" };
+
+const SERVICE_LIST: Tri[] = [
+  { en: "3D printing in PLA, PETG and resin", fr: "Impression 3D en PLA, PETG et résine", es: "Impresión 3D en PLA, PETG y resina" },
+  { en: "Laser-cut wood and foam signage", fr: "Enseignes en bois et mousse au laser", es: "Letreros en madera e icopor a láser" },
+  { en: "Full event styling and balloon decor", fr: "Décor d'événements et ballons", es: "Decoración de eventos y globos" },
+  { en: "Healthy, keto and protein pastry", fr: "Pâtisserie santé, keto et protéinée", es: "Repostería saludable, keto y proteica" },
+];
+
+const REVIEWS: { name: string; role: Tri; text: Tri }[] = [
   {
-    name: "Daniela Ruiz",
-    role: "Cumpleaños temático · Medellín",
-    text: "El backdrop y las letras en icopor quedaron idénticos al boceto. Llegaron 3 horas antes y montaron todo sin que yo moviera un dedo.",
+    name: "Danielle R.",
+    role: { en: "Birthday party · Toronto, ON", fr: "Fête d'anniversaire · Toronto (ON)", es: "Cumpleaños · Toronto, ON" },
+    text: {
+      en: "The double arch backdrop was identical to the mockup. The team arrived three hours early and set everything up.",
+      fr: "La double arche était identique à la maquette. L'équipe est arrivée trois heures d'avance et a tout installé.",
+      es: "El backdrop de arcos quedó idéntico al boceto. El equipo llegó tres horas antes y montó todo.",
+    },
   },
   {
-    name: "Andrés Villa",
-    role: "Gerente de oficina · Bogotá",
-    text: "Nuestro logo en madera cortado a láser cambió por completo la recepción. Los acabados y el empaque fueron impecables.",
+    name: "Andrew V.",
+    role: { en: "Office manager · Mississauga, ON", fr: "Gestionnaire de bureau · Mississauga (ON)", es: "Gerente de oficina · Mississauga, ON" },
+    text: {
+      en: "Our laser-cut wood wall completely changed the reception area. Flawless finish and packaging.",
+      fr: "Notre mur en bois découpé au laser a transformé la réception. Fini et emballage impeccables.",
+      es: "Nuestro mural en madera cortada a láser transformó la recepción. Acabado y empaque impecables.",
+    },
   },
   {
-    name: "Laura Mejía",
-    role: "Entrenadora fitness",
-    text: "Pido las cajas de postres fit cada semana para mis clientas. Sin azúcar, deliciosos y con etiqueta personalizada.",
+    name: "Laura M.",
+    role: { en: "Fitness coach · Vancouver, BC", fr: "Entraîneuse · Vancouver (C.-B.)", es: "Entrenadora fitness · Vancouver, BC" },
+    text: {
+      en: "I order the keto brownies weekly for my clients. No added sugar and they taste incredible.",
+      fr: "Je commande les brownies keto chaque semaine. Sans sucre ajouté et délicieux.",
+      es: "Pido los brownies keto cada semana. Sin azúcar añadida y deliciosos.",
+    },
   },
   {
-    name: "Carlos Peña",
-    role: "Ingeniero mecánico",
-    text: "Subí un STEP y en minutos tenía presupuesto. Las piezas en PETG soportaron perfecto la prueba de carga.",
+    name: "Charles P.",
+    role: { en: "Mechanical engineer · Montréal, QC", fr: "Ingénieur mécanique · Montréal (QC)", es: "Ingeniero mecánico · Montreal, QC" },
+    text: {
+      en: "I uploaded an STL and had a quote in minutes. The PETG parts passed my load test perfectly.",
+      fr: "J'ai téléversé un STL et obtenu un devis en minutes. Les pièces PETG ont réussi mon test de charge.",
+      es: "Subí un STL y tuve la cotización en minutos. Las piezas en PETG pasaron la prueba de carga.",
+    },
   },
   {
-    name: "Sofía Cárdenas",
-    role: "Wedding planner",
-    text: "Los pocillos personalizados como recordatorio fueron el detalle más comentado de la boda.",
+    name: "Sophie C.",
+    role: { en: "Wedding planner · Ottawa, ON", fr: "Organisatrice de mariages · Ottawa (ON)", es: "Wedding planner · Ottawa, ON" },
+    text: {
+      en: "The engraved keepsake boxes were the most talked-about detail of the whole wedding.",
+      fr: "Les boîtes souvenirs gravées ont été le détail le plus remarqué du mariage.",
+      es: "Las cajas de recuerdo grabadas fueron el detalle más comentado de la boda.",
+    },
   },
   {
-    name: "Julián Ortiz",
-    role: "Startup de hardware",
-    text: "Prototipos en resina con un nivel de detalle que no había conseguido con otros talleres de la ciudad.",
+    name: "Julien O.",
+    role: { en: "Hardware startup · Québec, QC", fr: "Startup matérielle · Québec (QC)", es: "Startup de hardware · Quebec, QC" },
+    text: {
+      en: "Resin prototypes with a level of detail no other local shop matched.",
+      fr: "Prototypes en résine d'un niveau de détail inégalé localement.",
+      es: "Prototipos en resina con un detalle que ningún otro taller local logró.",
+    },
   },
 ];
 
@@ -93,13 +172,7 @@ const Icon = {
     </svg>
   ),
   heart: (c = "", filled = false) => (
-    <svg
-      viewBox="0 0 24 24"
-      fill={filled ? "currentColor" : "none"}
-      stroke="currentColor"
-      strokeWidth="1.8"
-      className={c}
-    >
+    <svg viewBox="0 0 24 24" fill={filled ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.8" className={c}>
       <path d="M12 20s-7-4.35-7-9.5A4.5 4.5 0 0 1 12 7a4.5 4.5 0 0 1 7 3.5C19 15.65 12 20 12 20z" />
     </svg>
   ),
@@ -107,12 +180,6 @@ const Icon = {
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={c}>
       <circle cx="11" cy="11" r="6" />
       <path d="m16 16 4 4" strokeLinecap="round" />
-    </svg>
-  ),
-  upload: (c = "") => (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className={c}>
-      <path d="M12 16V4m0 0L8 8m4-4 4 4" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" strokeLinecap="round" />
     </svg>
   ),
   close: (c = "") => (
@@ -133,21 +200,36 @@ const Icon = {
       <circle cx="17.5" cy="18.5" r="2.5" />
     </svg>
   ),
-  filter: (c = "") => (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={c}>
-      <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  ),
   sparkles: (c = "") => (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={c}>
-      <path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3z" strokeLinecap="round" strokeLinejoin="round" />
+      <path
+        d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3z"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  ),
+  shield: (c = "") => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={c}>
+      <path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z" strokeLinecap="round" />
+      <path d="m9 12 2 2 4-4" strokeLinecap="round" />
+    </svg>
+  ),
+  globe: (c = "") => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={c}>
+      <circle cx="12" cy="12" r="8.5" />
+      <path d="M3.5 12h17M12 3.5c2.4 2.4 2.4 14.6 0 17M12 3.5c-2.4 2.4-2.4 14.6 0 17" />
     </svg>
   ),
 };
 
+const FREE_SHIP_THRESHOLD = 150;
+
 /* ── page ─────────────────────────────────────────────── */
 
 function JacDesign() {
+  const { t, tr, money, lang, setLang } = useI18n();
+
   const [cat, setCat] = useState<"todos" | Cat>("todos");
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<"featured" | "price-asc" | "price-desc" | "rating">("featured");
@@ -156,112 +238,143 @@ function JacDesign() {
   const [cart, setCart] = useState<{ id: string; name: string; price: number }[]>([]);
   const [quick, setQuick] = useState<Product | null>(null);
   const [cartOpen, setCartOpen] = useState(false);
+  const [langOpen, setLangOpen] = useState(false);
   const [toasts, setToasts] = useState<{ id: number; text: string }[]>([]);
   const [contact, setContact] = useState({ name: "", email: "", phone: "", message: "" });
   const toastId = useRef(0);
 
   // customizer
   const [base, setBase] = useState(BASES[0]!);
-  const [text, setText] = useState("Familia Jaramillo");
+  const [text, setText] = useState("Maple & Co.");
   const [font, setFont] = useState(FONTS[0]!);
   const [theme, setTheme] = useState(THEMES[0]!);
 
-  const toast = (text: string) => {
+  const toast = (msg: string) => {
     const id = ++toastId.current;
-    setToasts((t) => [...t, { id, text }]);
-    setTimeout(() => setToasts((t) => t.filter((x) => x.id !== id)), 2600);
+    setToasts((x) => [...x, { id, text: msg }]);
+    setTimeout(() => setToasts((x) => x.filter((y) => y.id !== id)), 2600);
   };
 
-  const categoryTabs = useMemo(() => {
-    return CATS.map((c) => ({
-      ...c,
-      count: c.id === "todos" ? PRODUCTS.length : PRODUCTS.filter((p) => p.cat === c.id).length,
-    }));
-  }, []);
+  const categoryTabs = useMemo(
+    () =>
+      CATS.map((c) => ({
+        id: c.id,
+        label: tr(CAT_LABELS[c.id]),
+        count: c.id === "todos" ? PRODUCTS.length : PRODUCTS.filter((p) => p.cat === c.id).length,
+      })),
+    [tr]
+  );
 
   const filtered = useMemo(() => {
     let list = PRODUCTS;
-    if (cat !== "todos") {
-      list = list.filter((p) => p.cat === cat);
-    }
-    if (onlyPopular) {
-      list = list.filter((p) => p.popular);
-    }
+    if (cat !== "todos") list = list.filter((p) => p.cat === cat);
+    if (onlyPopular) list = list.filter((p) => p.popular);
     if (search.trim()) {
       const q = search.toLowerCase();
-      list = list.filter(
-        (p) =>
-          p.name.toLowerCase().includes(q) ||
-          p.desc.toLowerCase().includes(q) ||
-          p.tag.toLowerCase().includes(q) ||
-          p.material.toLowerCase().includes(q)
+      list = list.filter((p) =>
+        [p.name[lang], p.desc[lang], p.tag[lang], p.material[lang]]
+          .join(" ")
+          .toLowerCase()
+          .includes(q)
       );
     }
-    if (sort === "price-asc") {
-      return [...list].sort((a, b) => a.price - b.price);
-    }
-    if (sort === "price-desc") {
-      return [...list].sort((a, b) => b.price - a.price);
-    }
-    if (sort === "rating") {
+    if (sort === "price-asc") return [...list].sort((a, b) => a.price - b.price);
+    if (sort === "price-desc") return [...list].sort((a, b) => b.price - a.price);
+    if (sort === "rating")
       return [...list].sort((a, b) => b.rating - a.rating || b.reviewCount - a.reviewCount);
-    }
     return list;
-  }, [cat, onlyPopular, search, sort]);
+  }, [cat, onlyPopular, search, sort, lang]);
+
   const total = cart.reduce((s, i) => s + i.price, 0);
+  const missingForFree = Math.max(0, FREE_SHIP_THRESHOLD - total);
 
   const addToCart = (p: { id: string; name: string; price: number }) => {
     setCart((c) => [...c, { id: p.id, name: p.name, price: p.price }]);
-    toast(`${p.name} añadido al carrito`);
+    toast(`${p.name} — ${t("addedToCart")}`);
   };
 
   const toggleWish = (p: Product) => {
-    setWish((w) => (w.includes(p.id) ? w.filter((x) => x !== p.id) : [...w, p.id]));
-    toast(wish.includes(p.id) ? "Eliminado de favoritos" : "Guardado en favoritos");
+    const saved = wish.includes(p.id);
+    setWish((w) => (saved ? w.filter((x) => x !== p.id) : [...w, p.id]));
+    toast(`${tr(p.name)} — ${saved ? t("removedFromWishlist") : t("addedToWishlist")}`);
   };
 
   const customPrice = useMemo(() => {
-    const extra = Math.min(text.trim().length, 40) * 0.6 + (font.id === "serif" ? 4 : 0);
+    const extra = Math.min(text.trim().length, 40) * 0.8 + (font.id === "serif" ? 5 : 0);
     return Math.round((base.price + extra) * 100) / 100;
   }, [base, text, font]);
 
+  const navLinks: [string, string][] = [
+    ["#inicio", t("navHome")],
+    ["#colecciones", t("navCatalog")],
+    ["#personalizador", t("navCustomizer")],
+    ["#cotizador", t("navQuoter")],
+    ["#galeria", t("navReviews")],
+    ["#contacto", t("navContact")],
+  ];
+
   return (
-    <div className="min-h-screen bg-background text-foreground dark:bg-dark text-dark">
+    <div className="min-h-screen bg-background text-foreground">
       {/* NAV */}
-      <header className="sticky top-0 z-40 border-b border-border/70 bg-background/80 backdrop-blur-md">
+      <header className="sticky top-0 z-40 border-b border-border/70 bg-background/85 backdrop-blur-md">
         <div className="mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-3 lg:px-8">
           <a href="#inicio" className="flex min-w-0 items-center gap-3">
-            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-gradient-warm text-base font-black tracking-tight text-rose-foreground shadow-soft dark:shadow-none">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-gradient-warm text-base font-black tracking-tight text-rose-foreground shadow-soft">
               JD
             </span>
             <span className="min-w-0">
-              <span className="block truncate text-lg font-extrabold tracking-tight">
-                Jac Design
-              </span>
+              <span className="block truncate text-lg font-extrabold tracking-tight">Jac Design</span>
               <span className="block truncate text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
-                3D • Fiestas • Láser • Icopor • Postres
+                {t("tagline")}
               </span>
             </span>
           </a>
 
           <div className="flex items-center gap-2">
-            <nav className="mr-2 hidden items-center gap-6 text-sm font-medium transition-colors dark:text-dark/60 xl:flex">
-              {[
-                ["#inicio", "Inicio"],
-                ["#colecciones", "Servicios y Colecciones"],
-                ["#personalizador", "Personalizador en Vivo"],
-                ["#cotizador", "Cotizador 3D IA"],
-                ["#galeria", "Galería de Clientes"],
-              ].map(([href, label]) => (
-                <a key={href} href={href} className="transition-colors hover:text-foreground">
+            <nav className="mr-2 hidden items-center gap-5 text-sm font-medium xl:flex">
+              {navLinks.map(([href, label]) => (
+                <a key={href} href={href} className="text-muted-foreground transition-colors hover:text-foreground">
                   {label}
                 </a>
               ))}
             </nav>
+
+            {/* language switcher */}
+            <div className="relative">
+              <button
+                onClick={() => setLangOpen((v) => !v)}
+                aria-label={t("language")}
+                aria-expanded={langOpen}
+                className="flex h-11 items-center gap-1.5 rounded-2xl border border-border bg-card px-2.5 text-xs font-bold transition-colors hover:bg-muted"
+              >
+                {Icon.globe("h-4 w-4")}
+                {LANGS.find((l) => l.id === lang)?.short}
+              </button>
+              {langOpen && (
+                <div className="absolute right-0 top-12 z-50 w-44 overflow-hidden rounded-2xl border border-border bg-card shadow-soft">
+                  {LANGS.map((l) => (
+                    <button
+                      key={l.id}
+                      onClick={() => {
+                        setLang(l.id);
+                        setLangOpen(false);
+                      }}
+                      className={`flex w-full items-center gap-2 px-3.5 py-2.5 text-left text-sm font-semibold transition-colors hover:bg-muted ${
+                        l.id === lang ? "text-primary" : "text-foreground"
+                      }`}
+                    >
+                      <span>{l.flag}</span>
+                      {l.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
             <button
-              onClick={() => toast(`${wish.length} artículo(s) en tu lista de deseos`)}
+              onClick={() => toast(`${wish.length} ${tr(WISH_TOAST)}`)}
               className="relative grid h-11 w-11 place-items-center rounded-2xl border border-border bg-card transition-colors hover:bg-muted"
-              aria-label="Lista de deseos"
+              aria-label={t("wishlist")}
             >
               {Icon.heart("h-5 w-5 text-rose", wish.length > 0)}
               <Badge n={wish.length} />
@@ -269,7 +382,7 @@ function JacDesign() {
             <button
               onClick={() => setCartOpen(true)}
               className="relative grid h-11 w-11 place-items-center rounded-2xl border border-border bg-card transition-colors hover:bg-muted"
-              aria-label="Carrito de compras"
+              aria-label={t("cart")}
             >
               {Icon.cart("h-5 w-5")}
               <Badge n={cart.length} />
@@ -279,112 +392,115 @@ function JacDesign() {
       </header>
 
       {/* HERO */}
-      <section id="inicio" className="relative min-h-[700px] bg-gradient-to-br from-amber-50 via-white to-amber-50 dark:from-dark dark:via-dark dark:to-secondary overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-tr from-amber-500/20 via-transparent to-transparent dark:from-amber-600/30 dark:via-transparent dark:to-transparent" />
+      <section
+        id="inicio"
+        className="relative overflow-hidden bg-gradient-to-br from-amber-50 via-white to-amber-50 dark:from-dark dark:via-dark dark:to-secondary"
+      >
         <div className="absolute -left-24 top-10 h-72 w-72 rounded-full bg-amber-100 blur-3xl dark:bg-amber-900/20" />
         <div className="absolute -right-16 bottom-0 h-80 w-80 rounded-full bg-rose-100 blur-3xl dark:bg-rose-900/20" />
         <div className="mx-auto max-w-7xl px-4 py-12 lg:px-8 lg:py-20">
-          <div className="grid lg:grid-cols-[1fr_1.2fr] gap-8 items-center">
+          <div className="grid items-center gap-8 lg:grid-cols-[1fr_1.1fr]">
             <div>
-              <span className="inline-flex items-center gap-2 rounded-full bg-gradient-warm px-4 py-2 text-xs font-semibold uppercase tracking-[0.15em] text-rose-foreground shadow-soft mb-6">
-                Taller de fabricación digital
+              <span className="mb-5 inline-flex items-center gap-2 rounded-full bg-gradient-warm px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.15em] text-rose-foreground shadow-soft">
+                {t("heroBadge")}
               </span>
-              <h1 className="text-[2rem] font-black leading-[1.1] tracking-tight [overflow-wrap:anywhere] sm:text-5xl lg:text-7xl mb-6">
-                Diseño integral para tus{" "}
-              <span className="bg-gradient-warm bg-clip-text text-transparent">ideas</span>{" "}
-              y{" "}
-              <span className="bg-gradient-warm bg-clip-text text-transparent">celebraciones</span>
+              <h1 className="mb-5 text-[1.9rem] font-black leading-[1.1] tracking-tight [overflow-wrap:anywhere] sm:text-5xl lg:text-6xl">
+                {t("heroTitle1")}{" "}
+                <span className="bg-gradient-warm bg-clip-text text-transparent">{t("heroTitle2")}</span>
               </h1>
-              <p className="text-base leading-relaxed text-muted-foreground sm:text-lg max-w-xl mb-8">
-                Impresión 3D, corte láser en madera, letreros en icopor, decoración de fiestas y repostería saludable. Un solo taller para imaginar, personalizar y recibir tu pedido en tiempo récord.
+              <p className="mb-7 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
+                {t("heroText")}
               </p>
-              <div className="flex flex-wrap gap-3 mb-10">
+              <div className="mb-8 flex flex-wrap gap-3">
                 <a
                   href="#colecciones"
-                  className="rounded-2xl bg-gradient-warm px-6 py-3 text-sm font-bold text-rose-foreground shadow-soft transition-all hover:scale-[1.05] focus:outline-none focus:ring-2 focus:ring-amber focus:ring-offset-2"
+                  className="rounded-2xl bg-gradient-warm px-6 py-3 text-sm font-bold text-rose-foreground shadow-soft transition-transform hover:scale-[1.04]"
                 >
-                  Explorar catálogo
+                  {t("ctaShop")}
                 </a>
                 <a
                   href="#personalizador"
-                  className="rounded-2xl border border-border bg-card px-6 py-3 text-sm font-bold transition-colors dark:border-dark hover:bg-muted focus:outline-none focus:ring-2 focus:ring-amber focus:ring-offset-2"
+                  className="rounded-2xl border border-border bg-card px-6 py-3 text-sm font-bold transition-colors hover:bg-muted"
                 >
-                  Iniciar configurador
+                  {t("ctaCustomize")}
                 </a>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
-                <div className="rounded-xl bg-card p-3 flex items-center gap-2">
-                  <span className="text-amber-500">🚀</span> +1.200 proyectos
+              <dl className="grid grid-cols-3 gap-2 text-center text-xs sm:text-sm">
+                <div className="rounded-2xl border border-border bg-card p-3">
+                  <dt className="text-lg font-black text-amber-600">{PRODUCTS.length}</dt>
+                  <dd className="text-muted-foreground">{t("statProducts")}</dd>
                 </div>
-                <div className="rounded-xl bg-card p-3 flex items-center gap-2">
-                  <span className="text-amber-500">⚡</span> 48h prototipado
+                <div className="rounded-2xl border border-border bg-card p-3">
+                  <dt className="text-lg font-black text-amber-600">4.9★</dt>
+                  <dd className="text-muted-foreground">{t("statRating")}</dd>
                 </div>
-                <div className="rounded-xl bg-card p-3 flex items-center gap-2">
-                  <span className="text-amber-500">★4.9</span> Reseñas verificadas
+                <div className="rounded-2xl border border-border bg-card p-3">
+                  <dt className="text-lg font-black text-amber-600">24 h</dt>
+                  <dd className="text-muted-foreground">{t("statShip")}</dd>
                 </div>
-              </div>
+              </dl>
             </div>
-            <div className="relative lg:order-2">
+            <div className="relative">
               <img
                 src={hero}
-                alt="Montaje de fiesta con arco de globos y letrero de madera personalizado de Jac Design"
-                className="w-full rounded-2xl shadow-2xl transition-transform hover:scale-[1.02] dark:shadow-none"
-                loading="lazy"
+                width={1200}
+                height={900}
+                alt="Custom balloon arch and engraved wood signage styled by Jac Design"
+                className="w-full rounded-3xl shadow-2xl"
               />
-              <div className="absolute -inset-4 rounded-3xl border border-amber/20 blur-2xl animate-pulse" />
             </div>
           </div>
         </div>
+
+        {/* trust bar */}
+        <div className="border-t border-border/70 bg-card/70 backdrop-blur-md">
+          <ul className="mx-auto grid max-w-7xl grid-cols-2 gap-y-2 px-4 py-4 text-[11px] font-semibold text-muted-foreground sm:text-xs lg:grid-cols-4 lg:px-8">
+            {[t("trustShipping"), t("trustSecure"), t("trustGuarantee"), t("trustLocal")].map((x) => (
+              <li key={x} className="flex items-center gap-2">
+                <span className="text-emerald-600">{Icon.shield("h-4 w-4")}</span>
+                {x}
+              </li>
+            ))}
+          </ul>
+        </div>
       </section>
 
-{/* CATALOG */}
-      <section id="colecciones" className="py-14 sm:py-20 lg:py-32 bg-muted/60 dark:bg-dark/60">
+      {/* CATALOG */}
+      <section id="colecciones" className="bg-muted/60 py-14 sm:py-20 lg:py-28">
         <div className="mx-auto max-w-7xl px-4 lg:px-8">
-          <div className="max-w-3xl mx-auto mb-12 text-center">
-            <span className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.14em] text-primary mb-3">
-              Catálogo Exclusivo 2026
+          <div className="mx-auto mb-10 max-w-3xl text-center">
+            <span className="mb-3 inline-flex rounded-full bg-primary/10 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.14em] text-primary">
+              {t("catalogKicker")}
             </span>
-            <h2 className="text-4xl font-black tracking-tight sm:text-5xl mb-4">
-              Servicios y colecciones premium
-            </h2>
-            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              50 productos de alta demanda organizados en nuestras 5 líneas especializadas: eventos, madera láser, impresión 3D, repostería fit y juguetes sensoriales.
-            </p>
+            <h2 className="mb-3 text-3xl font-black tracking-tight sm:text-5xl">{t("catalogTitle")}</h2>
+            <p className="mx-auto max-w-2xl text-muted-foreground sm:text-lg">{t("catalogText")}</p>
           </div>
 
-          {/* Categorías con contadores */}
-          <div className="mb-8">
-            <div className="flex flex-wrap gap-2 justify-center">
-              {categoryTabs.map((c) => (
-                <button
-                  key={c.id}
-                  onClick={() => setCat(c.id)}
-                  className={`
-                    inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold transition-all
-                    ${
-                      cat === c.id
-                        ? "bg-gradient-warm text-rose-foreground shadow-soft scale-105"
-                        : "border border-border bg-card text-muted-foreground hover:text-foreground dark:text-dark hover:border-amber/50"
-                    }
-                  `}
+          <div className="mb-6 flex flex-wrap justify-center gap-2">
+            {categoryTabs.map((c) => (
+              <button
+                key={c.id}
+                onClick={() => setCat(c.id)}
+                className={`inline-flex items-center gap-2 rounded-full px-3.5 py-2 text-xs font-semibold transition-all sm:text-sm ${
+                  cat === c.id
+                    ? "scale-105 bg-gradient-warm text-rose-foreground shadow-soft"
+                    : "border border-border bg-card text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <span>{c.label}</span>
+                <span
+                  className={`rounded-full px-2 py-0.5 text-[10px] font-extrabold ${
+                    cat === c.id ? "bg-black/20 text-white" : "bg-muted text-muted-foreground"
+                  }`}
                 >
-                  <span>{c.label}</span>
-                  <span
-                    className={`rounded-full px-2 py-0.5 text-xs font-extrabold ${
-                      cat === c.id
-                        ? "bg-black/20 text-white"
-                        : "bg-muted text-muted-foreground"
-                    }`}
-                  >
-                    {c.count}
-                  </span>
-                </button>
-              ))}
-            </div>
+                  {c.count}
+                </span>
+              </button>
+            ))}
           </div>
 
-          {/* Toolbar de búsqueda, filtros y ordenamiento */}
-          <div className="mb-10 flex flex-col md:flex-row items-center justify-between gap-4 rounded-3xl border border-border bg-card p-4 shadow-soft">
+          {/* toolbar */}
+          <div className="mb-8 flex flex-col items-center justify-between gap-3 rounded-3xl border border-border bg-card p-3 shadow-soft sm:p-4 md:flex-row">
             <div className="relative w-full md:w-80">
               <div className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-muted-foreground">
                 {Icon.search("h-4 w-4")}
@@ -393,12 +509,14 @@ function JacDesign() {
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Buscar por nombre, material..."
-                className="w-full rounded-2xl border border-input bg-background pl-10 pr-10 py-2.5 text-sm outline-none transition-shadow focus:ring-2 focus:ring-amber"
+                placeholder={tr(SEARCH_PH)}
+                aria-label={tr(SEARCH_PH)}
+                className="w-full rounded-2xl border border-input bg-background py-2.5 pl-10 pr-10 text-sm outline-none focus:ring-2 focus:ring-amber"
               />
               {search && (
                 <button
                   onClick={() => setSearch("")}
+                  aria-label={t("close")}
                   className="absolute inset-y-0 right-3 flex items-center text-muted-foreground hover:text-foreground"
                 >
                   {Icon.close("h-4 w-4")}
@@ -406,51 +524,45 @@ function JacDesign() {
               )}
             </div>
 
-            <div className="flex flex-wrap items-center gap-3 w-full md:w-auto justify-between md:justify-end">
+            <div className="flex w-full flex-wrap items-center justify-between gap-2 md:w-auto md:justify-end md:gap-3">
               <button
                 onClick={() => setOnlyPopular(!onlyPopular)}
-                className={`inline-flex items-center gap-2 rounded-2xl px-4 py-2.5 text-xs font-bold transition-colors ${
+                className={`inline-flex items-center gap-1.5 rounded-2xl px-3 py-2.5 text-[11px] font-bold transition-colors sm:text-xs ${
                   onlyPopular
                     ? "bg-amber-500 text-white shadow-soft"
                     : "border border-border bg-muted/40 text-muted-foreground hover:text-foreground"
                 }`}
               >
                 {Icon.sparkles("h-3.5 w-3.5")}
-                <span>Solo Más Vendidos</span>
+                <span>{tr(ONLY_POPULAR)}</span>
               </button>
 
               <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold text-muted-foreground hidden sm:inline">
-                  Ordenar:
-                </span>
+                <span className="hidden text-xs font-semibold text-muted-foreground sm:inline">{tr(SORT_LABEL)}</span>
                 <select
                   value={sort}
                   onChange={(e) => setSort(e.target.value as typeof sort)}
+                  aria-label={tr(SORT_LABEL)}
                   className="rounded-2xl border border-input bg-background px-3 py-2 text-xs font-semibold outline-none focus:ring-2 focus:ring-amber"
                 >
-                  <option value="featured">Destacados</option>
-                  <option value="price-asc">Precio: menor a mayor</option>
-                  <option value="price-desc">Precio: mayor a menor</option>
-                  <option value="rating">Mejor valorados (★)</option>
+                  {SORTS.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {tr(s.label)}
+                    </option>
+                  ))}
                 </select>
               </div>
 
-              <span className="text-xs font-bold text-muted-foreground px-2">
-                {filtered.length} {filtered.length === 1 ? "resultado" : "productos"}
+              <span className="px-1 text-xs font-bold text-muted-foreground">
+                {filtered.length} {tr(RESULTS)}
               </span>
             </div>
           </div>
 
-          {/* Grid de Productos */}
           {filtered.length === 0 ? (
-            <div className="rounded-3xl border border-dashed border-border p-12 text-center bg-card">
-              <div className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-muted text-muted-foreground">
-                {Icon.search("h-7 w-7")}
-              </div>
-              <h3 className="text-xl font-bold">No se encontraron productos</h3>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Intenta con otro término de búsqueda o restablece los filtros.
-              </p>
+            <div className="rounded-3xl border border-dashed border-border bg-card p-12 text-center">
+              <h3 className="text-xl font-bold">{tr(NO_RESULTS)}</h3>
+              <p className="mt-2 text-sm text-muted-foreground">{tr(NO_RESULTS_HINT)}</p>
               <button
                 onClick={() => {
                   setCat("todos");
@@ -460,7 +572,7 @@ function JacDesign() {
                 }}
                 className="mt-6 rounded-2xl bg-gradient-warm px-6 py-2.5 text-sm font-bold text-rose-foreground shadow-soft"
               >
-                Restablecer todos los filtros
+                {tr(RESET)}
               </button>
             </div>
           ) : (
@@ -468,7 +580,7 @@ function JacDesign() {
               {filtered.map((p) => (
                 <article
                   key={p.id}
-                  className="group flex flex-col rounded-2xl sm:rounded-3xl border border-border bg-card shadow-soft dark:border-dark/50 dark:bg-dark overflow-hidden transition-all duration-300 hover:shadow-xl hover:border-amber hover:-translate-y-1"
+                  className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-soft transition-all duration-300 hover:-translate-y-1 hover:border-amber hover:shadow-xl sm:rounded-3xl"
                 >
                   <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted">
                     <img
@@ -476,90 +588,75 @@ function JacDesign() {
                       width={800}
                       height={600}
                       loading="lazy"
-                      alt={p.name}
-                      className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-108"
+                      alt={tr(p.name)}
+                      className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-
-                    {/* Tag badge */}
-                    <div className="absolute left-1.5 top-1.5 sm:left-3 sm:top-3 flex flex-col gap-1 items-start">
-                      <span className="max-w-[9rem] truncate rounded-full bg-card/90 px-2 py-0.5 sm:px-3 sm:py-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider backdrop-blur-md shadow-sm">
-                        {p.tag}
+                    <div className="absolute left-1.5 top-1.5 flex flex-col items-start gap-1 sm:left-3 sm:top-3">
+                      <span className="max-w-[9rem] truncate rounded-full bg-card/90 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider shadow-sm backdrop-blur-md sm:px-3 sm:py-1 sm:text-[10px]">
+                        {tr(p.tag)}
                       </span>
                       {p.popular && (
-                        <span className="rounded-full bg-amber-500 text-white px-2 py-0.5 text-[9px] font-black uppercase tracking-wider shadow-sm flex items-center gap-1">
-                          {Icon.sparkles("h-2.5 w-2.5")} Bestseller
+                        <span className="flex items-center gap-1 rounded-full bg-amber-500 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-white shadow-sm">
+                          {Icon.sparkles("h-2.5 w-2.5")} {t("popular")}
                         </span>
                       )}
                     </div>
 
-                    {/* Actions on top-right */}
-                    <div className="absolute right-1.5 top-1.5 sm:right-3 sm:top-3 flex flex-col gap-1.5 sm:gap-2 z-10">
+                    <div className="absolute right-1.5 top-1.5 z-10 flex flex-col gap-1.5 sm:right-3 sm:top-3 sm:gap-2">
                       <button
                         onClick={() => toggleWish(p)}
-                        aria-label="Añadir a favoritos"
-                        className="grid h-8 w-8 sm:h-9 sm:w-9 place-items-center rounded-full bg-card/90 text-rose backdrop-blur-md transition-transform hover:scale-115 shadow-sm"
+                        aria-label={t("wishlist")}
+                        className="grid h-8 w-8 place-items-center rounded-full bg-card/90 text-rose shadow-sm backdrop-blur-md transition-transform hover:scale-110 sm:h-9 sm:w-9"
                       >
                         {Icon.heart("h-4 w-4", wish.includes(p.id))}
                       </button>
                       <button
                         onClick={() => setQuick(p)}
-                        aria-label="Vista rápida"
-                        className="grid h-8 w-8 sm:h-9 sm:w-9 place-items-center rounded-full bg-card/90 backdrop-blur-md transition-transform hover:scale-115 shadow-sm hover:text-primary"
+                        aria-label={t("quickView")}
+                        className="grid h-8 w-8 place-items-center rounded-full bg-card/90 shadow-sm backdrop-blur-md transition-transform hover:scale-110 hover:text-primary sm:h-9 sm:w-9"
                       >
                         {Icon.search("h-4 w-4")}
                       </button>
                     </div>
 
-                    {/* Rating badge bottom right */}
-                    <div className="absolute right-1.5 bottom-1.5 sm:right-3 sm:bottom-3 rounded-full bg-black/60 text-white px-2 py-0.5 sm:px-2.5 sm:py-1 text-[10px] sm:text-[11px] font-bold backdrop-blur-md flex items-center gap-1">
+                    <div className="absolute bottom-1.5 right-1.5 flex items-center gap-1 rounded-full bg-black/60 px-2 py-0.5 text-[10px] font-bold text-white backdrop-blur-md sm:bottom-3 sm:right-3 sm:px-2.5 sm:py-1 sm:text-[11px]">
                       <span className="text-amber-400">{Icon.star("h-3 w-3")}</span>
                       <span>{p.rating.toFixed(1)}</span>
-                      <span className="hidden sm:inline text-white/70 text-[10px]">({p.reviewCount})</span>
+                      <span className="hidden text-[10px] text-white/70 sm:inline">({p.reviewCount})</span>
                     </div>
                   </div>
 
                   <div className="flex flex-1 flex-col p-3 sm:p-5">
-                    <div className="flex min-w-0 flex-wrap items-center gap-x-2 mb-1 sm:mb-1.5 text-[10px] sm:text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
-                      <span className="text-primary font-bold truncate">
-                        {CATS.find((c) => c.id === p.cat)?.label}
-                      </span>
+                    <div className="mb-1 flex min-w-0 flex-wrap items-center gap-x-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground sm:mb-1.5 sm:text-[11px]">
+                      <span className="truncate font-bold text-primary">{tr(CAT_LABELS[p.cat])}</span>
                       <span className="hidden sm:inline">•</span>
-                      <span className="hidden sm:flex items-center gap-1">
-                        {Icon.truck("h-3 w-3")} {p.leadTime}
+                      <span className="hidden items-center gap-1 sm:flex">
+                        {Icon.truck("h-3 w-3")} {tr(LEAD_LABELS[p.lead])}
                       </span>
                     </div>
 
-                    <h3 className="line-clamp-2 text-sm sm:text-lg font-bold leading-snug tracking-tight group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
-                      {p.name}
+                    <h3 className="line-clamp-2 text-sm font-bold leading-snug tracking-tight transition-colors group-hover:text-amber-600 sm:text-lg">
+                      {tr(p.name)}
                     </h3>
 
-                    <p className="mt-1.5 sm:mt-2 hidden sm:line-clamp-2 text-xs leading-relaxed text-muted-foreground flex-1">
-                      {p.desc}
+                    <p className="mt-1.5 hidden flex-1 text-xs leading-relaxed text-muted-foreground sm:line-clamp-2 sm:mt-2">
+                      {tr(p.desc)}
                     </p>
 
-                    <div className="mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-border/60 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                      <div className="min-w-0">
-                        <span className="text-[10px] uppercase font-bold text-muted-foreground block">
-                          Precio
-                        </span>
-                        <span className="text-base sm:text-xl font-black tracking-tight">
-                          CAD ${p.price}
-                        </span>
-                      </div>
+                    <div className="mt-2 flex flex-col gap-2 border-t border-border/60 pt-2 sm:mt-3 sm:flex-row sm:items-center sm:justify-between sm:pt-3">
+                      <span className="text-base font-black tracking-tight sm:text-xl">{money(p.price)}</span>
                       <div className="grid grid-cols-2 gap-1.5 sm:flex sm:items-center sm:gap-2">
                         <button
-                          onClick={() => addToCart(p)}
-                          className="inline-flex items-center justify-center gap-1.5 rounded-xl sm:rounded-2xl bg-primary px-2 py-2 text-[11px] sm:text-xs font-bold text-primary-foreground transition-transform hover:scale-[1.04] shadow-sm"
+                          onClick={() => addToCart({ id: p.id, name: tr(p.name), price: p.price })}
+                          className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-primary px-2 py-2 text-[11px] font-bold text-primary-foreground shadow-sm transition-transform hover:scale-[1.04] sm:rounded-2xl sm:text-xs"
                         >
-                          {Icon.cart("h-3.5 w-3.5")} Añadir
+                          {Icon.cart("h-3.5 w-3.5")} {t("addToCart")}
                         </button>
                         <button
                           onClick={() => setQuick(p)}
-                          className="inline-flex items-center justify-center gap-1 rounded-xl sm:rounded-2xl bg-muted px-2 py-2 text-[11px] sm:text-xs font-bold transition-colors hover:bg-muted/80"
-                          title="Vista rápida"
+                          className="inline-flex items-center justify-center gap-1 rounded-xl bg-muted px-2 py-2 text-[11px] font-bold transition-colors hover:bg-muted/80 sm:rounded-2xl sm:text-xs"
                         >
-                          {Icon.search("h-3.5 w-3.5")} Ver
+                          {Icon.search("h-3.5 w-3.5")} {t("quickView")}
                         </button>
                       </div>
                     </div>
@@ -571,77 +668,80 @@ function JacDesign() {
         </div>
       </section>
 
-{/* CUSTOMIZER */}
-      <section id="personalizador" className="py-14 sm:py-20 lg:py-32 bg-muted/60 dark:bg-dark/60">
+      {/* CUSTOMIZER */}
+      <section id="personalizador" className="py-14 sm:py-20 lg:py-28">
         <div className="mx-auto max-w-7xl px-4 lg:px-8">
-          <div className="max-w-3xl mx-auto mb-12">
-            <h2 className="text-4xl font-black tracking-tight sm:text-5xl mb-4">
-              Personalizador en vivo
-            </h2>
-            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              Escribe, elige tipografía y acabado: el mockup y el precio se actualizan al instante.
-            </p>
+          <div className="mb-10 max-w-3xl">
+            <span className="mb-3 inline-flex rounded-full bg-primary/10 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.14em] text-primary">
+              {t("customKicker")}
+            </span>
+            <h2 className="mb-3 text-3xl font-black tracking-tight sm:text-5xl">{t("customTitle")}</h2>
+            <p className="text-muted-foreground sm:text-lg">{t("customText")}</p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.2fr] gap-8">
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_1.1fr]">
             <div className="space-y-6">
-              <Field label="Producto base">
+              <Field label={t("baseProduct")}>
                 <div className="grid gap-2 sm:grid-cols-3">
                   {BASES.map((b) => (
                     <button
                       key={b.id}
                       onClick={() => setBase(b)}
-                      className={`
-                        rounded-2xl border px-3 py-3 text-xs font-bold leading-tight transition-colors
-                        ${base.id === b.id ? 'border-transparent bg-primary text-primary-foreground' : 'border-border hover:bg-muted dark:hover:bg-dark'}
-                      `}
+                      className={`rounded-2xl border px-3 py-3 text-xs font-bold leading-tight transition-colors ${
+                        base.id === b.id
+                          ? "border-transparent bg-primary text-primary-foreground"
+                          : "border-border hover:bg-muted"
+                      }`}
                     >
-                      {b.label}
+                      {t(b.key)}
                     </button>
                   ))}
                 </div>
               </Field>
 
-              <Field label="Texto, dedicatoria o logotipo">
+              <Field label={t("yourText")}>
                 <input
                   value={text}
                   onChange={(e) => setText(e.target.value)}
                   maxLength={40}
-                  placeholder="Escribe aquí…"
-                  className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none transition-shadow focus:ring-2 focus:ring-amber dark:text-dark dark:bg-dark dark:focus:ring-amber"
+                  placeholder={t("textPlaceholder")}
+                  aria-label={t("yourText")}
+                  className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-amber"
                 />
               </Field>
 
-              <Field label="Tipografía">
+              <Field label={t("typeface")}>
                 <div className="grid gap-2 sm:grid-cols-3">
                   {FONTS.map((f) => (
                     <button
                       key={f.id}
                       onClick={() => setFont(f)}
                       style={{ fontFamily: f.css }}
-                      className={`
-                        rounded-2xl border px-3 py-3 text-xs font-bold transition-colors
-                        ${font.id === f.id ? 'border-transparent bg-primary text-primary-foreground' : 'border-border hover:bg-muted dark:hover:bg-dark'}
-                      `}
+                      className={`rounded-2xl border px-3 py-3 text-xs font-bold transition-colors ${
+                        font.id === f.id
+                          ? "border-transparent bg-primary text-primary-foreground"
+                          : "border-border hover:bg-muted"
+                      }`}
                     >
-                      {f.label}
+                      {t(f.key)}
                     </button>
                   ))}
                 </div>
               </Field>
 
-              <Field label={`Acabado · ${theme.label}`}>
+              <Field label={`${t("finish")} · ${t(theme.key)}`}>
                 <div className="flex gap-3">
-                  {THEMES.map((t) => (
+                  {THEMES.map((x) => (
                     <button
-                      key={t.id}
-                      onClick={() => setTheme(t)}
-                      aria-label={t.label}
-                      style={{ backgroundColor: t.token }}
-                      className={`
-                        h-10 w-10 rounded-full transition-transform
-                        ${theme.id === t.id ? 'scale-110 ring-2 ring-foreground ring-offset-2 ring-offset-card' : 'hover:scale-105 dark:hover:scale-105'}
-                      `}
+                      key={x.id}
+                      onClick={() => setTheme(x)}
+                      aria-label={t(x.key)}
+                      style={{ backgroundColor: x.token }}
+                      className={`h-10 w-10 rounded-full transition-transform ${
+                        theme.id === x.id
+                          ? "scale-110 ring-2 ring-foreground ring-offset-2 ring-offset-card"
+                          : "hover:scale-105"
+                      }`}
                     />
                   ))}
                 </div>
@@ -651,22 +751,22 @@ function JacDesign() {
                 onClick={() =>
                   addToCart({
                     id: `custom-${Date.now()}`,
-                    name: `${base.label} · "${text.trim() || "Sin texto"}"`,
+                    name: `${t(base.key)} · "${text.trim() || tr(NO_TEXT)}"`,
                     price: customPrice,
                   })
                 }
-                className="w-full rounded-2xl bg-gradient-warm py-4 text-sm font-bold text-rose-foreground shadow-soft transition-transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-amber focus:ring-offset-2 mt-4"
+                className="mt-2 w-full rounded-2xl bg-gradient-warm py-4 text-sm font-bold text-rose-foreground shadow-soft transition-transform hover:scale-[1.02]"
               >
-                Añadir personalización — CAD ${customPrice.toFixed(2)}
+                {t("addCustom")} — {money(customPrice)}
               </button>
             </div>
 
             <div className="rounded-3xl border border-border bg-card p-6 shadow-soft">
-              <p className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground mb-4">
-                Vista previa en vivo
+              <p className="mb-4 text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">
+                {t("livePreview")}
               </p>
               <div
-                className="mt-4 grid min-h-[300px] place-items-center rounded-[1.5rem] p-6 text-center"
+                className="mt-4 grid min-h-[280px] place-items-center rounded-[1.5rem] p-6 text-center"
                 style={{
                   backgroundColor: `color-mix(in oklab, ${theme.token} 15%, white)`,
                   border: `2px solid color-mix(in oklab, ${theme.token} 40%, white)`,
@@ -674,11 +774,11 @@ function JacDesign() {
               >
                 <div
                   className={
-                    base.id === "pocillo"
+                    base.id === "mug"
                       ? "relative grid h-40 w-52 place-items-center rounded-2xl bg-white shadow-soft"
-                      : base.id === "caja"
+                      : base.id === "box"
                         ? "grid h-40 w-60 place-items-center rounded-xl bg-white shadow-soft"
-                        : "grid h-38 w-68 place-items-center rounded-lg bg-white shadow-soft"
+                        : "grid h-36 w-64 place-items-center rounded-lg bg-white shadow-soft"
                   }
                   style={{ outline: `6px solid color-mix(in oklab, ${theme.token} 65%, white)` }}
                 >
@@ -686,21 +786,18 @@ function JacDesign() {
                     className="max-w-full break-words px-4 text-2xl font-bold leading-tight"
                     style={{ fontFamily: font.css, color: theme.token }}
                   >
-                    {text.trim() || "Tu texto aquí"}
+                    {text.trim() || tr(YOUR_TEXT_HERE)}
                   </span>
-                  {base.id === "pocillo" && (
-                    <span
-                      className="absolute -right-6 top-8 h-14 w-12 rounded-full border-8 border-white"
-                      style={{ borderColor: "white" }}
-                    />
+                  {base.id === "mug" && (
+                    <span className="absolute -right-6 top-8 h-14 w-12 rounded-full border-8 border-white" />
                   )}
                 </div>
               </div>
               <div className="mt-5 grid grid-cols-3 gap-3 text-center text-sm">
                 {[
-                  ["Base", base.label],
-                  ["Tipografía", font.label],
-                  ["Precio", `CAD $${customPrice.toFixed(2)}`],
+                  [t("baseProduct"), t(base.key)],
+                  [t("typeface"), t(font.key)],
+                  [t("totalPrice"), money(customPrice)],
                 ].map(([k, v]) => (
                   <div key={k} className="rounded-xl bg-muted p-3">
                     <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{k}</p>
@@ -713,19 +810,15 @@ function JacDesign() {
         </div>
       </section>
 
-{/* 3D QUOTER */}
-      <section id="cotizador" className="py-14 sm:py-20 lg:py-32 bg-muted/40 dark:bg-dark/60">
+      {/* 3D QUOTER */}
+      <section id="cotizador" className="bg-muted/40 py-14 sm:py-20 lg:py-28">
         <div className="mx-auto max-w-7xl px-4 lg:px-8">
-          <div className="max-w-3xl mb-12">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-xs font-bold uppercase tracking-wider mb-3">
-              Studio 3D en Tiempo Real
+          <div className="mb-10 max-w-3xl">
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-amber-600">
+              {tr(QUOTER_KICKER)}
             </div>
-            <h2 className="text-4xl font-black tracking-tight sm:text-5xl mb-4">
-              Maker Studio · Cotizador 3D Interactivo
-            </h2>
-            <p className="text-muted-foreground text-lg">
-              Visualiza geometrías en 3D con shaders en vivo, sube tus archivos STL con cálculo automático de volumen, ajusta materiales de ingeniería e infill, y obtén presupuestos precisos al instante.
-            </p>
+            <h2 className="mb-3 text-3xl font-black tracking-tight sm:text-5xl">{tr(QUOTER_TITLE)}</h2>
+            <p className="text-muted-foreground sm:text-lg">{tr(QUOTER_TEXT)}</p>
           </div>
 
           <Quoter3D
@@ -738,39 +831,33 @@ function JacDesign() {
       </section>
 
       {/* REVIEWS */}
-      <section id="galeria" className="py-14 sm:py-20 lg:py-32 bg-muted/60 dark:bg-dark/60">
+      <section id="galeria" className="py-14 sm:py-20 lg:py-28">
         <div className="mx-auto max-w-7xl px-4 lg:px-8">
-          <div className="max-w-2xl mx-auto mb-12 text-center">
-            <h2 className="text-4xl font-black tracking-tight sm:text-5xl mb-4">
-              Galería de clientes
-            </h2>
-            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              Eventos, oficinas, makers y repostería fit. Esto dicen quienes ya crearon con nosotros.
-            </p>
+          <div className="mx-auto mb-10 max-w-2xl text-center">
+            <span className="mb-3 inline-flex rounded-full bg-primary/10 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.14em] text-primary">
+              {t("reviewsKicker")}
+            </span>
+            <h2 className="text-3xl font-black tracking-tight sm:text-5xl">{t("reviewsTitle")}</h2>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {REVIEWS.map((r) => (
               <article
                 key={r.name}
-                className="group rounded-xl bg-card p-6 border border-border shadow-soft dark:border-dark/50 dark:bg-dark transition-all hover:shadow-lg hover:border-amber"
+                className="rounded-3xl border border-border bg-card p-6 shadow-soft transition-all hover:border-amber hover:shadow-lg"
               >
-                <div className="flex items-start gap-4 mb-4">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-warm flex items-center justify-center flex-shrink-0">
-                    <span className="text-white font-bold text-sm">{r.name.charAt(0)}</span>
+                <div className="mb-4 flex items-start gap-4">
+                  <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-gradient-warm">
+                    <span className="text-sm font-bold text-rose-foreground">{r.name.charAt(0)}</span>
                   </div>
                   <div className="flex-1">
-                    <p className="font-bold text-lg">{r.name}</p>
-                    <p className="text-sm text-muted-foreground">{r.role}</p>
+                    <p className="text-lg font-bold">{r.name}</p>
+                    <p className="text-sm text-muted-foreground">{tr(r.role)}</p>
                   </div>
                 </div>
-                <blockquote className="mb-4 leading-relaxed text-muted-foreground line-clamp-3">
-                  “{r.text}”
-                </blockquote>
-                <div className="flex gap-2">
+                <blockquote className="mb-4 leading-relaxed text-muted-foreground">“{tr(r.text)}”</blockquote>
+                <div className="flex gap-1 text-amber-500">
                   {[0, 1, 2, 3, 4].map((i) => (
-                    <span key={i} className="text-amber-500 text-xs">
-                      {Icon.star("h-3 w-3")}
-                    </span>
+                    <span key={i}>{Icon.star("h-3.5 w-3.5")}</span>
                   ))}
                 </div>
               </article>
@@ -779,76 +866,60 @@ function JacDesign() {
         </div>
       </section>
 
-      {/* FOOTER */}
-      <footer className="py-12 lg:py-16 bg-dark border-t border-dark/50">
+      {/* FOOTER + CONTACT */}
+      <footer className="border-t border-border bg-muted/50 py-12 lg:py-16">
         <div className="mx-auto max-w-7xl px-4 lg:px-8">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+          {/* CONTACT */}
+          <div
+            id="contacto"
+            className="mb-12 grid gap-6 rounded-3xl border border-border bg-card p-5 shadow-soft sm:p-8 lg:grid-cols-[1fr_1.2fr]"
+          >
             <div>
-              <span className="text-2xl font-black tracking-wider text-rose-foreground mb-4 block">Jac Design</span>
-              <p className="text-muted-foreground text-sm">
-                Impresión 3D · Fiestas · Corte láser · Icopor · Repostería saludable
-              </p>
-            </div>
-            <div>
-              <h4 className="font-bold text-foreground mb-4">Enlaces rápidos</h4>
-              <ul className="space-y-3 text-sm text-muted-foreground">
-                <li><a href="#inicio" className="transition-colors hover:text-foreground">Inicio</a></li>
-                <li><a href="#colecciones" className="transition-colors hover:text-foreground">Catálogo</a></li>
-                <li><a href="#personalizador" className="transition-colors hover:text-foreground">Configurador</a></li>
-                <li><a href="#cotizador" className="transition-colors hover:text-foreground">Cotizador 3D</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-bold text-foreground mb-4">Servicios</h4>
-              <ul className="space-y-3 text-sm text-muted-foreground">
-                <li>Impresión 3D en PLA, PETG y Resina</li>
-                <li>Corte láser en madera y icopor</li>
-                <li>Decoración de fiestas personalizada</li>
-                <li>Repostería saludable y fit</li>
-              </ul>
-            </div>
-          </div>
-
-          {/* CONTACTO */}
-          <div id="contacto" className="grid gap-6 lg:grid-cols-[1fr_1.2fr] rounded-3xl border border-border bg-card p-5 sm:p-8 shadow-soft mb-10">
-            <div>
-              <h4 className="text-xl sm:text-2xl font-black tracking-tight">Hablemos de tu proyecto</h4>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Cuéntanos qué necesitas y te enviamos una propuesta con precios en CAD.
-              </p>
+              <span className="mb-2 inline-flex rounded-full bg-primary/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-primary">
+                {t("contactKicker")}
+              </span>
+              <h2 className="text-xl font-black tracking-tight sm:text-3xl">{t("contactTitle")}</h2>
+              <p className="mt-2 text-sm text-muted-foreground">{t("contactText")}</p>
               <dl className="mt-5 space-y-3 text-sm">
                 <div>
-                  <dt className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Teléfono</dt>
+                  <dt className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                    {t("phoneLabel")}
+                  </dt>
                   <dd>
-                    <a href="tel:+15551234567" className="font-semibold hover:text-amber-600">
-                      +1 (555) 123-4567
+                    <a href="tel:+16475550142" className="font-semibold hover:text-amber-600">
+                      +1 (647) 555-0142
                     </a>
                   </dd>
                 </div>
                 <div>
-                  <dt className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Correo</dt>
+                  <dt className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                    {t("emailLabel")}
+                  </dt>
                   <dd>
-                    <a href="mailto:contacto@jac-design.com" className="font-semibold hover:text-amber-600">
-                      contacto@jac-design.com
+                    <a href="mailto:hello@jac-design.ca" className="font-semibold hover:text-amber-600">
+                      hello@jac-design.ca
                     </a>
                   </dd>
                 </div>
                 <div>
-                  <dt className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Horario de atención</dt>
-                  <dd className="font-semibold">Lunes a viernes 9:00–18:00 · Sábados 10:00–14:00 (ET)</dd>
+                  <dt className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                    {t("hoursLabel")}
+                  </dt>
+                  <dd className="font-semibold">{t("hoursValue")}</dd>
                 </div>
               </dl>
+              <p className="mt-4 text-[11px] italic text-muted-foreground">{t("placeholderNote")}</p>
             </div>
 
             <form
               onSubmit={(e) => {
                 e.preventDefault();
                 if (!contact.name.trim() || !contact.email.trim() || !contact.message.trim()) {
-                  toast("Completa nombre, correo y mensaje");
+                  toast(t("contactIncomplete"));
                   return;
                 }
                 setContact({ name: "", email: "", phone: "", message: "" });
-                toast("¡Mensaje enviado! Te respondemos en 48 horas");
+                toast(t("contactSent"));
               }}
               className="grid gap-3"
             >
@@ -857,8 +928,8 @@ function JacDesign() {
                   value={contact.name}
                   onChange={(e) => setContact({ ...contact, name: e.target.value })}
                   maxLength={100}
-                  placeholder="Nombre completo"
-                  aria-label="Nombre completo"
+                  placeholder={t("fieldName")}
+                  aria-label={t("fieldName")}
                   className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-amber"
                 />
                 <input
@@ -866,8 +937,8 @@ function JacDesign() {
                   onChange={(e) => setContact({ ...contact, phone: e.target.value })}
                   maxLength={30}
                   type="tel"
-                  placeholder="Teléfono (opcional)"
-                  aria-label="Teléfono"
+                  placeholder={t("fieldPhone")}
+                  aria-label={t("fieldPhone")}
                   className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-amber"
                 />
               </div>
@@ -876,8 +947,8 @@ function JacDesign() {
                 onChange={(e) => setContact({ ...contact, email: e.target.value })}
                 maxLength={255}
                 type="email"
-                placeholder="Correo electrónico"
-                aria-label="Correo electrónico"
+                placeholder={t("fieldEmail")}
+                aria-label={t("fieldEmail")}
                 className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-amber"
               />
               <textarea
@@ -885,114 +956,135 @@ function JacDesign() {
                 onChange={(e) => setContact({ ...contact, message: e.target.value })}
                 maxLength={1000}
                 rows={4}
-                placeholder="Cuéntanos qué quieres crear…"
-                aria-label="Mensaje"
+                placeholder={t("fieldMessage")}
+                aria-label={t("fieldMessage")}
                 className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-amber"
               />
               <button
                 type="submit"
                 className="w-full rounded-2xl bg-gradient-warm py-3.5 text-sm font-bold text-rose-foreground shadow-soft transition-transform hover:scale-[1.02]"
               >
-                Enviar mensaje
+                {t("send")}
               </button>
             </form>
           </div>
-          <div className="pt-8 border-t border-dark/20 flex flex-col lg:flex-row justify-between items-center gap-4">
-            <p className="text-xs text-muted-foreground">
-              2026 Jac Design. Todos los derechos reservados.
-            </p>
-            <div className="flex gap-3">
-              {/* Social links would go here */}
+
+          <div className="mb-10 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            <div>
+              <span className="mb-3 block text-2xl font-black tracking-tight">Jac Design</span>
+              <p className="text-sm text-muted-foreground">{t("footerText")}</p>
             </div>
+            <div>
+              <h3 className="mb-4 font-bold">{tr(LINKS)}</h3>
+              <ul className="space-y-3 text-sm text-muted-foreground">
+                {navLinks.slice(0, 5).map(([href, label]) => (
+                  <li key={href}>
+                    <a href={href} className="transition-colors hover:text-foreground">
+                      {label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <h3 className="mb-4 font-bold">{tr(SERVICES)}</h3>
+              <ul className="space-y-3 text-sm text-muted-foreground">
+                {SERVICE_LIST.map((s) => (
+                  <li key={s.en}>{tr(s)}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          <div className="flex flex-col items-center justify-between gap-2 border-t border-border pt-8 text-xs text-muted-foreground lg:flex-row">
+            <p>© 2026 Jac Design. {t("rights")}</p>
+            <p>{t("pricesCad")}</p>
           </div>
         </div>
       </footer>
 
+      {/* mobile sticky cart bar */}
+      {cart.length > 0 && (
+        <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-card/95 p-3 backdrop-blur-md sm:hidden">
+          <button
+            onClick={() => setCartOpen(true)}
+            className="flex w-full items-center justify-between rounded-2xl bg-gradient-warm px-4 py-3 text-sm font-bold text-rose-foreground shadow-soft"
+          >
+            <span className="flex items-center gap-2">
+              {Icon.cart("h-4 w-4")} {cart.length} · {t("cart")}
+            </span>
+            <span>{money(total)}</span>
+          </button>
+        </div>
+      )}
+
       {/* QUICK VIEW MODAL */}
       {quick && (
-        <Modal onClose={() => setQuick(null)} title="Detalle de producto">
-          <div className="grid gap-6 sm:grid-cols-2 items-start">
+        <Modal onClose={() => setQuick(null)} title={tr(QUICK_TITLE)} closeLabel={t("close")}>
+          <div className="grid items-start gap-6 sm:grid-cols-2">
             <div className="relative overflow-hidden rounded-2xl bg-muted">
               <img
                 src={quick.img}
                 width={900}
                 height={700}
                 loading="lazy"
-                alt={quick.name}
+                alt={tr(quick.name)}
                 className="aspect-[4/3] w-full rounded-2xl object-cover shadow-sm"
               />
-              <span className="absolute left-3 top-3 rounded-full bg-card/90 px-3 py-1 text-[10px] font-bold uppercase tracking-wider backdrop-blur-md shadow-sm">
-                {quick.tag}
+              <span className="absolute left-3 top-3 rounded-full bg-card/90 px-3 py-1 text-[10px] font-bold uppercase tracking-wider shadow-sm backdrop-blur-md">
+                {tr(quick.tag)}
               </span>
             </div>
 
             <div className="flex flex-col">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="rounded-full bg-primary/10 text-primary px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider">
-                  {CATS.find((c) => c.id === quick.cat)?.label}
+              <div className="mb-2 flex flex-wrap items-center gap-2">
+                <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-primary">
+                  {tr(CAT_LABELS[quick.cat])}
                 </span>
-                <div className="flex items-center gap-1 text-amber-500 text-xs font-bold">
+                <div className="flex items-center gap-1 text-xs font-bold text-amber-500">
                   {Icon.star("h-3.5 w-3.5")}
                   <span>{quick.rating.toFixed(1)}</span>
-                  <span className="text-muted-foreground font-normal text-[11px]">
-                    ({quick.reviewCount} opiniones verificadas)
+                  <span className="text-[11px] font-normal text-muted-foreground">
+                    ({quick.reviewCount} {tr(VERIFIED)})
                   </span>
                 </div>
               </div>
 
-              <h3 className="text-2xl font-black tracking-tight">{quick.name}</h3>
+              <h3 className="text-2xl font-black tracking-tight">{tr(quick.name)}</h3>
+              <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{tr(quick.desc)}</p>
 
-              <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-                {quick.desc}
-              </p>
-
-              {/* Ficha técnica */}
-              <div className="mt-4 grid grid-cols-2 gap-2.5 rounded-2xl bg-muted/50 p-3.5 border border-border/70 text-xs">
+              <div className="mt-4 grid grid-cols-2 gap-2.5 rounded-2xl border border-border/70 bg-muted/50 p-3.5 text-xs">
                 <div>
-                  <span className="text-[10px] uppercase font-bold text-muted-foreground block">
-                    Material / Base
-                  </span>
-                  <span className="font-semibold text-foreground">{quick.material}</span>
-                </div>
-                {quick.dimensions && (
-                  <div>
-                    <span className="text-[10px] uppercase font-bold text-muted-foreground block">
-                      Dimensiones
-                    </span>
-                    <span className="font-semibold text-foreground">{quick.dimensions}</span>
-                  </div>
-                )}
-                <div>
-                  <span className="text-[10px] uppercase font-bold text-muted-foreground block">
-                    Tiempo de producción
-                  </span>
-                  <span className="font-semibold text-foreground">{quick.leadTime}</span>
+                  <span className="block text-[10px] font-bold uppercase text-muted-foreground">{t("material")}</span>
+                  <span className="font-semibold">{tr(quick.material)}</span>
                 </div>
                 <div>
-                  <span className="text-[10px] uppercase font-bold text-muted-foreground block">
-                    Disponibilidad
-                  </span>
-                  <span className="font-semibold text-emerald-600 dark:text-emerald-400">
-                    Bajo demanda / Inmediata
-                  </span>
+                  <span className="block text-[10px] font-bold uppercase text-muted-foreground">{t("size")}</span>
+                  <span className="font-semibold">{quick.dimensions}</span>
+                </div>
+                <div>
+                  <span className="block text-[10px] font-bold uppercase text-muted-foreground">{t("delivery")}</span>
+                  <span className="font-semibold">{tr(LEAD_LABELS[quick.lead])}</span>
+                </div>
+                <div>
+                  <span className="block text-[10px] font-bold uppercase text-muted-foreground">{tr(AVAILABILITY)}</span>
+                  <span className="font-semibold text-emerald-600">{tr(AVAILABILITY_V)}</span>
                 </div>
               </div>
 
-              <div className="mt-6 flex items-center justify-between pt-4 border-t border-border">
+              <div className="mt-6 flex items-center justify-between border-t border-border pt-4">
                 <div>
-                  <span className="text-[10px] uppercase font-bold text-muted-foreground block">
-                    Precio total
-                  </span>
-                  <p className="text-3xl font-black tracking-tight">CAD ${quick.price}</p>
+                  <span className="block text-[10px] font-bold uppercase text-muted-foreground">{t("totalPrice")}</span>
+                  <p className="text-3xl font-black tracking-tight">{money(quick.price)}</p>
                 </div>
                 <button
                   onClick={() => {
-                    addToCart(quick);
+                    addToCart({ id: quick.id, name: tr(quick.name), price: quick.price });
                     setQuick(null);
                   }}
-                  className="rounded-2xl bg-gradient-warm px-6 py-3.5 text-sm font-bold text-rose-foreground shadow-soft transition-transform hover:scale-[1.03] active:scale-[0.98]"
+                  className="rounded-2xl bg-gradient-warm px-6 py-3.5 text-sm font-bold text-rose-foreground shadow-soft transition-transform hover:scale-[1.03]"
                 >
-                  {Icon.cart("h-4 w-4 inline mr-2")} Añadir al carrito
+                  {Icon.cart("mr-2 inline h-4 w-4")} {t("buyNow")}
                 </button>
               </div>
             </div>
@@ -1002,23 +1094,19 @@ function JacDesign() {
 
       {/* CART MODAL */}
       {cartOpen && (
-        <Modal onClose={() => setCartOpen(false)} title="Tu carrito">
+        <Modal onClose={() => setCartOpen(false)} title={t("cartTitle")} closeLabel={t("close")}>
           {cart.length === 0 ? (
-            <p className="py-8 text-center text-sm text-muted-foreground">
-              Tu carrito está vacío. Explora las colecciones o crea una personalización.
-            </p>
+            <p className="py-8 text-center text-sm text-muted-foreground">{t("cartEmpty")}</p>
           ) : (
             <>
               <ul className="divide-y divide-border">
                 {cart.map((item, i) => (
                   <li key={`${item.id}-${i}`} className="flex items-center gap-3 py-3">
-                    <span className="min-w-0 flex-1 truncate text-sm font-semibold">
-                      {item.name}
-                    </span>
-                    <span className="text-sm font-bold">CAD ${item.price.toFixed(2)}</span>
+                    <span className="min-w-0 flex-1 truncate text-sm font-semibold">{item.name}</span>
+                    <span className="text-sm font-bold">{money(item.price)}</span>
                     <button
                       onClick={() => setCart((c) => c.filter((_, idx) => idx !== i))}
-                      aria-label="Eliminar"
+                      aria-label={t("remove")}
                       className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-border text-muted-foreground transition-colors hover:bg-muted"
                     >
                       {Icon.close("h-4 w-4")}
@@ -1026,19 +1114,22 @@ function JacDesign() {
                   </li>
                 ))}
               </ul>
-              <div className="mt-4 flex items-center justify-between rounded-2xl bg-muted p-4">
-                <span className="text-sm font-semibold text-muted-foreground">Total</span>
-                <span className="text-xl font-black">CAD ${total.toFixed(2)}</span>
+              <p className="mt-4 rounded-2xl bg-emerald-500/10 px-4 py-2.5 text-xs font-semibold text-emerald-700 dark:text-emerald-400">
+                {missingForFree === 0 ? t("free") : `${money(missingForFree)} ${t("awayFromFree")}`}
+              </p>
+              <div className="mt-3 flex items-center justify-between rounded-2xl bg-muted p-4">
+                <span className="text-sm font-semibold text-muted-foreground">{t("total")}</span>
+                <span className="text-xl font-black">{money(total)}</span>
               </div>
               <button
                 onClick={() => {
                   setCart([]);
                   setCartOpen(false);
-                  toast("¡Pago exitoso! Te contactaremos con tu orden");
+                  toast(t("checkoutDone"));
                 }}
                 className="mt-4 w-full rounded-2xl bg-gradient-warm py-4 text-sm font-bold text-rose-foreground shadow-soft transition-transform hover:scale-[1.02]"
               >
-                Proceder al pago seguro
+                {t("checkout")}
               </button>
             </>
           )}
@@ -1046,13 +1137,13 @@ function JacDesign() {
       )}
 
       {/* TOASTS */}
-      <div className="pointer-events-none fixed bottom-5 right-4 z-[60] flex flex-col gap-2">
-        {toasts.map((t) => (
+      <div className="pointer-events-none fixed bottom-20 right-4 z-[60] flex flex-col gap-2 sm:bottom-5">
+        {toasts.map((x) => (
           <div
-            key={t.id}
-            className="animate-bounce rounded-2xl bg-slate-deep px-5 py-3 text-sm font-semibold text-primary-foreground shadow-soft"
+            key={x.id}
+            className="max-w-[80vw] truncate rounded-2xl bg-slate-deep px-5 py-3 text-sm font-semibold text-primary-foreground shadow-soft"
           >
-            {t.text}
+            {x.text}
           </div>
         ))}
       </div>
@@ -1072,9 +1163,7 @@ function Badge({ n }: { n: number }) {
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <p className="mb-2 text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">
-        {label}
-      </p>
+      <p className="mb-2 text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">{label}</p>
       {children}
     </div>
   );
@@ -1083,20 +1172,22 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 function Modal({
   title,
   onClose,
+  closeLabel,
   children,
 }: {
   title: string;
   onClose: () => void;
+  closeLabel: string;
   children: React.ReactNode;
 }) {
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-slate-deep/80 dark:bg-dark/80 p-4 backdrop-blur-md">
-      <div className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-3xl border border-border bg-card p-6 shadow-soft">
+    <div className="fixed inset-0 z-50 grid place-items-center bg-slate-deep/80 p-4 backdrop-blur-md">
+      <div className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-3xl border border-border bg-card p-5 shadow-soft sm:p-6">
         <div className="mb-5 flex items-center justify-between gap-4">
           <h2 className="text-lg font-black tracking-tight">{title}</h2>
           <button
             onClick={onClose}
-            aria-label="Cerrar"
+            aria-label={closeLabel}
             className="grid h-9 w-9 place-items-center rounded-full border border-border transition-colors hover:bg-muted"
           >
             {Icon.close("h-4 w-4")}
