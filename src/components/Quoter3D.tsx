@@ -293,6 +293,21 @@ export function Quoter3D({ onAddToCart }: Quoter3DProps) {
   const [layerHeight, setLayerHeight] = useState<number>(0.20);
   const [quantity, setQuantity] = useState<number>(1);
 
+  // AI design state (step 1: design the artwork, then validate it in 3D)
+  const [designPrompt, setDesignPrompt] = useState<string>("");
+  const [designStyle, setDesignStyle] = useState<string>("styleRelief");
+  const [designImage, setDesignImage] = useState<string | null>(null);
+  const [designIsFinal, setDesignIsFinal] = useState<boolean>(false);
+  const [isGenerating, setIsGenerating] = useState<boolean>(false);
+  const [isBuildingRelief, setIsBuildingRelief] = useState<boolean>(false);
+  const [reliefShape, setReliefShape] = useState<ReliefShape>("plaque");
+  const [reliefWidth, setReliefWidth] = useState<number>(90);
+  const [reliefDepth, setReliefDepth] = useState<number>(3);
+  const [reliefBase, setReliefBase] = useState<number>(2);
+  const [reliefInvert, setReliefInvert] = useState<boolean>(false);
+  const [hasRelief, setHasRelief] = useState<boolean>(false);
+  const reliefGeoRef = useRef<THREE.BufferGeometry | null>(null);
+
   // Viewport toggles
   const [autoRotate, setAutoRotate] = useState<boolean>(true);
   const [wireframe, setWireframe] = useState<boolean>(false);
