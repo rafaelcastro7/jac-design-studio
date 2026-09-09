@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAdminCatalog } from "@/hooks/useCatalog";
 import { useAuth } from "@/hooks/useAuth";
@@ -9,6 +9,9 @@ import { IMAGE_MAP, seedRows, type ShopProduct } from "@/lib/catalog";
 import { Card, Empty, Field, Pill, btnGhost, btnPrimary, cadExact, downloadCsv, inputCls } from "@/components/admin/kit";
 
 export const Route = createFileRoute("/_authenticated/admin/products")({
+  validateSearch: (search: Record<string, unknown>): { edit?: string } => ({
+    edit: typeof search['edit'] === "string" ? (search['edit'] as string) : undefined,
+  }),
   component: ProductsAdmin,
 });
 
