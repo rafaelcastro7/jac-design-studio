@@ -241,6 +241,12 @@ export function Customizer({ onAddToCart }: Props) {
                         active ? "border-primary bg-primary/5 shadow-soft" : "border-border bg-card hover:bg-muted"
                       }`}
                     >
+                      <img
+                        src={MOCKUP[b.id].photo}
+                        alt={tr(MOCKUP[b.id].alt)}
+                        loading="lazy"
+                        className="mb-2 h-16 w-full rounded-xl object-cover"
+                      />
                       <p className="text-xs font-bold leading-tight">{tr(b.name)}</p>
                       <p className="mt-1 text-[11px] leading-snug text-muted-foreground">{tr(b.material)}</p>
                       <p className="mt-2 text-xs font-black text-primary">{money(b.price)}</p>
