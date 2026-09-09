@@ -169,12 +169,12 @@ export function Quoter3D({ onAddToCart }: Quoter3DProps) {
 
   // Canvas Refs
   const containerRef = useRef<HTMLDivElement>(null);
-  const sceneRef = useRef<THREE.Scene | null>(null);
-  const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
-  const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
-  const controlsRef = useRef<OrbitControls | null>(null);
-  const currentMeshRef = useRef<THREE.Mesh | null>(null);
-  const gridHelperRef = useRef<THREE.GridHelper | null>(null);
+  const sceneRef = useRef<any>(null);
+  const rendererRef = useRef<any>(null);
+  const cameraRef = useRef<any>(null);
+  const controlsRef = useRef<any>(null);
+  const currentMeshRef = useRef<any>(null);
+  const gridHelperRef = useRef<any>(null);
   const animationFrameIdRef = useRef<number | null>(null);
 
   // Active Material Info
@@ -231,7 +231,7 @@ export function Quoter3D({ onAddToCart }: Quoter3DProps) {
   }, [printTimeMinutes]);
 
   // Compute exact volume of a BufferGeometry using signed tetrahedrons
-  const calculateGeometryVolume = (geo: THREE.BufferGeometry): number => {
+  const calculateGeometryVolume = (geo: any): number => {
     let position = geo.attributes.position;
     let faces = position.count / 3;
     let totalVolume = 0;
@@ -253,7 +253,7 @@ export function Quoter3D({ onAddToCart }: Quoter3DProps) {
   };
 
   // Build Procedural Geometries
-  const createPresetGeometry = (key: PresetKey): THREE.BufferGeometry => {
+  const createPresetGeometry = (key: PresetKey): any => {
     switch (key) {
       case "dice-tower": {
         // Multi-level fortress tower
@@ -341,7 +341,7 @@ export function Quoter3D({ onAddToCart }: Quoter3DProps) {
   };
 
   // Apply geometry to scene
-  const applyGeometryToScene = (geo: THREE.BufferGeometry, title: string) => {
+  const applyGeometryToScene = (geo: any, title: string) => {
     if (!sceneRef.current) return;
 
     geo.computeBoundingBox();
@@ -480,7 +480,7 @@ export function Quoter3D({ onAddToCart }: Quoter3DProps) {
 
     // Load initial preset
     const initialGeo = createPresetGeometry(selectedPreset);
-    applyGeometryToScene(initialGeo, PRESETS[0].name);
+    applyGeometryToScene(initialGeo, PRESETS[0]!.name);
 
     // Animation Loop
     let clock = new THREE.Clock();
@@ -522,7 +522,7 @@ export function Quoter3D({ onAddToCart }: Quoter3DProps) {
   // Sync Color / Wireframe Changes
   useEffect(() => {
     if (!currentMeshRef.current) return;
-    const mat = currentMeshRef.current.material as THREE.MeshStandardMaterial;
+    const mat = currentMeshRef.current.material as any;
     if (mat) {
       mat.color.set(selectedColor.hex);
       mat.roughness = selectedColor.roughness;
