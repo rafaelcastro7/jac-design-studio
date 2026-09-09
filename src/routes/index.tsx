@@ -489,7 +489,7 @@ function JacDesign() {
               </div>
               <dl className="grid grid-cols-3 gap-2 text-center text-xs sm:text-sm">
                 <div className="rounded-2xl border border-border bg-card p-3">
-                  <dt className="text-lg font-black text-amber-600">{PRODUCTS.length}</dt>
+                  <dt className="text-lg font-black text-amber-600">{products.length}</dt>
                   <dd className="text-muted-foreground">{t("statProducts")}</dd>
                 </div>
                 <div className="rounded-2xl border border-border bg-card p-3">
