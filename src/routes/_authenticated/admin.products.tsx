@@ -173,6 +173,42 @@ function ProductsAdmin() {
     onError: (e: Error) => setError(e.message),
   });
 
+  // Renumbering: persists 10, 20, 30 … so there is always room in between
+  const applyOrder = async (rows: ShopProduct[]) => {
+    const updates = rows.map((p, i) => ({ rowId: p.rowId!, sort_order: (i + 1) * 10 }));
+    for (const u of updates) {
+      const { error } = await supabase.from("products").update({ sort_order: u.sort_order }).eq("id", u.rowId);
+      if (error) throw error;
+    }
+  };
+
+  const move = useMutation({
+    mutationFn: async ({ rows, from, to }: { rows: ShopProduct[]; from: number; to: number }) => {
+      if (to < 0 || to >= rows.length) return;
+      const next = [...rows];
+      const [item] = next.splice(from, 1);
+      next.splice(to, 0, item!);
+      await applyOrder(next);
+    },
+    onSuccess: refresh,
+    onError: (e: Error) => setError(e.message),
+  });
+
+  const setPosition = useMutation({
+    mutationFn: async ({ p, value }: { p: ShopProduct; value: number }) => {
+      const { error } = await supabase.from("products").update({ sort_order: value }).eq("id", p.rowId!);
+      if (error) throw error;
+    },
+    onSuccess: refresh,
+    onError: (e: Error) => setError(e.message),
+  });
+
+  const renumber = useMutation({
+    mutationFn: async () => applyOrder(list),
+    onSuccess: refresh,
+    onError: (e: Error) => setError(e.message),
+  });
+
   const importSeed = useMutation({
     mutationFn: async () => {
       const { error } = await supabase.from("products").upsert(seedRows(), { onConflict: "slug" });
@@ -206,13 +242,16 @@ function ProductsAdmin() {
                 onClick={() =>
                   downloadCsv(
                     "catalogo-jac-design.csv",
-                    ["slug", "categoria", "precio_cad", "publicado", "stock", "nombre_en", "nombre_es"],
-                    (data ?? []).map((p) => [p.id, p.cat, p.price, p.published ? "si" : "no", p.stock ?? "", p.name.en, p.name.es])
+                    ["orden", "slug", "categoria", "precio_cad", "publicado", "stock", "nombre_en", "nombre_es"],
+                    (data ?? []).map((p) => [p.sortOrder, p.id, p.cat, p.price, p.published ? "si" : "no", p.stock ?? "", p.name.en, p.name.es])
                   )
                 }
                 className={btnGhost}
               >
                 Exportar CSV
+              </button>
+              <button onClick={() => renumber.mutate()} disabled={renumber.isPending} className={btnGhost}>
+                {renumber.isPending ? "Numerando…" : "Renumerar 10, 20, 30…"}
               </button>
               <button onClick={() => setDraft(emptyDraft())} className={btnPrimary}>
                 + Nuevo producto
@@ -251,8 +290,33 @@ function ProductsAdmin() {
           </Empty>
         ) : (
           <ul className="grid gap-2">
-            {list.map((p) => (
+            {list.map((p, i) => (
               <li key={p.rowId ?? p.id} className="flex flex-wrap items-center gap-3 rounded-2xl border border-border p-2.5">
+                <div className="flex items-center gap-1.5">
+                  <span className="grid h-7 w-7 place-items-center rounded-xl bg-muted text-[11px] font-black text-muted-foreground">
+                    {i + 1}
+                  </span>
+                  {isAdmin && (
+                    <div className="grid gap-0.5">
+                      <button
+                        onClick={() => move.mutate({ rows: list, from: i, to: i - 1 })}
+                        disabled={i === 0 || move.isPending}
+                        title="Subir"
+                        className="rounded-md border border-border px-1.5 text-[10px] leading-4 disabled:opacity-30 hover:bg-muted"
+                      >
+                        ▲
+                      </button>
+                      <button
+                        onClick={() => move.mutate({ rows: list, from: i, to: i + 1 })}
+                        disabled={i === list.length - 1 || move.isPending}
+                        title="Bajar"
+                        className="rounded-md border border-border px-1.5 text-[10px] leading-4 disabled:opacity-30 hover:bg-muted"
+                      >
+                        ▼
+                      </button>
+                    </div>
+                  )}
+                </div>
                 <img src={p.img} alt="" loading="lazy" className="h-14 w-14 rounded-xl object-cover" />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-bold">{p.name.es || p.name.en}</p>
@@ -260,6 +324,21 @@ function ProductsAdmin() {
                     {p.id} · {CAT_LABELS[p.cat].es} · {cadExact(p.price)}
                   </p>
                 </div>
+                {isAdmin && (
+                  <label className="flex items-center gap-1.5 text-[11px] font-semibold text-muted-foreground">
+                    N.º
+                    <input
+                      type="number"
+                      defaultValue={p.sortOrder}
+                      key={`ord-${p.rowId}-${p.sortOrder}`}
+                      onBlur={(e) => {
+                        const value = Number(e.target.value);
+                        if (Number.isFinite(value) && value !== p.sortOrder) setPosition.mutate({ p, value });
+                      }}
+                      className="w-16 rounded-xl border border-border bg-background px-2 py-1 text-xs font-bold text-foreground"
+                    />
+                  </label>
+                )}
                 {p.stock !== null && (
                   <Pill tone={p.stock === 0 ? "warn" : p.stock <= 3 ? "info" : "muted"}>
                     {p.stock === 0 ? "Sin stock" : `${p.stock} en stock`}
