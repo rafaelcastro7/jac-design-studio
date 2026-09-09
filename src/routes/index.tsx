@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useRef, useState } from "react";
 import { Quoter3D } from "@/components/Quoter3D";
+import { Customizer } from "@/components/Customizer";
 import { useI18n, LANGS } from "@/i18n";
 import type { Tri } from "@/i18n/lang";
 import { CATS, CAT_LABELS, LEAD_LABELS, type Cat, type Product } from "@/data/products";
@@ -33,25 +34,6 @@ export const Route = createFileRoute("/")({
 });
 
 /* ── local trilingual copy ─────────────────────────────── */
-
-const FONTS = [
-  { id: "sans", key: "fontSans", css: "var(--font-sans)" },
-  { id: "serif", key: "fontSerif", css: "var(--font-serif)" },
-  { id: "mono", key: "fontMono", css: "var(--font-mono)" },
-];
-
-const THEMES = [
-  { id: "amber", key: "colAmber", token: "var(--amber)" },
-  { id: "rose", key: "colRose", token: "var(--rose)" },
-  { id: "healthy", key: "colGreen", token: "var(--healthy)" },
-  { id: "graphite", key: "colBlack", token: "var(--graphite)" },
-];
-
-const BASES = [
-  { id: "sign", key: "prodSign", price: 68 },
-  { id: "mug", key: "prodMug", price: 26 },
-  { id: "box", key: "prodBox", price: 34 },
-];
 
 const SORTS: { id: "featured" | "price-asc" | "price-desc" | "rating"; label: Tri }[] = [
   { id: "featured", label: { en: "Featured", fr: "En vedette", es: "Destacados" } },
@@ -360,11 +342,6 @@ function JacDesign() {
       setSending(false);
     }
   };
-
-  const customPrice = useMemo(() => {
-    const extra = Math.min(text.trim().length, 40) * 0.8 + (font.id === "serif" ? 5 : 0);
-    return Math.round((base.price + extra) * 100) / 100;
-  }, [base, text, font]);
 
   const navLinks: [string, string][] = [
     ["#inicio", t("navHome")],

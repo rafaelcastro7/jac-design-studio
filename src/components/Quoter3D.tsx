@@ -98,7 +98,7 @@ export const MATERIALS = [
 export const COLOR_OPTIONS = [
   { name: "Matte carbon black", hex: "#1f2328", roughness: 0.6, metalness: 0.1 },
   { name: "Arctic white", hex: "#f8f9fa", roughness: 0.4, metalness: 0.05 },
-  { name: "Studio neon orange", hex: "#ff5722", roughness: 0.35, metalness: 0.1 },
+  { name: "Sunset orange", hex: "#ff5722", roughness: 0.35, metalness: 0.1 },
   { name: "Electric cobalt blue", hex: "#1d4ed8", roughness: 0.3, metalness: 0.2 },
   { name: "Pearl silk gold", hex: "#d4af37", roughness: 0.25, metalness: 0.6 },
   { name: "Emerald silk green", hex: "#059669", roughness: 0.28, metalness: 0.4 },
@@ -222,7 +222,7 @@ const QT: Record<string, Tri> = {
   // Colours
   "Matte carbon black": { en: "Matte carbon black", fr: "Noir carbone mat", es: "Negro carbón mate" },
   "Arctic white": { en: "Arctic white", fr: "Blanc arctique", es: "Blanco ártico" },
-  "Studio neon orange": { en: "Studio neon orange", fr: "Orange néon studio", es: "Naranja neón studio" },
+  "Sunset orange": { en: "Sunset orange", fr: "Orange coucher de soleil", es: "Naranja atardecer" },
   "Electric cobalt blue": { en: "Electric cobalt blue", fr: "Bleu cobalt électrique", es: "Azul cobalto eléctrico" },
   "Pearl silk gold": { en: "Pearl silk gold", fr: "Or soie perlé", es: "Oro seda perlado" },
   "Emerald silk green": { en: "Emerald silk green", fr: "Vert émeraude soie", es: "Verde esmeralda seda" },
@@ -246,7 +246,7 @@ export function Quoter3D({ onAddToCart }: Quoter3DProps) {
 
   // Print Configuration state
   const [materialId, setMaterialId] = useState<string>("pla-eco");
-  const [selectedColor, setSelectedColor] = useState(COLOR_OPTIONS[2]!); // Studio neon orange
+  const [selectedColor, setSelectedColor] = useState(COLOR_OPTIONS[2]!); // Sunset orange
   const [infillPercent, setInfillPercent] = useState<number>(20);
   const [layerHeight, setLayerHeight] = useState<number>(0.20);
   const [quantity, setQuantity] = useState<number>(1);
